@@ -4,212 +4,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jordan — LinkedIn Journey Framework | Streets of Growth</title>
+<title>Yasmin — LinkedIn Journey Framework | Streets of Growth</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f7; color: #323E48; }
+body { font-family: 'Open Sans', sans-serif; background: #F5F5F7; color: #323E48; }
 :root {
   --purple: #625D9C; --blue: #4197CB; --teal: #0095A9; --green: #00AF9A;
-  --black: #323E48;
+  --black: #323E48; --offwhite: #F5F5F7;
   --purple-l: #EEEDFE; --blue-l: #E6F1FB; --teal-l: #E1F5EE; --green-l: #EAF3DE;
-  --coral-l: #FAECE7; --amber-l: #FAEEDA;
+  --coral: #D85A30; --coral-l: #FAECE7; --amber: #BA7517; --amber-l: #FAEEDA;
 }
+.site-header { background: #fff; padding: 14px 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #0095A9; }
+.site-header img { height: 52px; width: auto; max-width: 260px; }
+.header-badge { background: #625D9C; color: #fff; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 20px; letter-spacing: .05em; white-space: nowrap; }
 .page { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
-.header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; }
-.header-text h1 { font-size: 20px; font-weight: 600; color: var(--purple); }
-.header-text p { font-size: 13px; color: #666; margin-top: 3px; }
-.sog-badge { background: var(--purple); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .05em; white-space: nowrap; }
-
-.tab-nav { display: flex; gap: 0; border-bottom: 1px solid #ddd; margin-bottom: 0; overflow-x: auto; background: #fff; border-radius: 12px 12px 0 0; padding: 0 1rem; }
-.tab-btn { padding: 12px 16px; font-size: 13px; font-weight: 500; border: none; background: none; cursor: pointer; color: #666; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .15s, border-color .15s; }
+.page-header { padding: 1.5rem 0 1.25rem; border-bottom: 1px solid #e0e0e0; margin-bottom: 1.75rem; }
+.page-header h1 { font-size: 22px; font-weight: 700; color: #625D9C; margin-bottom: .3rem; }
+.page-header p { font-size: 13px; color: #666; }
+.page-header-rule { width: 40px; height: 3px; background: #625D9C; border-radius: 2px; margin: .6rem 0; }
+.tab-nav { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 0; overflow-x: auto; background: #fff; border-radius: 12px 12px 0 0; padding: 0 1rem; }
+.tab-btn { padding: 12px 16px; font-size: 13px; font-weight: 600; border: none; background: none; cursor: pointer; color: #888; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .15s, border-color .15s; font-family: 'Open Sans', sans-serif; }
 .tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
-.content-area { background: #fff; border-radius: 0 0 12px 12px; padding: 1.5rem; border: 1px solid #e8e8e8; border-top: none; }
-
-.section-label { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: #888; margin-bottom: .9rem; }
+.content-area { background: #fff; border-radius: 0 0 12px 12px; padding: 1.5rem; border: 1px solid #e8e8e8; border-top: none; margin-bottom: 2rem; }
+.section-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0095A9; margin-bottom: .9rem; padding-bottom: .4rem; border-bottom: 1px solid #e8e8e8; }
 .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: .75rem; }
-.card-head { font-size: 13px; font-weight: 600; margin-bottom: .5rem; }
+.card-head { font-size: 13px; font-weight: 700; margin-bottom: .5rem; }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-top: 1rem; }
 @media(max-width:600px){ .two-col,.three-col { grid-template-columns: 1fr; } }
-.metric-card { background: #f5f5f7; border-radius: 8px; padding: .75rem 1rem; text-align: center; }
+.metric-card { background: #F5F5F7; border-radius: 8px; padding: .75rem 1rem; text-align: center; }
 .metric-val { font-size: 24px; font-weight: 700; }
-.metric-label { font-size: 11px; color: #888; margin-top: 2px; }
-
-.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.metric-label { font-size: 11px; color: #888; margin-top: 2px; font-weight: 400; }
+.badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; letter-spacing: .03em; }
 .bdg-m1 { background: #EEEDFE; color: #625D9C; }
 .bdg-m2 { background: #E6F1FB; color: #185FA5; }
 .bdg-m3 { background: #E1F5EE; color: #0F6E56; }
 .bdg-m4 { background: #EAF3DE; color: #3B6D11; }
 .bdg-m5 { background: #f0fde4; color: #2E7D32; }
 .bdg-m6 { background: #eceff1; color: #323E48; }
-
-.type-reflection { background: #EEEDFE; color: #625D9C; }
-.type-insight { background: #E6F1FB; color: #185FA5; }
-.type-story { background: #E1F5EE; color: #0F6E56; }
-.type-milestone { background: #EAF3DE; color: #3B6D11; }
-.type-gratitude { background: #FFF8E1; color: #795548; }
-.type-challenge { background: #FCE4EC; color: #880E4F; }
-.type-capstone { background: #EEEDFE; color: #625D9C; }
-.type-advice { background: #E6F1FB; color: #185FA5; }
-
+.type-reflection { background: #EEEDFE; color: #625D9C; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.type-insight { background: #E6F1FB; color: #185FA5; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.type-story { background: #E1F5EE; color: #0F6E56; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.type-milestone { background: #EAF3DE; color: #3B6D11; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.type-gratitude { background: #FFF8E1; color: #795548; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.type-challenge { background: #FCE4EC; color: #880E4F; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.type-capstone { background: #EEEDFE; color: #625D9C; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.type-advice { background: #E6F1FB; color: #185FA5; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
 .fw-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
 @media(max-width:560px){ .fw-wrap { grid-template-columns: 1fr; } }
 .fw-node { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: .75rem 1rem; cursor: pointer; margin-bottom: .5rem; transition: all .15s; }
-.fw-node:hover { border-color: #bbb; }
+.fw-node:hover { border-color: #625D9C; }
 .fw-node.active { border-color: var(--purple); background: #EEEDFE; }
-.fw-node-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
-.fw-node-desc { font-size: 12px; color: #666; line-height: 1.5; }
-.fw-detail { background: #f5f5f7; border-radius: 12px; padding: 1rem 1.25rem; min-height: 120px; margin-top: .75rem; }
-.fw-detail h4 { font-size: 13px; font-weight: 600; color: var(--purple); margin-bottom: .5rem; }
-.fw-detail p { font-size: 13px; color: #555; line-height: 1.6; }
-
+.fw-node-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.fw-node-desc { font-size: 12px; color: #666; line-height: 1.5; font-weight: 400; }
+.fw-detail { background: #F5F5F7; border-radius: 12px; padding: 1rem 1.25rem; min-height: 120px; margin-top: .75rem; border-left: 3px solid #625D9C; }
+.fw-detail h4 { font-size: 13px; font-weight: 700; color: var(--purple); margin-bottom: .5rem; }
+.fw-detail p { font-size: 13px; color: #555; line-height: 1.6; font-weight: 400; }
 .timeline { position: relative; padding-left: 1.5rem; }
-.timeline::before { content:''; position:absolute; left:6px; top:8px; bottom:8px; width:1px; background:#e0e0e0; }
+.timeline::before { content:''; position:absolute; left:6px; top:8px; bottom:8px; width:2px; background:#F5F5F7; }
 .month-block { position: relative; margin-bottom: 1.75rem; }
 .month-dot { position:absolute; left:-1.5rem; top:4px; width:13px; height:13px; border-radius:50%; border:2px solid; background:#fff; cursor:pointer; transition:transform .15s; }
 .month-dot:hover { transform:scale(1.2); }
 .month-header { display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem; cursor:pointer; flex-wrap:wrap; }
-.month-title { font-size:14px; font-weight:600; }
-.month-theme { font-size:12px; color:#777; margin-bottom:.75rem; }
+.month-title { font-size:14px; font-weight:700; }
+.month-theme { font-size:12px; color:#777; margin-bottom:.75rem; font-weight:400; }
 .month-posts { display:none; flex-direction:column; gap:.5rem; }
 .month-posts.open { display:flex; }
-
-.post-card { background:#fff; border:1px solid #e8e8e8; border-radius:8px; padding:.75rem 1rem; cursor:pointer; transition:border-color .15s; }
-.post-card:hover { border-color:#bbb; }
+.post-card { background:#fff; border:1px solid #e8e8e8; border-radius:8px; padding:.75rem 1rem; transition:border-color .15s; }
+.post-card:hover { border-color:#625D9C; }
 .post-meta { display:flex; align-items:center; gap:.4rem; margin-bottom:.35rem; flex-wrap:wrap; }
-.post-type { font-size:10px; font-weight:600; padding:2px 7px; border-radius:20px; }
-.post-title { font-size:13px; font-weight:600; line-height:1.4; margin-bottom:3px; }
-.post-hook { font-size:12px; color:#666; line-height:1.5; }
+.post-title { font-size:13px; font-weight:700; line-height:1.4; margin-bottom:3px; color:#323E48; }
+.post-hook { font-size:12px; color:#666; line-height:1.5; font-weight:400; }
 .post-tags { display:flex; gap:.35rem; margin-top:.4rem; flex-wrap:wrap; }
-.post-tag { font-size:10px; padding:1px 6px; border-radius:20px; background:#f5f5f7; color:#555; }
-.post-hint { font-size:10px; color:#aaa; margin-top:.35rem; }
+.post-tag { font-size:10px; padding:1px 6px; border-radius:20px; background:#F5F5F7; color:#555; font-weight:600; }
 .toggle-lbl { font-size:11px; color:#aaa; cursor:pointer; user-select:none; }
-
 .list-clean { list-style:none; }
-.list-clean li { font-size:12px; color:#555; line-height:1.5; padding-left:.9rem; position:relative; margin-bottom:.35rem; }
-.list-clean li::before { content:'–'; position:absolute; left:0; color:#bbb; }
+.list-clean li { font-size:12px; color:#555; line-height:1.5; padding-left:.9rem; position:relative; margin-bottom:.35rem; font-weight:400; }
+.list-clean li::before { content:'–'; position:absolute; left:0; color:#0095A9; font-weight:700; }
+.site-footer { background: #323E48; padding: 1rem 1.5rem; text-align: center; border-top: 3px solid #0095A9; }
+.site-footer p { font-size: 11px; color: #aaa; font-family: 'Open Sans', sans-serif; }
+.site-footer a { color: #0095A9; text-decoration: none; }
 </style>
 </head>
 <body>
+<header class="site-header">
+  <img src="https://sohailraja0407.github.io/streetsofgrowth/SOG%20Logo-Light%20Background-Transparent%20Background.png" alt="Streets of Growth" style="height:32px;width:auto;">
+  <div class="header-badge">Phase 3 Framework</div>
+</header>
 <div class="page">
-  <div class="header">
-    <div class="sog-badge">Streets of Growth</div>
-    <div class="header-text">
-      <h1>Jordan's LinkedIn journey — Phase 3 framework</h1>
-      <p>6-month posting plan · Flywheel model · Posting guide</p>
-    </div>
+  <div class="page-header">
+    <h1>Yasmin's LinkedIn journey</h1>
+    <div class="page-header-rule"></div>
+    <p>Phase 3 · My journey to employment with Streets of Growth · 6-month framework</p>
   </div>
-
   <div class="tab-nav">
     <button class="tab-btn active" onclick="showTab('flywheel',this)">Flywheel concept</button>
     <button class="tab-btn" onclick="showTab('timeline',this)">6-month plan</button>
     <button class="tab-btn" onclick="showTab('guide',this)">Posting guide</button>
   </div>
-
   <div class="content-area">
 
-    <!-- FLYWHEEL -->
     <div id="tab-flywheel" class="tab-panel active">
       <p class="section-label">How one young person's posts create value for everyone</p>
       <div class="fw-wrap">
         <div>
           <svg width="100%" viewBox="0 0 300 300">
-            <defs>
-              <marker id="fw-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </marker>
-            </defs>
+            <defs><marker id="fw-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
             <circle cx="150" cy="150" r="130" fill="none" stroke="#e0e0e0" stroke-width="0.5" stroke-dasharray="4 4"/>
-            <path d="M 150 20 A 130 130 0 0 1 260 85" fill="none" stroke="#625D9C" stroke-width="1.5" opacity=".6" marker-end="url(#fw-arrow)"/>
-            <path d="M 265 100 A 130 130 0 0 1 265 200" fill="none" stroke="#4197CB" stroke-width="1.5" opacity=".6" marker-end="url(#fw-arrow)"/>
-            <path d="M 255 215 A 130 130 0 0 1 150 280" fill="none" stroke="#0095A9" stroke-width="1.5" opacity=".6" marker-end="url(#fw-arrow)"/>
-            <path d="M 135 280 A 130 130 0 0 1 40 215" fill="none" stroke="#00AF9A" stroke-width="1.5" opacity=".6" marker-end="url(#fw-arrow)"/>
-            <path d="M 35 200 A 130 130 0 0 1 35 100" fill="none" stroke="#2E7D32" stroke-width="1.5" opacity=".6" marker-end="url(#fw-arrow)"/>
-            <path d="M 40 85 A 130 130 0 0 1 150 20" fill="none" stroke="#625D9C" stroke-width="1.5" opacity=".6" marker-end="url(#fw-arrow)"/>
-            <circle id="fn0" cx="150" cy="22" r="18" fill="#EEEDFE" stroke="#625D9C" stroke-width="1" cursor="pointer" onclick="activateFw(0)"/>
-            <circle id="fn1" cx="262" cy="90" r="18" fill="#E6F1FB" stroke="#4197CB" stroke-width="1" cursor="pointer" onclick="activateFw(1)"/>
-            <circle id="fn2" cx="262" cy="210" r="18" fill="#E1F5EE" stroke="#0095A9" stroke-width="1" cursor="pointer" onclick="activateFw(2)"/>
-            <circle id="fn3" cx="150" cy="278" r="18" fill="#EAF3DE" stroke="#00AF9A" stroke-width="1" cursor="pointer" onclick="activateFw(3)"/>
-            <circle id="fn4" cx="38" cy="210" r="18" fill="#f0fde4" stroke="#2E7D32" stroke-width="1" cursor="pointer" onclick="activateFw(4)"/>
-            <circle id="fn5" cx="38" cy="90" r="18" fill="#EEEDFE" stroke="#625D9C" stroke-width="1" cursor="pointer" onclick="activateFw(5)"/>
-            <text x="150" y="27" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#625D9C" style="pointer-events:none">1</text>
-            <text x="262" y="95" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#185FA5" style="pointer-events:none">2</text>
-            <text x="262" y="215" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#0F6E56" style="pointer-events:none">3</text>
-            <text x="150" y="283" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#3B6D11" style="pointer-events:none">4</text>
-            <text x="38" y="215" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#2E7D32" style="pointer-events:none">5</text>
-            <text x="38" y="95" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#625D9C" style="pointer-events:none">6</text>
-            <circle cx="150" cy="150" r="46" fill="#fff" stroke="#e0e0e0" stroke-width="0.5"/>
-            <text x="150" y="144" text-anchor="middle" font-size="11" font-weight="600" fill="#323E48" style="pointer-events:none">Jordan's</text>
-            <text x="150" y="158" text-anchor="middle" font-size="11" font-weight="600" fill="#323E48" style="pointer-events:none">LinkedIn</text>
-            <text x="150" y="172" text-anchor="middle" font-size="10" fill="#888" style="pointer-events:none">journey</text>
+            <path d="M 150 20 A 130 130 0 0 1 260 85" fill="none" stroke="#625D9C" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
+            <path d="M 265 100 A 130 130 0 0 1 265 200" fill="none" stroke="#4197CB" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
+            <path d="M 255 215 A 130 130 0 0 1 150 280" fill="none" stroke="#0095A9" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
+            <path d="M 135 280 A 130 130 0 0 1 40 215" fill="none" stroke="#00AF9A" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
+            <path d="M 35 200 A 130 130 0 0 1 35 100" fill="none" stroke="#2E7D32" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
+            <path d="M 40 85 A 130 130 0 0 1 150 20" fill="none" stroke="#625D9C" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
+            <circle cx="150" cy="22" r="18" fill="#EEEDFE" stroke="#625D9C" stroke-width="1.5" cursor="pointer" onclick="activateFw(0)"/>
+            <circle cx="262" cy="90" r="18" fill="#E6F1FB" stroke="#4197CB" stroke-width="1.5" cursor="pointer" onclick="activateFw(1)"/>
+            <circle cx="262" cy="210" r="18" fill="#E1F5EE" stroke="#0095A9" stroke-width="1.5" cursor="pointer" onclick="activateFw(2)"/>
+            <circle cx="150" cy="278" r="18" fill="#EAF3DE" stroke="#00AF9A" stroke-width="1.5" cursor="pointer" onclick="activateFw(3)"/>
+            <circle cx="38" cy="210" r="18" fill="#f0fde4" stroke="#2E7D32" stroke-width="1.5" cursor="pointer" onclick="activateFw(4)"/>
+            <circle cx="38" cy="90" r="18" fill="#EEEDFE" stroke="#625D9C" stroke-width="1.5" cursor="pointer" onclick="activateFw(5)"/>
+            <text x="150" y="27" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#625D9C" style="pointer-events:none;font-family:'Open Sans',sans-serif">1</text>
+            <text x="262" y="95" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#185FA5" style="pointer-events:none;font-family:'Open Sans',sans-serif">2</text>
+            <text x="262" y="215" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#0F6E56" style="pointer-events:none;font-family:'Open Sans',sans-serif">3</text>
+            <text x="150" y="283" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#3B6D11" style="pointer-events:none;font-family:'Open Sans',sans-serif">4</text>
+            <text x="38" y="215" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#2E7D32" style="pointer-events:none;font-family:'Open Sans',sans-serif">5</text>
+            <text x="38" y="95" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#625D9C" style="pointer-events:none;font-family:'Open Sans',sans-serif">6</text>
+            <circle cx="150" cy="150" r="46" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+            <text x="150" y="144" text-anchor="middle" font-size="11" font-weight="700" fill="#323E48" style="pointer-events:none;font-family:'Open Sans',sans-serif">Yasmin's</text>
+            <text x="150" y="158" text-anchor="middle" font-size="11" font-weight="700" fill="#323E48" style="pointer-events:none;font-family:'Open Sans',sans-serif">LinkedIn</text>
+            <text x="150" y="172" text-anchor="middle" font-size="10" fill="#0095A9" style="pointer-events:none;font-family:'Open Sans',sans-serif">journey</text>
           </svg>
         </div>
         <div>
           <ul id="fw-list" style="list-style:none;"></ul>
           <div class="fw-detail" id="fw-detail">
             <h4>Starting the wheel turning</h4>
-            <p>Jordan doesn't need to be polished — authenticity is the asset. A single honest post about what Phase 3 has meant triggers a chain reaction that benefits Jordan, peers, SoG, and the wider employer network.</p>
+            <p>Yasmin doesn't need to be polished — authenticity is the asset. A single honest post about what Phase 3 has meant triggers a chain reaction that benefits Yasmin, peers, SoG, and the wider employer network.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- TIMELINE -->
     <div id="tab-timeline" class="tab-panel">
-      <p class="section-label">Jordan's journey — Phase 3 · 6-month post plan</p>
+      <p class="section-label">Yasmin's journey — Phase 3 · 6-month post plan</p>
       <div class="timeline" id="timeline-root"></div>
     </div>
 
-    <!-- GUIDE -->
     <div id="tab-guide" class="tab-panel">
-      <p class="section-label">Practical posting guidance for Jordan and SoG staff</p>
+      <p class="section-label">Practical posting guidance for Yasmin and SoG staff</p>
       <div class="two-col">
-        <div class="card">
-          <div class="card-head" style="color:var(--purple)">What to post</div>
-          <ul class="list-clean">
-            <li>Honest reflections — what surprised you, what was hard</li>
-            <li>Specific skills from work experience sessions</li>
-            <li>A question your mentor helped you answer</li>
-            <li>Something a peer taught you</li>
-            <li>Before/after: who you were vs who you're becoming</li>
-            <li>A photo from a placement or SoG event (with consent)</li>
-          </ul>
-        </div>
-        <div class="card">
-          <div class="card-head" style="color:#185FA5">What to avoid</div>
-          <ul class="list-clean">
-            <li>Vague or generic updates ("Had a great week!")</li>
-            <li>Sharing anything personal about other participants</li>
-            <li>Complaining about specific employers or placements</li>
-            <li>Posting when emotionally reactive — write it, wait, then post</li>
-            <li>Copying others' posts — your voice is the value</li>
-            <li>Oversharing — professional doesn't mean emotionless</li>
-          </ul>
-        </div>
-        <div class="card">
-          <div class="card-head" style="color:#0095A9">How SoG staff support</div>
-          <ul class="list-clean">
-            <li>Review draft posts before publishing if Jordan wants</li>
-            <li>Like and comment within 24 hours of posting</li>
-            <li>Tag relevant employer partners where appropriate</li>
-            <li>Reshare to SoG's organisational page</li>
-            <li>Screenshot notable engagement to celebrate in sessions</li>
-            <li>Suggest post ideas based on session content each week</li>
-          </ul>
-        </div>
-        <div class="card">
-          <div class="card-head" style="color:#00AF9A">Profile basics first</div>
-          <ul class="list-clean">
-            <li>Professional or clear headshot — no group photos</li>
-            <li>Headline: "Phase 3 participant @ Streets of Growth | [sector interest]"</li>
-            <li>About section: 3–4 sentences, first-person, honest about the journey</li>
-            <li>Add Streets of Growth as experience (start date = Phase 3 start)</li>
-            <li>List any work experience placements as experience entries</li>
-            <li>Connect with SoG staff, partners, and work experience supervisors</li>
-          </ul>
-        </div>
+        <div class="card"><div class="card-head" style="color:var(--purple)">What to post</div><ul class="list-clean"><li>Honest reflections — what surprised you, what was hard</li><li>Specific skills from work experience sessions</li><li>A question your mentor helped you answer</li><li>Something a peer taught you</li><li>Before/after: who you were vs who you're becoming</li><li>A photo from a placement or SoG event (with consent)</li></ul></div>
+        <div class="card"><div class="card-head" style="color:#4197CB">What to avoid</div><ul class="list-clean"><li>Vague or generic updates ("Had a great week!")</li><li>Sharing anything personal about other participants</li><li>Complaining about specific employers or placements</li><li>Posting when emotionally reactive — write it, wait, then post</li><li>Copying others' posts — your voice is the value</li><li>Oversharing — professional doesn't mean emotionless</li></ul></div>
+        <div class="card"><div class="card-head" style="color:#0095A9">How SoG staff support</div><ul class="list-clean"><li>Review draft posts before publishing if Yasmin wants</li><li>Like and comment within 24 hours of posting</li><li>Tag relevant employer partners where appropriate</li><li>Reshare to SoG's organisational page</li><li>Screenshot notable engagement to celebrate in sessions</li><li>Suggest post ideas based on session content each week</li></ul></div>
+        <div class="card"><div class="card-head" style="color:#00AF9A">Profile basics first</div><ul class="list-clean"><li>Professional or clear headshot — no group photos</li><li>Headline: "Phase 3 participant @ Streets of Growth | [sector interest]"</li><li>About section: 3–4 sentences, first-person, honest about the journey</li><li>Add Streets of Growth as experience (start date = Phase 3 start)</li><li>List any work experience placements as experience entries</li><li>Connect with SoG staff, partners, and work experience supervisors</li></ul></div>
       </div>
       <p class="section-label" style="margin-top:1.25rem;">Target outcomes over 6 months</p>
       <div class="three-col">
@@ -217,192 +167,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <div class="metric-card"><div class="metric-val" style="color:#4197CB">50+</div><div class="metric-label">Connections made</div></div>
         <div class="metric-card"><div class="metric-val" style="color:#0095A9">3+</div><div class="metric-label">Employer conversations</div></div>
       </div>
-      <div style="margin-top:1.25rem;background:#f5f5f7;border-radius:12px;padding:1rem 1.25rem;">
-        <div style="font-size:13px;font-weight:600;color:var(--purple);margin-bottom:.5rem;">On consent and safeguarding</div>
-        <p style="font-size:12px;color:#555;line-height:1.6;">All posts should be written and controlled by the young person. SoG staff should not post on their behalf without explicit consent. Any tagging of SoG accounts or employer partners should be agreed in advance. Young people should be made aware that LinkedIn is a public platform and that posts may be seen by future employers, funders, and others beyond their current network.</p>
+      <div style="margin-top:1.25rem;background:#F5F5F7;border-radius:12px;padding:1rem 1.25rem;border-left:3px solid #0095A9;">
+        <div style="font-size:13px;font-weight:700;color:#0095A9;margin-bottom:.5rem;">On consent and safeguarding</div>
+        <p style="font-size:12px;color:#555;line-height:1.6;">All posts should be written and controlled by the young person. SoG staff should not post on their behalf without explicit consent. Any tagging of SoG accounts or employer partners should be agreed in advance. Young people should be made aware that LinkedIn is a public platform and posts may be seen by future employers, funders, and others beyond their current network.</p>
       </div>
     </div>
 
   </div>
 </div>
-
+<footer class="site-footer">
+  <p>Streets of Growth · Registered Charity No. 1198741 · Phase 3 Digital Frameworks · <a href="../">Back to all frameworks</a></p>
+</footer>
 <script>
-const FLYWHEEL_NODES = [
-  { title:"1 · Young person posts", color:"#625D9C", desc:"Jordan shares an honest update about Phase 3 — a session, a placement, a challenge overcome." },
-  { title:"2 · SoG staff engage", color:"#185FA5", desc:"Staff comment, share, and amplify. Post reaches SoG's network and employer contacts." },
-  { title:"3 · Partners notice", color:"#0F6E56", desc:"Work experience hosts and employer partners see authentic voice. Jordan becomes visible." },
-  { title:"4 · Peers are inspired", color:"#3B6D11", desc:"Other young people in SoG's programme see a peer doing it. Reduces fear. They start posting too." },
-  { title:"5 · SoG's reach grows", color:"#2E7D32", desc:"Authentic youth voices build SoG's credibility with funders, press, and new employer partners." },
-  { title:"6 · Jordan's prospects improve", color:"#625D9C", desc:"Profile views rise. Employers reach out. Jordan has evidence of growth to take into interviews." }
-];
-
-const FLYWHEEL_DETAILS = [
-  { h:"Starting the wheel turning", p:"Jordan doesn't need to be polished — authenticity is the asset. A single honest post about what Phase 3 has meant triggers a chain reaction that benefits Jordan, peers, SoG, and the wider employer network." },
-  { h:"SoG staff as amplifiers", p:"When staff comment and reshare within hours, the post lands in networks Jordan couldn't reach alone — employer contacts, sector professionals, funders, and commissioners who follow SoG's organisational page." },
-  { h:"Partners see a real person", p:"Work experience hosts and employer partners often don't see the full journey — just the placement. A post that names and thanks them turns a transactional relationship into a visible endorsement. Partners share it. New employers notice." },
-  { h:"Peer activation effect", p:"When a young person sees someone from their own cohort posting professionally, the barrier drops. LinkedIn stops feeling like 'somewhere else'. Three peers start posting — and the flywheel accelerates for everyone." },
-  { h:"SoG's brand through youth voice", p:"Funders and commissioners trust outcomes they can see. A young person describing their own progress in their own words is more compelling than any impact report. Jordan's posts are evidence SoG doesn't have to write itself." },
-  { h:"Jordan's profile becomes a portfolio", p:"Six months of honest, consistent posts document growth that no CV can replicate. Profile views increase. Recruiters and employers reach out directly. Jordan enters interviews with something concrete to point to." }
-];
-
-const MONTHS = [
-  { n:1, col:"m1", dotColor:"#625D9C", title:"Month 1 — Arrival", theme:"Establishing presence. Who is Jordan and what is this journey?", phase:"Phase 3 start",
-    posts:[
-      { type:"milestone", title:"My first day at Streets of Growth", hook:"I didn't know what to expect. Here's what I walked into — and why I decided to stay.", tags:["#StreetsOfGrowth","#YouthEmployment"] },
-      { type:"reflection", title:"What Phase 3 actually means for me", hook:"It's not just a programme. It's the first time someone sat down and actually mapped out where I could go.", tags:["#AIM","#MyJourney"] }
-    ]
-  },
-  { n:2, col:"m2", dotColor:"#4197CB", title:"Month 2 — First insights", theme:"Work experience begins. What Jordan is learning from partners and the workplace.", phase:"Placement begins",
-    posts:[
-      { type:"insight", title:"Three things my placement taught me in week one", hook:"Nobody warns you about this bit. I thought I knew how an office worked. I did not.", tags:["#WorkExperience","#EarlyCareer"] },
-      { type:"story", title:"My mentor asked me one question that changed how I think", hook:"It was a small question. But it stopped me in my tracks.", tags:["#Mentoring","#StreetsOfGrowth"] },
-      { type:"gratitude", title:"Shout-out to the team at [Partner name]", hook:"They didn't have to go this far. They did anyway. This is what good employer partnership looks like.", tags:["#Partnerships","#ThankYou"] }
-    ]
-  },
-  { n:3, col:"m3", dotColor:"#0095A9", title:"Month 3 — The hard bit", theme:"Honest reflection on challenge, setback, and what it takes to push through.", phase:"Mid-programme",
-    posts:[
-      { type:"challenge", title:"I had a rough week. Here's what I did with it.", hook:"Not every week goes to plan. This is what Phase 3 looks like when things don't go to plan — and why I kept showing up.", tags:["#Resilience","#MyJourney"] },
-      { type:"reflection", title:"What I've learned about myself in 3 months", hook:"I came in thinking I knew my strengths. I was half right. The other half surprised me.", tags:["#SelfAwareness","#YouthEmployment"] }
-    ]
-  },
-  { n:4, col:"m4", dotColor:"#00AF9A", title:"Month 4 — Peer and community", theme:"What Jordan is learning from peers inside the SoG cohort.", phase:"Building cohort",
-    posts:[
-      { type:"story", title:"My peer in the programme said something I keep thinking about", hook:"We were in a session together. They said it quietly. Everyone in the room heard it.", tags:["#Community","#StreetsOfGrowth"] },
-      { type:"insight", title:"Five skills I didn't know I had until someone pointed them out", hook:"They were there all along. I just didn't have language for them.", tags:["#SkillsDevelopment","#EarlyCareer"] },
-      { type:"milestone", title:"Half-way milestone: what's changed since Month 1", hook:"I looked back at my first post. I barely recognise the version of me that wrote it.", tags:["#Progress","#MyJourney"] }
-    ]
-  },
-  { n:5, col:"m5", dotColor:"#2E7D32", title:"Month 5 — Forward focus", theme:"Jordan gets specific about goals, sectors, and what employment means to them.", phase:"Employment focus",
-    posts:[
-      { type:"reflection", title:"The kind of work I actually want — and why it took me this long to say it out loud", hook:"I've spent years saying 'anything, really'. Phase 3 helped me stop doing that.", tags:["#CareerGoals","#StreetsOfGrowth"] },
-      { type:"insight", title:"What I learned from talking to three employers this month", hook:"They don't want perfect. They want people who know how to learn. That's something I can do.", tags:["#JobSearch","#EarlyCareer"] }
-    ]
-  },
-  { n:6, col:"m6", dotColor:"#323E48", title:"Month 6 — The full story", theme:"Jordan closes the chapter and opens the next one.", phase:"Programme end",
-    posts:[
-      { type:"milestone", title:"Six months with Streets of Growth: what I'm taking with me", hook:"I didn't plan to write this publicly. But someone told me that someone else's story might be the thing that changes everything for a young person who needs it.", tags:["#StreetsOfGrowth","#YouthEmployment","#MyJourney"] },
-      { type:"gratitude", title:"Thank you to everyone who made Phase 3 real", hook:"The staff. The employers. My peers. The people who commented on my first-ever LinkedIn post when I had 9 connections. You're all in this.", tags:["#Gratitude","#Community"] },
-      { type:"advice", title:"What I'd tell the version of me from 6 months ago", hook:"Show up. Even when it's uncomfortable. Especially when it's uncomfortable.", tags:["#Advice","#EarlyCareer","#MyJourney"] }
-    ]
-  }
-];
-
-function buildFlywheel() {
-  const list = document.getElementById('fw-list');
-  FLYWHEEL_NODES.forEach((n, i) => {
-    const li = document.createElement('li');
-    li.className = 'fw-node' + (i === 0 ? ' active' : '');
-    li.innerHTML = '<div class="fw-node-title" style="color:' + n.color + '">' + n.title + '</div><div class="fw-node-desc">' + n.desc + '</div>';
-    li.onclick = () => activateFw(i);
-    list.appendChild(li);
-  });
-}
-
-function activateFw(i) {
-  document.querySelectorAll('.fw-node').forEach((el, j) => el.classList.toggle('active', j === i));
-  const d = FLYWHEEL_DETAILS[i];
-  document.getElementById('fw-detail').innerHTML = '<h4>' + d.h + '</h4><p>' + d.p + '</p>';
-}
-
-function buildTimeline() {
-  const root = document.getElementById('timeline-root');
-  MONTHS.forEach((m, mi) => {
-    const block = document.createElement('div');
-    block.className = 'month-block';
-
-    const dot = document.createElement('div');
-    dot.className = 'month-dot';
-    dot.style.borderColor = m.dotColor;
-    dot.onclick = () => togglePosts(mi);
-    block.appendChild(dot);
-
-    const hdr = document.createElement('div');
-    hdr.className = 'month-header';
-    hdr.onclick = () => togglePosts(mi);
-
-    const ph = document.createElement('span');
-    ph.className = 'badge bdg-' + m.col;
-    ph.textContent = m.phase;
-    hdr.appendChild(ph);
-
-    const tt = document.createElement('span');
-    tt.className = 'month-title';
-    tt.textContent = m.title;
-    hdr.appendChild(tt);
-
-    const tog = document.createElement('span');
-    tog.className = 'toggle-lbl';
-    tog.id = 'tog-' + mi;
-    tog.textContent = '▾ ' + m.posts.length + ' posts';
-    hdr.appendChild(tog);
-
-    block.appendChild(hdr);
-
-    const theme = document.createElement('div');
-    theme.className = 'month-theme';
-    theme.textContent = m.theme;
-    block.appendChild(theme);
-
-    const postsDiv = document.createElement('div');
-    postsDiv.className = 'month-posts';
-    postsDiv.id = 'posts-' + mi;
-
-    m.posts.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'post-card';
-
-      const meta = document.createElement('div');
-      meta.className = 'post-meta';
-      const t = document.createElement('span');
-      t.className = 'post-type type-' + p.type;
-      t.textContent = p.type;
-      meta.appendChild(t);
-      card.appendChild(meta);
-
-      const title = document.createElement('div');
-      title.className = 'post-title';
-      title.textContent = p.title;
-      card.appendChild(title);
-
-      const hook = document.createElement('div');
-      hook.className = 'post-hook';
-      hook.textContent = p.hook;
-      card.appendChild(hook);
-
-      const tags = document.createElement('div');
-      tags.className = 'post-tags';
-      p.tags.forEach(tag => {
-        const span = document.createElement('span');
-        span.className = 'post-tag';
-        span.textContent = tag;
-        tags.appendChild(span);
-      });
-      card.appendChild(tags);
-
-      postsDiv.appendChild(card);
-    });
-
-    block.appendChild(postsDiv);
-    root.appendChild(block);
-  });
-}
-
-function togglePosts(i) {
-  const p = document.getElementById('posts-' + i);
-  const t = document.getElementById('tog-' + i);
-  const open = p.classList.toggle('open');
-  t.textContent = (open ? '▴' : '▾') + ' ' + MONTHS[i].posts.length + ' posts';
-}
-
-function showTab(id, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  btn.classList.add('active');
-}
-
-buildFlywheel();
-buildTimeline();
+const FW_NODES=[{title:"1 · Young person posts",color:"#625D9C",desc:"Yasmin shares an honest update about Phase 3 — a session, a placement, a challenge overcome."},{title:"2 · SoG staff engage",color:"#185FA5",desc:"Staff comment, share, and amplify. Post reaches SoG's network and employer contacts."},{title:"3 · Partners notice",color:"#0F6E56",desc:"Work experience hosts and employer partners see authentic voice. Yasmin becomes visible."},{title:"4 · Peers are inspired",color:"#3B6D11",desc:"Other young people in SoG's programme see a peer doing it. Reduces fear. They start posting too."},{title:"5 · SoG's reach grows",color:"#2E7D32",desc:"Authentic youth voices build SoG's credibility with funders, press, and new employer partners."},{title:"6 · Yasmin's prospects improve",color:"#625D9C",desc:"Profile views rise. Employers reach out. Yasmin has evidence of growth to take into interviews."}];
+const FW_DETAILS=[{h:"Starting the wheel turning",p:"Yasmin doesn't need to be polished — authenticity is the asset. A single honest post about what Phase 3 has meant triggers a chain reaction that benefits Yasmin, peers, SoG, and the wider employer network."},{h:"SoG staff as amplifiers",p:"When staff comment and reshare within hours, the post lands in networks Yasmin couldn't reach alone — employer contacts, sector professionals, funders, and commissioners who follow SoG's organisational page."},{h:"Partners see a real person",p:"Work experience hosts and employer partners often don't see the full journey — just the placement. A post that names and thanks them turns a transactional relationship into a visible endorsement."},{h:"Peer activation effect",p:"When a young person sees someone from their own cohort posting professionally, the barrier drops. LinkedIn stops feeling like 'somewhere else'. Peers start posting — and the flywheel accelerates for everyone."},{h:"SoG's brand through youth voice",p:"Funders and commissioners trust outcomes they can see. A young person describing their own progress in their own words is more compelling than any impact report."},{h:"Yasmin's profile becomes a portfolio",p:"Six months of honest, consistent posts document growth that no CV can replicate. Profile views increase. Recruiters and employers reach out directly. Yasmin enters interviews with something concrete to point to."}];
+const MONTHS=[{n:1,col:"m1",dot:"#625D9C",title:"Month 1 — Arrival",theme:"Establishing presence. Who is Yasmin and what is this journey?",phase:"Phase 3 start",posts:[{type:"milestone",title:"My first day at Streets of Growth",hook:"I didn't know what to expect. Here's what I walked into — and why I decided to stay.",tags:["#StreetsOfGrowth","#YouthEmployment"]},{type:"reflection",title:"What Phase 3 actually means for me",hook:"It's not just a programme. It's the first time someone sat down and actually mapped out where I could go.",tags:["#AIM","#MyJourney"]}]},{n:2,col:"m2",dot:"#4197CB",title:"Month 2 — First insights",theme:"Work experience begins. What Yasmin is learning from partners and the workplace.",phase:"Placement begins",posts:[{type:"insight",title:"Three things my placement taught me in week one",hook:"Nobody warns you about this bit. I thought I knew how an office worked. I did not.",tags:["#WorkExperience","#EarlyCareer"]},{type:"story",title:"My mentor asked me one question that changed how I think",hook:"It was a small question. But it stopped me in my tracks.",tags:["#Mentoring","#StreetsOfGrowth"]},{type:"gratitude",title:"Shout-out to the team at [Partner name]",hook:"They didn't have to go this far. They did anyway.",tags:["#Partnerships","#ThankYou"]}]},{n:3,col:"m3",dot:"#0095A9",title:"Month 3 — The hard bit",theme:"Honest reflection on challenge, setback, and what it takes to push through.",phase:"Mid-programme",posts:[{type:"challenge",title:"I had a rough week. Here's what I did with it.",hook:"Not every week goes to plan. This is what Phase 3 looks like when things don't go to plan.",tags:["#Resilience","#MyJourney"]},{type:"reflection",title:"What I've learned about myself in 3 months",hook:"I came in thinking I knew my strengths. I was half right. The other half surprised me.",tags:["#SelfAwareness","#YouthEmployment"]}]},{n:4,col:"m4",dot:"#00AF9A",title:"Month 4 — Peer and community",theme:"What Yasmin is learning from peers inside the SoG cohort.",phase:"Building cohort",posts:[{type:"story",title:"My peer in the programme said something I keep thinking about",hook:"We were in a session together. They said it quietly. Everyone in the room heard it.",tags:["#Community","#StreetsOfGrowth"]},{type:"insight",title:"Five skills I didn't know I had until someone pointed them out",hook:"They were there all along. I just didn't have language for them.",tags:["#SkillsDevelopment","#EarlyCareer"]},{type:"milestone",title:"Half-way milestone: what's changed since Month 1",hook:"I looked back at my first post. I barely recognise the version of me that wrote it.",tags:["#Progress","#MyJourney"]}]},{n:5,col:"m5",dot:"#2E7D32",title:"Month 5 — Forward focus",theme:"Yasmin gets specific about goals, sectors, and what employment means to her.",phase:"Employment focus",posts:[{type:"reflection",title:"The kind of work I actually want — and why it took me this long to say it out loud",hook:"I've spent years saying 'anything, really'. Phase 3 helped me stop doing that.",tags:["#CareerGoals","#StreetsOfGrowth"]},{type:"insight",title:"What I learned from talking to three employers this month",hook:"They don't want perfect. They want people who know how to learn.",tags:["#JobSearch","#EarlyCareer"]}]},{n:6,col:"m6",dot:"#323E48",title:"Month 6 — The full story",theme:"Yasmin closes the chapter and opens the next one.",phase:"Programme end",posts:[{type:"milestone",title:"Six months with Streets of Growth: what I'm taking with me",hook:"I didn't plan to write this publicly. But someone told me that someone else's story might change everything for a young person who needs it.",tags:["#StreetsOfGrowth","#YouthEmployment","#MyJourney"]},{type:"gratitude",title:"Thank you to everyone who made Phase 3 real",hook:"The staff. The employers. My peers. The people who commented on my first-ever LinkedIn post when I had 9 connections.",tags:["#Gratitude","#Community"]},{type:"advice",title:"What I'd tell the version of me from 6 months ago",hook:"Show up. Even when it's uncomfortable. Especially when it's uncomfortable.",tags:["#Advice","#EarlyCareer","#MyJourney"]}]}];
+function buildFlywheel(){const list=document.getElementById('fw-list');FW_NODES.forEach((n,i)=>{const li=document.createElement('li');li.className='fw-node'+(i===0?' active':'');li.innerHTML='<div class="fw-node-title" style="color:'+n.color+'">'+n.title+'</div><div class="fw-node-desc">'+n.desc+'</div>';li.onclick=()=>activateFw(i);list.appendChild(li);});}
+function activateFw(i){document.querySelectorAll('.fw-node').forEach((el,j)=>el.classList.toggle('active',j===i));const d=FW_DETAILS[i];document.getElementById('fw-detail').innerHTML='<h4>'+d.h+'</h4><p>'+d.p+'</p>';}
+function buildTimeline(){const root=document.getElementById('timeline-root');MONTHS.forEach((m,mi)=>{const block=document.createElement('div');block.className='month-block';const dot=document.createElement('div');dot.className='month-dot';dot.style.borderColor=m.dot;dot.onclick=()=>toggle(mi);block.appendChild(dot);const hdr=document.createElement('div');hdr.className='month-header';hdr.onclick=()=>toggle(mi);const ph=document.createElement('span');ph.className='badge bdg-'+m.col;ph.textContent=m.phase;hdr.appendChild(ph);const tt=document.createElement('span');tt.className='month-title';tt.textContent=m.title;hdr.appendChild(tt);const tog=document.createElement('span');tog.className='toggle-lbl';tog.id='tog-'+mi;tog.textContent='▾ '+m.posts.length+' posts';hdr.appendChild(tog);block.appendChild(hdr);const theme=document.createElement('div');theme.className='month-theme';theme.textContent=m.theme;block.appendChild(theme);const pd=document.createElement('div');pd.className='month-posts';pd.id='posts-'+mi;m.posts.forEach(p=>{const card=document.createElement('div');card.className='post-card';const meta=document.createElement('div');meta.className='post-meta';const t=document.createElement('span');t.className='type-'+p.type;t.textContent=p.type;meta.appendChild(t);card.appendChild(meta);const ti=document.createElement('div');ti.className='post-title';ti.textContent=p.title;card.appendChild(ti);const ho=document.createElement('div');ho.className='post-hook';ho.textContent=p.hook;card.appendChild(ho);const tags=document.createElement('div');tags.className='post-tags';p.tags.forEach(tag=>{const s=document.createElement('span');s.className='post-tag';s.textContent=tag;tags.appendChild(s);});card.appendChild(tags);pd.appendChild(card);});block.appendChild(pd);root.appendChild(block);});}
+function toggle(i){const p=document.getElementById('posts-'+i);const t=document.getElementById('tog-'+i);const open=p.classList.toggle('open');t.textContent=(open?'▴':'▾')+' '+MONTHS[i].posts.length+' posts';}
+function showTab(id,btn){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active');}
+buildFlywheel();buildTimeline();
 </script>
 </body>
 </html>
