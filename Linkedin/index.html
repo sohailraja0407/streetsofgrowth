@@ -5,134 +5,329 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yasmin — LinkedIn Journey Framework | Streets of Growth</title>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Open Sans', sans-serif; background: #F5F5F7; color: #323E48; }
-:root {
-  --purple: #625D9C; --blue: #4197CB; --teal: #0095A9; --green: #00AF9A;
-  --black: #323E48; --offwhite: #F5F5F7;
-  --purple-l: #EEEDFE; --blue-l: #E6F1FB; --teal-l: #E1F5EE; --green-l: #EAF3DE;
-  --coral: #D85A30; --coral-l: #FAECE7; --amber: #BA7517; --amber-l: #FAEEDA;
+/* ═══════════════════════════════════════
+   SKIP NAV
+═══════════════════════════════════════ */
+#skip-link {
+  position: absolute; top: -100%; left: 16px;
+  background: #625D9C; color: #fff;
+  padding: 8px 16px; border-radius: 6px;
+  font-weight: 600; text-decoration: none;
+  z-index: 999; transition: top 0.15s;
+  font-family: 'Open Sans', sans-serif; font-size: 14px;
 }
-.site-header { background: #fff; padding: 14px 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #0095A9; }
-.site-header img { height: 52px; width: auto; max-width: 260px; }
-.header-badge { background: #625D9C; color: #fff; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 20px; letter-spacing: .05em; white-space: nowrap; }
+#skip-link:focus { top: 16px; }
+
+/* ═══════════════════════════════════════
+   RESET & TOKENS
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sog-purple:   #625D9C;
+  --sog-blue:     #4197CB;
+  --sog-sky:      #5EB3E4;
+  --sog-teal:     #0095A9;
+  --sog-green:    #00AF9A;
+  --sog-charcoal: #323E48;
+  --sog-red:      #F32735;
+  --sog-orange:   #FF6C0E;
+  --sog-yellow:   #F2CD00;
+  --sog-off-white:#F5F5F7;
+  --purple-10: #F0EFF6; --purple-20: #E0DFEB; --purple-40: #C0BED7; --purple-70: #918DB9;
+  --blue-10:   #ECF5FA; --blue-20:   #D9EAF5; --blue-40:   #B3D5EA; --blue-70:   #7AB7DB;
+  --sky-10:    #EFF8FD; --sky-40:    #BFE1F4;
+  --teal-10:   #E6F5F7; --teal-20:   #CCEAEE; --teal-40:   #99D5DD; --teal-70:   #4DB5C3;
+  --green-10:  #E6F7F5; --green-20:  #CCEFEB; --green-40:  #99DFD7;
+  --charcoal-10: #EBECED; --charcoal-20: #D6D8DA; --charcoal-40: #ADB2B6; --charcoal-70: #70787F;
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+  --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  background: var(--sog-off-white);
+  color: var(--sog-charcoal);
+  font-size: 14px; line-height: 1.6;
+}
+:focus-visible { outline: 2px solid var(--sog-purple); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* ═══════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════ */
+.topbar {
+  background: #ffffff;
+  border-bottom: 1px solid #E2E4E6;
+  padding: 11px 24px; position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo-full { height: 28px; display: block; }
+.logo-mark { height: 32px; display: none; }
+@media (max-width: 600px) {
+  .logo-full { display: none; }
+  .logo-mark { display: block; }
+}
+.header-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px;
+  background: var(--purple-10); color: var(--sog-purple);
+  border: 1.5px solid var(--purple-40);
+  border-radius: var(--radius-sm);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════
+   PAGE LAYOUT
+═══════════════════════════════════════ */
 .page { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
-.page-header { padding: 1.5rem 0 1.25rem; border-bottom: 1px solid #e0e0e0; margin-bottom: 1.75rem; }
-.page-header h1 { font-size: 22px; font-weight: 700; color: #625D9C; margin-bottom: .3rem; }
-.page-header p { font-size: 13px; color: #666; }
-.page-header-rule { width: 40px; height: 3px; background: #625D9C; border-radius: 2px; margin: .6rem 0; }
-.tab-nav { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 0; overflow-x: auto; background: #fff; border-radius: 12px 12px 0 0; padding: 0 1rem; }
-.tab-btn { padding: 12px 16px; font-size: 13px; font-weight: 600; border: none; background: none; cursor: pointer; color: #888; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .15s, border-color .15s; font-family: 'Open Sans', sans-serif; }
-.tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+.page-header {
+  padding: 1.5rem 0 1.25rem;
+  border-bottom: 1px solid #E2E4E6;
+  margin-bottom: 1.75rem;
+}
+.page-header h1 { font-size: 22px; font-weight: 700; color: var(--sog-purple); margin-bottom: .3rem; }
+.page-header p  { font-size: 13px; color: var(--charcoal-70); }
+.page-header-rule { width: 40px; height: 3px; background: var(--sog-purple); border-radius: 2px; margin: .6rem 0; }
+
+/* ═══════════════════════════════════════
+   TAB NAV — SoG confirmed pattern
+═══════════════════════════════════════ */
+.tab-nav {
+  display: flex;
+  background: var(--sog-off-white);
+  border-bottom: 1px solid #E2E4E6;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 0 1rem; overflow-x: auto;
+}
+.tab-btn {
+  padding: 12px 16px; font-size: 13px; font-weight: 600;
+  border: none; background: none; cursor: pointer;
+  color: var(--charcoal-40);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap; transition: color .15s, border-color .15s;
+  font-family: 'Open Sans', sans-serif;
+}
+.tab-btn:hover  { color: var(--sog-charcoal); }
+.tab-btn.active { color: var(--sog-purple); border-bottom-color: var(--sog-purple); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
-.content-area { background: #fff; border-radius: 0 0 12px 12px; padding: 1.5rem; border: 1px solid #e8e8e8; border-top: none; margin-bottom: 2rem; }
-.section-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #0095A9; margin-bottom: .9rem; padding-bottom: .4rem; border-bottom: 1px solid #e8e8e8; }
-.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: .75rem; }
+.content-area {
+  background: #fff;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding: 1.5rem; border: 1px solid #E2E4E6;
+  border-top: none; margin-bottom: 2rem;
+}
+
+/* ═══════════════════════════════════════
+   SECTION LABEL
+═══════════════════════════════════════ */
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--sog-purple);
+  margin-bottom: .9rem; padding-bottom: .4rem;
+  border-bottom: 1px solid #E2E4E6;
+}
+
+/* ═══════════════════════════════════════
+   CARDS
+═══════════════════════════════════════ */
+.card {
+  background: #fff; border: 1px solid #E2E4E6;
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem; margin-bottom: .75rem;
+  box-shadow: 0 1px 4px rgba(50,62,72,0.06);
+}
 .card-head { font-size: 13px; font-weight: 700; margin-bottom: .5rem; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-top: 1rem; }
 @media(max-width:600px){ .two-col,.three-col { grid-template-columns: 1fr; } }
-.metric-card { background: #F5F5F7; border-radius: 8px; padding: .75rem 1rem; text-align: center; }
-.metric-val { font-size: 24px; font-weight: 700; }
-.metric-label { font-size: 11px; color: #888; margin-top: 2px; font-weight: 400; }
-.badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; letter-spacing: .03em; }
-.bdg-m1 { background: #EEEDFE; color: #625D9C; }
-.bdg-m2 { background: #E6F1FB; color: #185FA5; }
-.bdg-m3 { background: #E1F5EE; color: #0F6E56; }
-.bdg-m4 { background: #EAF3DE; color: #3B6D11; }
-.bdg-m5 { background: #f0fde4; color: #2E7D32; }
-.bdg-m6 { background: #eceff1; color: #323E48; }
-.type-reflection { background: #EEEDFE; color: #625D9C; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
-.type-insight { background: #E6F1FB; color: #185FA5; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
-.type-story { background: #E1F5EE; color: #0F6E56; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
-.type-milestone { background: #EAF3DE; color: #3B6D11; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
-.type-gratitude { background: #FFF8E1; color: #795548; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
-.type-challenge { background: #FCE4EC; color: #880E4F; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
-.type-capstone { background: #EEEDFE; color: #625D9C; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
-.type-advice { background: #E6F1FB; color: #185FA5; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+
+/* ═══════════════════════════════════════
+   METRIC CARDS
+═══════════════════════════════════════ */
+.metric-card {
+  background: var(--sog-off-white); border-radius: var(--radius-md);
+  padding: .75rem 1rem; text-align: center; border: 1px solid #E2E4E6;
+}
+.metric-val   { font-size: 24px; font-weight: 700; }
+.metric-label { font-size: 11px; color: var(--charcoal-70); margin-top: 2px; font-weight: 400; }
+
+/* ═══════════════════════════════════════
+   BADGE SYSTEM — unified SoG spec
+═══════════════════════════════════════ */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: var(--radius-sm);
+  font-size: 10px; font-weight: 700;
+  white-space: nowrap; line-height: 1.4;
+  border: 1.5px solid transparent;
+}
+/* Month badges — mapped to SoG palette in sequence */
+.bdg-m1 { color: var(--sog-purple); border-color: var(--purple-40); background: var(--purple-10); }
+.bdg-m2 { color: var(--sog-blue);   border-color: var(--blue-40);   background: var(--blue-10); }
+.bdg-m3 { color: var(--sog-teal);   border-color: var(--teal-40);   background: var(--teal-10); }
+.bdg-m4 { color: var(--sog-green);  border-color: var(--green-40);  background: var(--green-10); }
+.bdg-m5 { color: #403C65;           border-color: var(--purple-40); background: var(--purple-10); }
+.bdg-m6 { color: var(--charcoal-70);border-color: var(--charcoal-40);background: var(--charcoal-10); }
+
+/* Post type badges */
+.type-reflection { color: var(--sog-purple); background: var(--purple-10); border: 1.5px solid var(--purple-40); font-size:10px; font-weight:700; padding:2px 8px; border-radius:var(--radius-sm); }
+.type-insight    { color: var(--sog-blue);   background: var(--blue-10);   border: 1.5px solid var(--blue-40);   font-size:10px; font-weight:700; padding:2px 8px; border-radius:var(--radius-sm); }
+.type-story      { color: var(--sog-teal);   background: var(--teal-10);   border: 1.5px solid var(--teal-40);   font-size:10px; font-weight:700; padding:2px 8px; border-radius:var(--radius-sm); }
+.type-milestone  { color: var(--sog-green);  background: var(--green-10);  border: 1.5px solid var(--green-40);  font-size:10px; font-weight:700; padding:2px 8px; border-radius:var(--radius-sm); }
+.type-gratitude  { color: #7a6500;           background: rgba(242,205,0,0.12); border: 1.5px solid rgba(242,205,0,0.4); font-size:10px; font-weight:700; padding:2px 8px; border-radius:var(--radius-sm); }
+.type-challenge  { color: var(--sog-orange); background: rgba(255,108,14,0.08); border: 1.5px solid rgba(255,108,14,0.3); font-size:10px; font-weight:700; padding:2px 8px; border-radius:var(--radius-sm); }
+.type-capstone   { color: var(--sog-purple); background: var(--purple-10); border: 1.5px solid var(--purple-40); font-size:10px; font-weight:700; padding:2px 8px; border-radius:var(--radius-sm); }
+.type-advice     { color: var(--sog-blue);   background: var(--blue-10);   border: 1.5px solid var(--blue-40);   font-size:10px; font-weight:700; padding:2px 8px; border-radius:var(--radius-sm); }
+
+/* ═══════════════════════════════════════
+   FLYWHEEL
+═══════════════════════════════════════ */
 .fw-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
 @media(max-width:560px){ .fw-wrap { grid-template-columns: 1fr; } }
-.fw-node { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: .75rem 1rem; cursor: pointer; margin-bottom: .5rem; transition: all .15s; }
-.fw-node:hover { border-color: #625D9C; }
-.fw-node.active { border-color: var(--purple); background: #EEEDFE; }
+.fw-node {
+  background: #fff; border: 1px solid #E2E4E6;
+  border-radius: var(--radius-lg);
+  padding: .75rem 1rem; cursor: pointer; margin-bottom: .5rem;
+  transition: all .15s; box-shadow: 0 1px 3px rgba(50,62,72,0.05);
+}
+.fw-node:hover  { border-color: var(--sog-purple); background: var(--purple-10); }
+.fw-node.active { border-color: var(--sog-purple); background: var(--purple-10); }
 .fw-node-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
-.fw-node-desc { font-size: 12px; color: #666; line-height: 1.5; font-weight: 400; }
-.fw-detail { background: #F5F5F7; border-radius: 12px; padding: 1rem 1.25rem; min-height: 120px; margin-top: .75rem; border-left: 3px solid #625D9C; }
-.fw-detail h4 { font-size: 13px; font-weight: 700; color: var(--purple); margin-bottom: .5rem; }
-.fw-detail p { font-size: 13px; color: #555; line-height: 1.6; font-weight: 400; }
+.fw-node-desc  { font-size: 12px; color: var(--charcoal-70); line-height: 1.5; font-weight: 400; }
+.fw-detail {
+  background: var(--sog-off-white); border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem; min-height: 120px; margin-top: .75rem;
+  border-left: 3px solid var(--sog-purple);
+}
+.fw-detail h4 { font-size: 13px; font-weight: 700; color: var(--sog-purple); margin-bottom: .5rem; }
+.fw-detail p  { font-size: 13px; color: var(--charcoal-70); line-height: 1.6; font-weight: 400; }
+
+/* ═══════════════════════════════════════
+   TIMELINE
+═══════════════════════════════════════ */
 .timeline { position: relative; padding-left: 1.5rem; }
-.timeline::before { content:''; position:absolute; left:6px; top:8px; bottom:8px; width:2px; background:#F5F5F7; }
-.month-block { position: relative; margin-bottom: 1.75rem; }
-.month-dot { position:absolute; left:-1.5rem; top:4px; width:13px; height:13px; border-radius:50%; border:2px solid; background:#fff; cursor:pointer; transition:transform .15s; }
+.timeline::before {
+  content:''; position:absolute; left:6px; top:8px; bottom:8px;
+  width:2px; background: var(--charcoal-10);
+}
+.month-block  { position: relative; margin-bottom: 1.75rem; }
+.month-dot    {
+  position:absolute; left:-1.5rem; top:4px;
+  width:13px; height:13px; border-radius:50%;
+  border:2px solid; background:#fff; cursor:pointer;
+  transition:transform .15s;
+}
 .month-dot:hover { transform:scale(1.2); }
 .month-header { display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem; cursor:pointer; flex-wrap:wrap; }
-.month-title { font-size:14px; font-weight:700; }
-.month-theme { font-size:12px; color:#777; margin-bottom:.75rem; font-weight:400; }
-.month-posts { display:none; flex-direction:column; gap:.5rem; }
+.month-title  { font-size:14px; font-weight:700; }
+.month-theme  { font-size:12px; color:var(--charcoal-70); margin-bottom:.75rem; font-weight:400; }
+.month-posts  { display:none; flex-direction:column; gap:.5rem; }
 .month-posts.open { display:flex; }
-.post-card { background:#fff; border:1px solid #e8e8e8; border-radius:8px; padding:.75rem 1rem; transition:border-color .15s; }
-.post-card:hover { border-color:#625D9C; }
-.post-meta { display:flex; align-items:center; gap:.4rem; margin-bottom:.35rem; flex-wrap:wrap; }
-.post-title { font-size:13px; font-weight:700; line-height:1.4; margin-bottom:3px; color:#323E48; }
-.post-hook { font-size:12px; color:#666; line-height:1.5; font-weight:400; }
-.post-tags { display:flex; gap:.35rem; margin-top:.4rem; flex-wrap:wrap; }
-.post-tag { font-size:10px; padding:1px 6px; border-radius:20px; background:#F5F5F7; color:#555; font-weight:600; }
-.toggle-lbl { font-size:11px; color:#aaa; cursor:pointer; user-select:none; }
+.post-card {
+  background:#fff; border:1px solid #E2E4E6;
+  border-radius:var(--radius-md); padding:.75rem 1rem;
+  transition:border-color .15s; box-shadow:0 1px 3px rgba(50,62,72,0.04);
+}
+.post-card:hover { border-color:var(--sog-purple); }
+.post-meta  { display:flex; align-items:center; gap:.4rem; margin-bottom:.35rem; flex-wrap:wrap; }
+.post-title { font-size:13px; font-weight:700; line-height:1.4; margin-bottom:3px; color:var(--sog-charcoal); }
+.post-hook  { font-size:12px; color:var(--charcoal-70); line-height:1.5; font-weight:400; }
+.post-tags  { display:flex; gap:.35rem; margin-top:.4rem; flex-wrap:wrap; }
+.post-tag   { font-size:10px; padding:1px 6px; border-radius:var(--radius-sm); background:var(--sog-off-white); color:var(--charcoal-70); font-weight:600; border:1px solid #E2E4E6; }
+.toggle-lbl { font-size:11px; color:var(--charcoal-40); cursor:pointer; user-select:none; }
+
+/* ═══════════════════════════════════════
+   LIST
+═══════════════════════════════════════ */
 .list-clean { list-style:none; }
-.list-clean li { font-size:12px; color:#555; line-height:1.5; padding-left:.9rem; position:relative; margin-bottom:.35rem; font-weight:400; }
-.list-clean li::before { content:'–'; position:absolute; left:0; color:#0095A9; font-weight:700; }
-.site-footer { background: #323E48; padding: 1rem 1.5rem; text-align: center; border-top: 3px solid #0095A9; }
-.site-footer p { font-size: 11px; color: #aaa; font-family: 'Open Sans', sans-serif; }
-.site-footer a { color: #0095A9; text-decoration: none; }
+.list-clean li { font-size:12px; color:var(--charcoal-70); line-height:1.5; padding-left:.9rem; position:relative; margin-bottom:.35rem; font-weight:400; }
+.list-clean li::before { content:'–'; position:absolute; left:0; color:var(--sog-teal); font-weight:700; }
+
+/* ═══════════════════════════════════════
+   FOOTER — gradient-authority
+═══════════════════════════════════════ */
+.site-footer {
+  background: linear-gradient(135deg, #323E48 0%, #625D9C 100%);
+  padding: 1.25rem 1.5rem; text-align: center;
+}
+.site-footer p { font-size: 11px; color: rgba(255,255,255,0.65); font-family: 'Open Sans', sans-serif; }
+.site-footer a { color: #99D5DD; text-decoration: none; }
+.site-footer a:hover { color: #fff; }
 </style>
 </head>
 <body>
-<header class="site-header">
-  <img src="https://sohailraja0407.github.io/streetsofgrowth/SOG%20Logo-Light%20Background-Transparent%20Background.png" alt="Streets of Growth" style="height:32px;width:auto;">
-  <div class="header-badge">Phase 3 Framework</div>
+
+<a href="#main-content" id="skip-link">Skip to main content</a>
+
+<header class="topbar" role="banner">
+  <img class="logo-full"
+       src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTAyMy41IiBoZWlnaHQ9IjEzMiIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMTAyMy41IDEzMiI+CiAgPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI5LjUuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDIuMS4wIEJ1aWxkIDEzNykgIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsOiAjNDE5N2NiOwogICAgICB9CgogICAgICAuc3QxIHsKICAgICAgICBmaWxsOiAjNWViM2U0OwogICAgICB9CgogICAgICAuc3QyIHsKICAgICAgICBmaWxsOiAjMDA5NWE5OwogICAgICB9CgogICAgICAuc3QzIHsKICAgICAgICBmaWxsOiAjNjI1ZDljOwogICAgICB9CgogICAgICAuc3Q0IHsKICAgICAgICBmaWxsOiAjMzIzZTQ4OwogICAgICB9CgogICAgICAuc3Q1IHsKICAgICAgICBmaWxsOiAjMDBhZjlhOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8Zz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMjE1LjEsNzMuOWMtMTAuMi0zLjYtMjEuOC05LjEtMjEuOC0yMi4xczguOC0xOS43LDIyLjgtMTkuNywyMi43LDExLDIyLjcsMTFsLTguMyw4LjJzLTUuOC03LjktMTQuNC03LjktMTAuNiwzLjctMTAuNiw4LjQsNS41LDgsMTUsMTEuNWMxMC42LDQsMTkuNSw4LjgsMTkuNSwyMS40cy0xMS4xLDE5LjQtMjQuMywxOS40LTI1LjUtMTQuMi0yNS41LTE0LjJsOS03LjZzNiwxMC40LDE2LjUsMTAuNCwxMi4xLTIuNCwxMi4xLTguMS00LjUtOC0xMi43LTEwLjhaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0yNDcuMSw1NS44aDkuM3YtMTRoMTEuOXYxNGgxNC4ydjEwLjdoLTE0LjJ2MTljMCw1LjgsMyw3LjUsNi4yLDcuNXM1LTEuNyw1LTEuN2w0LjQsOS43cy00LjUsMy4xLTExLjMsMy4xLTE2LjEtNi43LTE2LjEtMTYuN3YtMjAuOWgtOS4zdi0xMC43WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMzI0LjYsNTYuMWwtNC4yLDEwLjdzLTIuMi0xLjEtNS43LTEuMWMtNy4zLDAtMTAuNSw2LjQtMTAuNSw2LjR2MzAuOGgtMTEuOXYtNDcuMmgxMS4zdjYuOXM0LjEtOC4xLDEyLjgtOC4xLDguMiwxLjUsOC4yLDEuNVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTM3My40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNMzYxLjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQyNi40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNNDE0LjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQzMS40LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik00ODAuMyw4N3M2LjMsNi44LDE0LjIsNi44LDktMS40LDktNC4zLTIuMi0zLjctOS40LTUuMmMtOS40LTItMTcuNS02LTE3LjUtMTQuOXM3LjQtMTQuNywyMC4zLTE0LjcsMTcuNyw1LjgsMTcuNyw1LjhsLTYsOC43cy01LjQtNC4xLTExLjctNC4xLTguNiwxLjYtOC42LDQuNSwzLjIsMy42LDExLjEsNS4zYzkuNCwyLDE2LDUuMSwxNiwxNC44cy04LjYsMTQuNS0yMC42LDE0LjUtMjEuMy04LjYtMjEuMy04LjZsNi43LTguN1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwMS4xLDc5LjRjMCwxMy44LTExLjEsMjQuOC0yNS4yLDI0LjhzLTI1LjItMTAuOS0yNS4yLTI0LjgsMTEuMS0yNC44LDI1LjItMjQuOCwyNS4yLDEwLjgsMjUuMiwyNC44Wk01ODguOSw3OS40YzAtNy40LTUtMTMuNi0xMy0xMy42cy0xMyw2LjMtMTMsMTMuNiw1LDEzLjYsMTMsMTMuNiwxMy02LjMsMTMtMTMuNloiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwNS41LDU1LjhoOS40di0xMS41YzAtMTMuMSw5LjMtMTcuNywxNi45LTE3LjdzMTAuNCwyLjUsMTAuNCwyLjVsLTQuNSwxMHMtMS44LTEuNC00LjgtMS40LTYuMiwxLjMtNi4yLDcuMnYxMC45aDExLjV2MTAuN2gtMTEuNXYzNi40aC0xMS45di0zNi40aC05LjR2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik03MjQuMSw4OS43di0xNC43aC0xNS44di0xMS4xaDI3LjZ2MzEuNnMtOC45LDguOC0yNS44LDguOC0zNi42LTE1LjQtMzYuNi0zNiwxNS43LTM2LDM2LjEtMzYsMjUuOCwxMC40LDI1LjgsMTAuNGwtOC4yLDhzLTUuOC03LjMtMTcuNi03LjMtMjQsMTEuNC0yNCwyNC45LDEwLjQsMjQuOSwyNC41LDI0LjksMTQtMy40LDE0LTMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTc3OS4zLDU2LjFsLTQuMiwxMC43cy0yLjItMS4xLTUuNy0xLjFjLTcuMywwLTEwLjUsNi40LTEwLjUsNi40djMwLjhoLTExLjl2LTQ3LjJoMTEuM3Y2LjlzNC4xLTguMSwxMi44LTguMSw4LjIsMS41LDguMiwxLjVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik04MzEsNzkuNGMwLDEzLjgtMTEuMSwyNC44LTI1LjIsMjQuOHMtMjUuMi0xMC45LTI1LjItMjQuOCwxMS4xLTI0LjgsMjUuMi0yNC44LDI1LjIsMTAuOCwyNS4yLDI0LjhaTTgxOC45LDc5LjRjMC03LjQtNS0xMy42LTEzLTEzLjZzLTEzLDYuMy0xMywxMy42LDUsMTMuNiwxMywxMy42LDEzLTYuMywxMy0xMy42WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNODQ2LDU1LjhsOS43LDI0LjIsMTAuMi0yNC4yaDEwbDkuOSwyNC4yLDEwLjEtMjQuMmgxMi4xbC0yMi44LDQ5LjUtMTUuMS0zMy42LTE0LjksMzMuNi0yMi44LTQ5LjVoMTMuM1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTkxMC45LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0xMDAwLDcyLjV2MzAuNWgtMTEuOXYtMjcuNmMwLTYuOC00LjItOS43LTkuMy05LjdzLTkuNCw2LjItOS40LDYuMnYzMWgtMTEuOVYyNy44aDExLjl2MzMuN3M0LjItNi45LDEzLjMtNi45LDE3LjMsNi41LDE3LjMsMTcuOFoiLz4KICAgIDwvZz4KICAgIDxnPgogICAgICA8Zz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjEyNi45IDU4LjcgMTI2LjkgMTE3LjMgMTkuOSAxMTcuMyAxOS45IDEwMi41IDI1LjIgMTAyLjUgMTIuNiA4MC43IDAgMTAyLjUgNS4zIDEwMi41IDUuMyAxMzIgMTkuOSAxMzIgMTkuOSAxMzIgMTI2LjkgMTMyIDE0MS41IDExNy4zIDE0MS41IDU4LjcgMTI2LjkgNTguNyIvPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMTQxLjUgMjkuNSAxNDEuNSAwIDEyNi45IDAgMTI2LjkgMCAxOS45IDAgNS4zIDE0LjcgNS4zIDczLjMgMTkuOSA3My4zIDE5LjkgMTQuNyAxMjYuOSAxNC43IDEyNi45IDI5LjUgMTIxLjYgMjkuNSAxMzQuMiA1MS4zIDE0Ni44IDI5LjUgMTQxLjUgMjkuNSIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDEiIHg9IjYzLjkiIHk9IjU4LjciIHdpZHRoPSI0OC41IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cmVjdCBjbGFzcz0ic3Q1IiB4PSIzNC42IiB5PSI4OCIgd2lkdGg9Ijc3LjgiIGhlaWdodD0iMTQuNyIvPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDMiIHg9IjM0LjYiIHk9IjI5LjMiIHdpZHRoPSI3Ny44IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjQ5LjMgNTguNyAzNC42IDczLjMgMzQuNiAyOS4zIDQ5LjMgNDQgNDkuMyA1OC43Ii8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9InN0MiIgcG9pbnRzPSIxMTIuNCAxMDIuNyA5Ny43IDg4IDk3LjcgNzMuMyAxMTIuNCA1OC43IDExMi40IDEwMi43Ii8+CiAgICAgIDwvZz4KICAgIDwvZz4KICA8L2c+CiAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTEwMjMuNSw5NC4zYzAsNC43LTMuNyw4LjMtOC40LDguM3MtOC41LTMuNy04LjUtOC4zLDMuOC04LjIsOC41LTguMiw4LjQsMy43LDguNCw4LjJaTTEwMDguNyw5NC4zYzAsMy43LDIuNyw2LjYsNi40LDYuNnM2LjMtMi45LDYuMy02LjUtMi43LTYuNi02LjMtNi42LTYuNCwzLTYuNCw2LjZaTTEwMTMuOCw5OC42aC0xLjl2LTguMmMuOC0uMiwxLjgtLjMsMy4yLS4zczIuMy4zLDIuOS42Yy41LjQuOCwxLC44LDEuOHMtLjcsMS42LTEuNywxLjloMGMuOC40LDEuMywxLDEuNSwyLjEuMywxLjMuNCwxLjguNiwyLjFoLTIuMWMtLjItLjMtLjQtMS4xLS43LTItLjEtLjktLjctMS4zLTEuNy0xLjNoLS45djMuM1pNMTAxMy44LDk0aC45YzEuMSwwLDEuOS0uNCwxLjktMS4ycy0uNi0xLjMtMS44LTEuMy0uOSwwLTEuMS4xdjIuNFoiLz4KPC9zdmc+"
+       alt="Streets of Growth" height="28">
+  <svg class="logo-mark" xmlns="http://www.w3.org/2000/svg" width="147" height="132" viewBox="0 0 147 132" aria-hidden="true">
+    <defs><style>.st0{fill:#4197cb}.st1{fill:#5eb3e4}.st2{fill:#0095a9}.st3{fill:#625d9c}.st4{fill:#323e48}.st5{fill:#00af9a}</style></defs>
+    <g><g>
+      <polygon class="st4" points="126.9 58.7 126.9 117.3 19.9 117.3 19.9 102.5 25.2 102.5 12.6 80.7 0 102.5 5.3 102.5 5.3 132 19.9 132 19.9 132 126.9 132 141.5 117.3 141.5 58.7 126.9 58.7"/>
+      <polygon class="st4" points="141.5 29.5 141.5 0 126.9 0 126.9 0 19.9 0 5.3 14.7 5.3 73.3 19.9 73.3 19.9 14.7 126.9 14.7 126.9 29.5 121.6 29.5 134.2 51.3 146.8 29.5 141.5 29.5"/>
+    </g><g>
+      <rect class="st1" x="63.9" y="58.7" width="48.5" height="14.7"/>
+      <rect class="st5" x="34.6" y="88" width="77.8" height="14.7"/>
+      <rect class="st3" x="34.6" y="29.3" width="77.8" height="14.7"/>
+      <polygon class="st0" points="49.3 58.7 34.6 73.3 34.6 29.3 49.3 44 49.3 58.7"/>
+      <polygon class="st2" points="112.4 102.7 97.7 88 97.7 73.3 112.4 58.7 112.4 102.7"/>
+    </g></g>
+  </svg>
+  <span class="header-badge">Phase 3 Framework</span>
 </header>
+
+<main id="main-content">
 <div class="page">
   <div class="page-header">
     <h1>Yasmin's LinkedIn journey</h1>
     <div class="page-header-rule"></div>
-    <p>Phase 3 · My journey to employment with Streets of Growth · 6-month framework</p>
+    <p>Phase 3 &nbsp;·&nbsp; My journey to employment with Streets of Growth &nbsp;·&nbsp; 6-month framework</p>
   </div>
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="showTab('flywheel',this)">Flywheel concept</button>
+
+  <nav class="tab-nav" role="navigation" aria-label="Framework sections">
+    <button class="tab-btn active" onclick="showTab('flywheel',this)" aria-current="page">Flywheel concept</button>
     <button class="tab-btn" onclick="showTab('timeline',this)">6-month plan</button>
     <button class="tab-btn" onclick="showTab('guide',this)">Posting guide</button>
-  </div>
+  </nav>
+
   <div class="content-area">
 
-    <div id="tab-flywheel" class="tab-panel active">
+    <!-- TAB: FLYWHEEL -->
+    <div id="tab-flywheel" class="tab-panel active" role="tabpanel">
       <p class="section-label">How one young person's posts create value for everyone</p>
       <div class="fw-wrap">
         <div>
           <svg width="100%" viewBox="0 0 300 300">
             <defs><marker id="fw-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
-            <circle cx="150" cy="150" r="130" fill="none" stroke="#e0e0e0" stroke-width="0.5" stroke-dasharray="4 4"/>
-            <path d="M 150 20 A 130 130 0 0 1 260 85" fill="none" stroke="#625D9C" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
-            <path d="M 265 100 A 130 130 0 0 1 265 200" fill="none" stroke="#4197CB" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
-            <path d="M 255 215 A 130 130 0 0 1 150 280" fill="none" stroke="#0095A9" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
-            <path d="M 135 280 A 130 130 0 0 1 40 215" fill="none" stroke="#00AF9A" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
-            <path d="M 35 200 A 130 130 0 0 1 35 100" fill="none" stroke="#2E7D32" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
-            <path d="M 40 85 A 130 130 0 0 1 150 20" fill="none" stroke="#625D9C" stroke-width="1.5" opacity=".7" marker-end="url(#fw-arrow)"/>
-            <circle cx="150" cy="22" r="18" fill="#EEEDFE" stroke="#625D9C" stroke-width="1.5" cursor="pointer" onclick="activateFw(0)"/>
-            <circle cx="262" cy="90" r="18" fill="#E6F1FB" stroke="#4197CB" stroke-width="1.5" cursor="pointer" onclick="activateFw(1)"/>
-            <circle cx="262" cy="210" r="18" fill="#E1F5EE" stroke="#0095A9" stroke-width="1.5" cursor="pointer" onclick="activateFw(2)"/>
-            <circle cx="150" cy="278" r="18" fill="#EAF3DE" stroke="#00AF9A" stroke-width="1.5" cursor="pointer" onclick="activateFw(3)"/>
-            <circle cx="38" cy="210" r="18" fill="#f0fde4" stroke="#2E7D32" stroke-width="1.5" cursor="pointer" onclick="activateFw(4)"/>
-            <circle cx="38" cy="90" r="18" fill="#EEEDFE" stroke="#625D9C" stroke-width="1.5" cursor="pointer" onclick="activateFw(5)"/>
-            <text x="150" y="27" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#625D9C" style="pointer-events:none;font-family:'Open Sans',sans-serif">1</text>
-            <text x="262" y="95" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#185FA5" style="pointer-events:none;font-family:'Open Sans',sans-serif">2</text>
-            <text x="262" y="215" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#0F6E56" style="pointer-events:none;font-family:'Open Sans',sans-serif">3</text>
-            <text x="150" y="283" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#3B6D11" style="pointer-events:none;font-family:'Open Sans',sans-serif">4</text>
-            <text x="38" y="215" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#2E7D32" style="pointer-events:none;font-family:'Open Sans',sans-serif">5</text>
-            <text x="38" y="95" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#625D9C" style="pointer-events:none;font-family:'Open Sans',sans-serif">6</text>
-            <circle cx="150" cy="150" r="46" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>
+            <circle cx="150" cy="150" r="130" fill="none" stroke="#E2E4E6" stroke-width="0.5" stroke-dasharray="4 4"/>
+            <path d="M 150 20 A 130 130 0 0 1 260 85"  fill="none" stroke="#625D9C" stroke-width="1.5" opacity=".8" marker-end="url(#fw-arrow)"/>
+            <path d="M 265 100 A 130 130 0 0 1 265 200" fill="none" stroke="#4197CB" stroke-width="1.5" opacity=".8" marker-end="url(#fw-arrow)"/>
+            <path d="M 255 215 A 130 130 0 0 1 150 280" fill="none" stroke="#0095A9" stroke-width="1.5" opacity=".8" marker-end="url(#fw-arrow)"/>
+            <path d="M 135 280 A 130 130 0 0 1 40 215"  fill="none" stroke="#00AF9A" stroke-width="1.5" opacity=".8" marker-end="url(#fw-arrow)"/>
+            <path d="M 35 200 A 130 130 0 0 1 35 100"   fill="none" stroke="#534F85" stroke-width="1.5" opacity=".8" marker-end="url(#fw-arrow)"/>
+            <path d="M 40 85 A 130 130 0 0 1 150 20"    fill="none" stroke="#625D9C" stroke-width="1.5" opacity=".8" marker-end="url(#fw-arrow)"/>
+            <circle cx="150" cy="22"  r="18" fill="#F0EFF6" stroke="#625D9C" stroke-width="1.5" cursor="pointer" onclick="activateFw(0)"/>
+            <circle cx="262" cy="90"  r="18" fill="#ECF5FA" stroke="#4197CB" stroke-width="1.5" cursor="pointer" onclick="activateFw(1)"/>
+            <circle cx="262" cy="210" r="18" fill="#E6F5F7" stroke="#0095A9" stroke-width="1.5" cursor="pointer" onclick="activateFw(2)"/>
+            <circle cx="150" cy="278" r="18" fill="#E6F7F5" stroke="#00AF9A" stroke-width="1.5" cursor="pointer" onclick="activateFw(3)"/>
+            <circle cx="38"  cy="210" r="18" fill="#F0EFF6" stroke="#534F85" stroke-width="1.5" cursor="pointer" onclick="activateFw(4)"/>
+            <circle cx="38"  cy="90"  r="18" fill="#F0EFF6" stroke="#625D9C" stroke-width="1.5" cursor="pointer" onclick="activateFw(5)"/>
+            <text x="150" y="27"  text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#625D9C" style="pointer-events:none;font-family:'Open Sans',sans-serif">1</text>
+            <text x="262" y="95"  text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#4197CB" style="pointer-events:none;font-family:'Open Sans',sans-serif">2</text>
+            <text x="262" y="215" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#0095A9" style="pointer-events:none;font-family:'Open Sans',sans-serif">3</text>
+            <text x="150" y="283" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#00AF9A" style="pointer-events:none;font-family:'Open Sans',sans-serif">4</text>
+            <text x="38"  y="215" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#534F85" style="pointer-events:none;font-family:'Open Sans',sans-serif">5</text>
+            <text x="38"  y="95"  text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#625D9C" style="pointer-events:none;font-family:'Open Sans',sans-serif">6</text>
+            <circle cx="150" cy="150" r="46" fill="#fff" stroke="#E2E4E6" stroke-width="1"/>
             <text x="150" y="144" text-anchor="middle" font-size="11" font-weight="700" fill="#323E48" style="pointer-events:none;font-family:'Open Sans',sans-serif">Yasmin's</text>
             <text x="150" y="158" text-anchor="middle" font-size="11" font-weight="700" fill="#323E48" style="pointer-events:none;font-family:'Open Sans',sans-serif">LinkedIn</text>
             <text x="150" y="172" text-anchor="middle" font-size="10" fill="#0095A9" style="pointer-events:none;font-family:'Open Sans',sans-serif">journey</text>
@@ -148,46 +343,155 @@ body { font-family: 'Open Sans', sans-serif; background: #F5F5F7; color: #323E48
       </div>
     </div>
 
-    <div id="tab-timeline" class="tab-panel">
-      <p class="section-label">Yasmin's journey — Phase 3 · 6-month post plan</p>
+    <!-- TAB: TIMELINE -->
+    <div id="tab-timeline" class="tab-panel" role="tabpanel">
+      <p class="section-label">Yasmin's journey — Phase 3 &nbsp;·&nbsp; 6-month post plan</p>
       <div class="timeline" id="timeline-root"></div>
     </div>
 
-    <div id="tab-guide" class="tab-panel">
+    <!-- TAB: POSTING GUIDE -->
+    <div id="tab-guide" class="tab-panel" role="tabpanel">
       <p class="section-label">Practical posting guidance for Yasmin and SoG staff</p>
       <div class="two-col">
-        <div class="card"><div class="card-head" style="color:var(--purple)">What to post</div><ul class="list-clean"><li>Honest reflections — what surprised you, what was hard</li><li>Specific skills from work experience sessions</li><li>A question your mentor helped you answer</li><li>Something a peer taught you</li><li>Before/after: who you were vs who you're becoming</li><li>A photo from a placement or SoG event (with consent)</li></ul></div>
-        <div class="card"><div class="card-head" style="color:#4197CB">What to avoid</div><ul class="list-clean"><li>Vague or generic updates ("Had a great week!")</li><li>Sharing anything personal about other participants</li><li>Complaining about specific employers or placements</li><li>Posting when emotionally reactive — write it, wait, then post</li><li>Copying others' posts — your voice is the value</li><li>Oversharing — professional doesn't mean emotionless</li></ul></div>
-        <div class="card"><div class="card-head" style="color:#0095A9">How SoG staff support</div><ul class="list-clean"><li>Review draft posts before publishing if Yasmin wants</li><li>Like and comment within 24 hours of posting</li><li>Tag relevant employer partners where appropriate</li><li>Reshare to SoG's organisational page</li><li>Screenshot notable engagement to celebrate in sessions</li><li>Suggest post ideas based on session content each week</li></ul></div>
-        <div class="card"><div class="card-head" style="color:#00AF9A">Profile basics first</div><ul class="list-clean"><li>Professional or clear headshot — no group photos</li><li>Headline: "Phase 3 participant @ Streets of Growth | [sector interest]"</li><li>About section: 3–4 sentences, first-person, honest about the journey</li><li>Add Streets of Growth as experience (start date = Phase 3 start)</li><li>List any work experience placements as experience entries</li><li>Connect with SoG staff, partners, and work experience supervisors</li></ul></div>
+        <div class="card"><div class="card-head" style="color:var(--sog-purple)">What to post</div><ul class="list-clean"><li>Honest reflections — what surprised you, what was hard</li><li>Specific skills from work experience sessions</li><li>A question your mentor helped you answer</li><li>Something a peer taught you</li><li>Before/after: who you were vs who you're becoming</li><li>A photo from a placement or SoG event (with consent)</li></ul></div>
+        <div class="card"><div class="card-head" style="color:var(--sog-blue)">What to avoid</div><ul class="list-clean"><li>Vague or generic updates ("Had a great week!")</li><li>Sharing anything personal about other participants</li><li>Complaining about specific employers or placements</li><li>Posting when emotionally reactive — write it, wait, then post</li><li>Copying others' posts — your voice is the value</li><li>Oversharing — professional doesn't mean emotionless</li></ul></div>
+        <div class="card"><div class="card-head" style="color:var(--sog-teal)">How SoG staff support</div><ul class="list-clean"><li>Review draft posts before publishing if Yasmin wants</li><li>Like and comment within 24 hours of posting</li><li>Tag relevant employer partners where appropriate</li><li>Reshare to SoG's organisational page</li><li>Screenshot notable engagement to celebrate in sessions</li><li>Suggest post ideas based on session content each week</li></ul></div>
+        <div class="card"><div class="card-head" style="color:var(--sog-green)">Profile basics first</div><ul class="list-clean"><li>Professional or clear headshot — no group photos</li><li>Headline: "Phase 3 participant @ Streets of Growth | [sector interest]"</li><li>About section: 3–4 sentences, first-person, honest about the journey</li><li>Add Streets of Growth as experience (start date = Phase 3 start)</li><li>List any work experience placements as experience entries</li><li>Connect with SoG staff, partners, and work experience supervisors</li></ul></div>
       </div>
       <p class="section-label" style="margin-top:1.25rem;">Target outcomes over 6 months</p>
       <div class="three-col">
-        <div class="metric-card"><div class="metric-val" style="color:var(--purple)">12–18</div><div class="metric-label">Posts published</div></div>
-        <div class="metric-card"><div class="metric-val" style="color:#4197CB">50+</div><div class="metric-label">Connections made</div></div>
-        <div class="metric-card"><div class="metric-val" style="color:#0095A9">3+</div><div class="metric-label">Employer conversations</div></div>
+        <div class="metric-card"><div class="metric-val" style="color:var(--sog-purple)">12–18</div><div class="metric-label">Posts published</div></div>
+        <div class="metric-card"><div class="metric-val" style="color:var(--sog-blue)">50+</div><div class="metric-label">Connections made</div></div>
+        <div class="metric-card"><div class="metric-val" style="color:var(--sog-teal)">3+</div><div class="metric-label">Employer conversations</div></div>
       </div>
-      <div style="margin-top:1.25rem;background:#F5F5F7;border-radius:12px;padding:1rem 1.25rem;border-left:3px solid #0095A9;">
-        <div style="font-size:13px;font-weight:700;color:#0095A9;margin-bottom:.5rem;">On consent and safeguarding</div>
-        <p style="font-size:12px;color:#555;line-height:1.6;">All posts should be written and controlled by the young person. SoG staff should not post on their behalf without explicit consent. Any tagging of SoG accounts or employer partners should be agreed in advance. Young people should be made aware that LinkedIn is a public platform and posts may be seen by future employers, funders, and others beyond their current network.</p>
+      <div style="margin-top:1.25rem;background:var(--sog-off-white);border-radius:var(--radius-lg);padding:1rem 1.25rem;border-left:3px solid var(--sog-teal);">
+        <div style="font-size:13px;font-weight:700;color:var(--sog-teal);margin-bottom:.5rem;">On consent and safeguarding</div>
+        <p style="font-size:12px;color:var(--charcoal-70);line-height:1.6;">All posts should be written and controlled by the young person. SoG staff should not post on their behalf without explicit consent. Any tagging of SoG accounts or employer partners should be agreed in advance. Young people should be made aware that LinkedIn is a public platform and posts may be seen by future employers, funders, and others beyond their current network.</p>
       </div>
     </div>
 
   </div>
 </div>
-<footer class="site-footer">
-  <p>Streets of Growth · Registered Charity No. 1198741 · Phase 3 Digital Frameworks · <a href="../">Back to all frameworks</a></p>
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <p>Streets of Growth &nbsp;·&nbsp; Registered Charity No. 1198741 &nbsp;·&nbsp; Phase 3 Digital Frameworks &nbsp;·&nbsp; <a href="../">Back to all frameworks</a></p>
 </footer>
+
 <script>
-const FW_NODES=[{title:"1 · Young person posts",color:"#625D9C",desc:"Yasmin shares an honest update about Phase 3 — a session, a placement, a challenge overcome."},{title:"2 · SoG staff engage",color:"#185FA5",desc:"Staff comment, share, and amplify. Post reaches SoG's network and employer contacts."},{title:"3 · Partners notice",color:"#0F6E56",desc:"Work experience hosts and employer partners see authentic voice. Yasmin becomes visible."},{title:"4 · Peers are inspired",color:"#3B6D11",desc:"Other young people in SoG's programme see a peer doing it. Reduces fear. They start posting too."},{title:"5 · SoG's reach grows",color:"#2E7D32",desc:"Authentic youth voices build SoG's credibility with funders, press, and new employer partners."},{title:"6 · Yasmin's prospects improve",color:"#625D9C",desc:"Profile views rise. Employers reach out. Yasmin has evidence of growth to take into interviews."}];
-const FW_DETAILS=[{h:"Starting the wheel turning",p:"Yasmin doesn't need to be polished — authenticity is the asset. A single honest post about what Phase 3 has meant triggers a chain reaction that benefits Yasmin, peers, SoG, and the wider employer network."},{h:"SoG staff as amplifiers",p:"When staff comment and reshare within hours, the post lands in networks Yasmin couldn't reach alone — employer contacts, sector professionals, funders, and commissioners who follow SoG's organisational page."},{h:"Partners see a real person",p:"Work experience hosts and employer partners often don't see the full journey — just the placement. A post that names and thanks them turns a transactional relationship into a visible endorsement."},{h:"Peer activation effect",p:"When a young person sees someone from their own cohort posting professionally, the barrier drops. LinkedIn stops feeling like 'somewhere else'. Peers start posting — and the flywheel accelerates for everyone."},{h:"SoG's brand through youth voice",p:"Funders and commissioners trust outcomes they can see. A young person describing their own progress in their own words is more compelling than any impact report."},{h:"Yasmin's profile becomes a portfolio",p:"Six months of honest, consistent posts document growth that no CV can replicate. Profile views increase. Recruiters and employers reach out directly. Yasmin enters interviews with something concrete to point to."}];
-const MONTHS=[{n:1,col:"m1",dot:"#625D9C",title:"Month 1 — Arrival",theme:"Establishing presence. Who is Yasmin and what is this journey?",phase:"Phase 3 start",posts:[{type:"milestone",title:"My first day at Streets of Growth",hook:"I didn't know what to expect. Here's what I walked into — and why I decided to stay.",tags:["#StreetsOfGrowth","#YouthEmployment"]},{type:"reflection",title:"What Phase 3 actually means for me",hook:"It's not just a programme. It's the first time someone sat down and actually mapped out where I could go.",tags:["#AIM","#MyJourney"]}]},{n:2,col:"m2",dot:"#4197CB",title:"Month 2 — First insights",theme:"Work experience begins. What Yasmin is learning from partners and the workplace.",phase:"Placement begins",posts:[{type:"insight",title:"Three things my placement taught me in week one",hook:"Nobody warns you about this bit. I thought I knew how an office worked. I did not.",tags:["#WorkExperience","#EarlyCareer"]},{type:"story",title:"My mentor asked me one question that changed how I think",hook:"It was a small question. But it stopped me in my tracks.",tags:["#Mentoring","#StreetsOfGrowth"]},{type:"gratitude",title:"Shout-out to the team at [Partner name]",hook:"They didn't have to go this far. They did anyway.",tags:["#Partnerships","#ThankYou"]}]},{n:3,col:"m3",dot:"#0095A9",title:"Month 3 — The hard bit",theme:"Honest reflection on challenge, setback, and what it takes to push through.",phase:"Mid-programme",posts:[{type:"challenge",title:"I had a rough week. Here's what I did with it.",hook:"Not every week goes to plan. This is what Phase 3 looks like when things don't go to plan.",tags:["#Resilience","#MyJourney"]},{type:"reflection",title:"What I've learned about myself in 3 months",hook:"I came in thinking I knew my strengths. I was half right. The other half surprised me.",tags:["#SelfAwareness","#YouthEmployment"]}]},{n:4,col:"m4",dot:"#00AF9A",title:"Month 4 — Peer and community",theme:"What Yasmin is learning from peers inside the SoG cohort.",phase:"Building cohort",posts:[{type:"story",title:"My peer in the programme said something I keep thinking about",hook:"We were in a session together. They said it quietly. Everyone in the room heard it.",tags:["#Community","#StreetsOfGrowth"]},{type:"insight",title:"Five skills I didn't know I had until someone pointed them out",hook:"They were there all along. I just didn't have language for them.",tags:["#SkillsDevelopment","#EarlyCareer"]},{type:"milestone",title:"Half-way milestone: what's changed since Month 1",hook:"I looked back at my first post. I barely recognise the version of me that wrote it.",tags:["#Progress","#MyJourney"]}]},{n:5,col:"m5",dot:"#2E7D32",title:"Month 5 — Forward focus",theme:"Yasmin gets specific about goals, sectors, and what employment means to her.",phase:"Employment focus",posts:[{type:"reflection",title:"The kind of work I actually want — and why it took me this long to say it out loud",hook:"I've spent years saying 'anything, really'. Phase 3 helped me stop doing that.",tags:["#CareerGoals","#StreetsOfGrowth"]},{type:"insight",title:"What I learned from talking to three employers this month",hook:"They don't want perfect. They want people who know how to learn.",tags:["#JobSearch","#EarlyCareer"]}]},{n:6,col:"m6",dot:"#323E48",title:"Month 6 — The full story",theme:"Yasmin closes the chapter and opens the next one.",phase:"Programme end",posts:[{type:"milestone",title:"Six months with Streets of Growth: what I'm taking with me",hook:"I didn't plan to write this publicly. But someone told me that someone else's story might change everything for a young person who needs it.",tags:["#StreetsOfGrowth","#YouthEmployment","#MyJourney"]},{type:"gratitude",title:"Thank you to everyone who made Phase 3 real",hook:"The staff. The employers. My peers. The people who commented on my first-ever LinkedIn post when I had 9 connections.",tags:["#Gratitude","#Community"]},{type:"advice",title:"What I'd tell the version of me from 6 months ago",hook:"Show up. Even when it's uncomfortable. Especially when it's uncomfortable.",tags:["#Advice","#EarlyCareer","#MyJourney"]}]}];
-function buildFlywheel(){const list=document.getElementById('fw-list');FW_NODES.forEach((n,i)=>{const li=document.createElement('li');li.className='fw-node'+(i===0?' active':'');li.innerHTML='<div class="fw-node-title" style="color:'+n.color+'">'+n.title+'</div><div class="fw-node-desc">'+n.desc+'</div>';li.onclick=()=>activateFw(i);list.appendChild(li);});}
-function activateFw(i){document.querySelectorAll('.fw-node').forEach((el,j)=>el.classList.toggle('active',j===i));const d=FW_DETAILS[i];document.getElementById('fw-detail').innerHTML='<h4>'+d.h+'</h4><p>'+d.p+'</p>';}
-function buildTimeline(){const root=document.getElementById('timeline-root');MONTHS.forEach((m,mi)=>{const block=document.createElement('div');block.className='month-block';const dot=document.createElement('div');dot.className='month-dot';dot.style.borderColor=m.dot;dot.onclick=()=>toggle(mi);block.appendChild(dot);const hdr=document.createElement('div');hdr.className='month-header';hdr.onclick=()=>toggle(mi);const ph=document.createElement('span');ph.className='badge bdg-'+m.col;ph.textContent=m.phase;hdr.appendChild(ph);const tt=document.createElement('span');tt.className='month-title';tt.textContent=m.title;hdr.appendChild(tt);const tog=document.createElement('span');tog.className='toggle-lbl';tog.id='tog-'+mi;tog.textContent='▾ '+m.posts.length+' posts';hdr.appendChild(tog);block.appendChild(hdr);const theme=document.createElement('div');theme.className='month-theme';theme.textContent=m.theme;block.appendChild(theme);const pd=document.createElement('div');pd.className='month-posts';pd.id='posts-'+mi;m.posts.forEach(p=>{const card=document.createElement('div');card.className='post-card';const meta=document.createElement('div');meta.className='post-meta';const t=document.createElement('span');t.className='type-'+p.type;t.textContent=p.type;meta.appendChild(t);card.appendChild(meta);const ti=document.createElement('div');ti.className='post-title';ti.textContent=p.title;card.appendChild(ti);const ho=document.createElement('div');ho.className='post-hook';ho.textContent=p.hook;card.appendChild(ho);const tags=document.createElement('div');tags.className='post-tags';p.tags.forEach(tag=>{const s=document.createElement('span');s.className='post-tag';s.textContent=tag;tags.appendChild(s);});card.appendChild(tags);pd.appendChild(card);});block.appendChild(pd);root.appendChild(block);});}
-function toggle(i){const p=document.getElementById('posts-'+i);const t=document.getElementById('tog-'+i);const open=p.classList.toggle('open');t.textContent=(open?'▴':'▾')+' '+MONTHS[i].posts.length+' posts';}
-function showTab(id,btn){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active');}
-buildFlywheel();buildTimeline();
+/* Month colour maps — SoG tokens as hex for inline SVG/style use */
+const M_BG   = {m1:'#F0EFF6',m2:'#ECF5FA',m3:'#E6F5F7',m4:'#E6F7F5',m5:'#F0EFF6',m6:'#EBECED'};
+const M_COL  = {m1:'#625D9C',m2:'#4197CB',m3:'#0095A9',m4:'#00AF9A',m5:'#403C65',m6:'#70787F'};
+const M_BDR  = {m1:'#C0BED7',m2:'#B3D5EA',m3:'#99D5DD',m4:'#99DFD7',m5:'#C0BED7',m6:'#ADB2B6'};
+
+const FW_NODES=[
+  {title:"1 · Young person posts",   color:"#625D9C",desc:"Yasmin shares an honest update about Phase 3 — a session, a placement, a challenge overcome."},
+  {title:"2 · SoG staff engage",     color:"#4197CB",desc:"Staff comment, share, and amplify. Post reaches SoG's network and employer contacts."},
+  {title:"3 · Partners notice",      color:"#0095A9",desc:"Work experience hosts and employer partners see authentic voice. Yasmin becomes visible."},
+  {title:"4 · Peers are inspired",   color:"#00AF9A",desc:"Other young people in SoG's programme see a peer doing it. Reduces fear. They start posting too."},
+  {title:"5 · SoG's reach grows",   color:"#534F85",desc:"Authentic youth voices build SoG's credibility with funders, press, and new employer partners."},
+  {title:"6 · Yasmin's prospects improve",color:"#625D9C",desc:"Profile views rise. Employers reach out. Yasmin has evidence of growth to take into interviews."}
+];
+const FW_DETAILS=[
+  {h:"Starting the wheel turning",p:"Yasmin doesn't need to be polished — authenticity is the asset. A single honest post about what Phase 3 has meant triggers a chain reaction that benefits Yasmin, peers, SoG, and the wider employer network."},
+  {h:"SoG staff as amplifiers",p:"When staff comment and reshare within hours, the post lands in networks Yasmin couldn't reach alone — employer contacts, sector professionals, funders, and commissioners who follow SoG's organisational page."},
+  {h:"Partners see a real person",p:"Work experience hosts and employer partners often don't see the full journey — just the placement. A post that names and thanks them turns a transactional relationship into a visible endorsement."},
+  {h:"Peer activation effect",p:"When a young person sees someone from their own cohort posting professionally, the barrier drops. LinkedIn stops feeling like 'somewhere else'. Peers start posting — and the flywheel accelerates for everyone."},
+  {h:"SoG's brand through youth voice",p:"Funders and commissioners trust outcomes they can see. A young person describing their own progress in their own words is more compelling than any impact report."},
+  {h:"Yasmin's profile becomes a portfolio",p:"Six months of honest, consistent posts document growth that no CV can replicate. Profile views increase. Recruiters and employers reach out directly. Yasmin enters interviews with something concrete to point to."}
+];
+const MONTHS=[
+  {n:1,col:"m1",dot:"#625D9C",title:"Month 1 — Arrival",theme:"Establishing presence. Who is Yasmin and what is this journey?",phase:"Phase 3 start",posts:[
+    {type:"milestone",title:"My first day at Streets of Growth",hook:"I didn't know what to expect. Here's what I walked into — and why I decided to stay.",tags:["#StreetsOfGrowth","#YouthEmployment"]},
+    {type:"reflection",title:"What Phase 3 actually means for me",hook:"It's not just a programme. It's the first time someone sat down and actually mapped out where I could go.",tags:["#AIM","#MyJourney"]}
+  ]},
+  {n:2,col:"m2",dot:"#4197CB",title:"Month 2 — First insights",theme:"Work experience begins. What Yasmin is learning from partners and the workplace.",phase:"Placement begins",posts:[
+    {type:"insight",title:"Three things my placement taught me in week one",hook:"Nobody warns you about this bit. I thought I knew how an office worked. I did not.",tags:["#WorkExperience","#EarlyCareer"]},
+    {type:"story",title:"My mentor asked me one question that changed how I think",hook:"It was a small question. But it stopped me in my tracks.",tags:["#Mentoring","#StreetsOfGrowth"]},
+    {type:"gratitude",title:"Shout-out to the team at [Partner name]",hook:"They didn't have to go this far. They did anyway.",tags:["#Partnerships","#ThankYou"]}
+  ]},
+  {n:3,col:"m3",dot:"#0095A9",title:"Month 3 — The hard bit",theme:"Honest reflection on challenge, setback, and what it takes to push through.",phase:"Mid-programme",posts:[
+    {type:"challenge",title:"I had a rough week. Here's what I did with it.",hook:"Not every week goes to plan. This is what Phase 3 looks like when things don't go to plan.",tags:["#Resilience","#MyJourney"]},
+    {type:"reflection",title:"What I've learned about myself in 3 months",hook:"I came in thinking I knew my strengths. I was half right. The other half surprised me.",tags:["#SelfAwareness","#YouthEmployment"]}
+  ]},
+  {n:4,col:"m4",dot:"#00AF9A",title:"Month 4 — Peer and community",theme:"What Yasmin is learning from peers inside the SoG cohort.",phase:"Building cohort",posts:[
+    {type:"story",title:"My peer in the programme said something I keep thinking about",hook:"We were in a session together. They said it quietly. Everyone in the room heard it.",tags:["#Community","#StreetsOfGrowth"]},
+    {type:"insight",title:"Five skills I didn't know I had until someone pointed them out",hook:"They were there all along. I just didn't have language for them.",tags:["#SkillsDevelopment","#EarlyCareer"]},
+    {type:"milestone",title:"Half-way milestone: what's changed since Month 1",hook:"I looked back at my first post. I barely recognise the version of me that wrote it.",tags:["#Progress","#MyJourney"]}
+  ]},
+  {n:5,col:"m5",dot:"#534F85",title:"Month 5 — Forward focus",theme:"Yasmin gets specific about goals, sectors, and what employment means to her.",phase:"Employment focus",posts:[
+    {type:"reflection",title:"The kind of work I actually want — and why it took me this long to say it out loud",hook:"I've spent years saying 'anything, really'. Phase 3 helped me stop doing that.",tags:["#CareerGoals","#StreetsOfGrowth"]},
+    {type:"insight",title:"What I learned from talking to three employers this month",hook:"They don't want perfect. They want people who know how to learn.",tags:["#JobSearch","#EarlyCareer"]}
+  ]},
+  {n:6,col:"m6",dot:"#70787F",title:"Month 6 — The full story",theme:"Yasmin closes the chapter and opens the next one.",phase:"Programme end",posts:[
+    {type:"milestone",title:"Six months with Streets of Growth: what I'm taking with me",hook:"I didn't plan to write this publicly. But someone told me that someone else's story might change everything for a young person who needs it.",tags:["#StreetsOfGrowth","#YouthEmployment","#MyJourney"]},
+    {type:"gratitude",title:"Thank you to everyone who made Phase 3 real",hook:"The staff. The employers. My peers. The people who commented on my first-ever LinkedIn post when I had 9 connections.",tags:["#Gratitude","#Community"]},
+    {type:"advice",title:"What I'd tell the version of me from 6 months ago",hook:"Show up. Even when it's uncomfortable. Especially when it's uncomfortable.",tags:["#Advice","#EarlyCareer","#MyJourney"]}
+  ]}
+];
+
+function buildFlywheel(){
+  const list=document.getElementById('fw-list');
+  FW_NODES.forEach((n,i)=>{
+    const li=document.createElement('li');
+    li.className='fw-node'+(i===0?' active':'');
+    li.innerHTML='<div class="fw-node-title" style="color:'+n.color+'">'+n.title+'</div><div class="fw-node-desc">'+n.desc+'</div>';
+    li.onclick=()=>activateFw(i);
+    list.appendChild(li);
+  });
+}
+function activateFw(i){
+  document.querySelectorAll('.fw-node').forEach((el,j)=>el.classList.toggle('active',j===i));
+  const d=FW_DETAILS[i];
+  document.getElementById('fw-detail').innerHTML='<h4>'+d.h+'</h4><p>'+d.p+'</p>';
+}
+
+function buildTimeline(){
+  const root=document.getElementById('timeline-root');
+  MONTHS.forEach((m,mi)=>{
+    const block=document.createElement('div'); block.className='month-block';
+    const dot=document.createElement('div'); dot.className='month-dot';
+    dot.style.borderColor=m.dot; dot.onclick=()=>toggle(mi); block.appendChild(dot);
+    const hdr=document.createElement('div'); hdr.className='month-header'; hdr.onclick=()=>toggle(mi);
+    const ph=document.createElement('span');
+    ph.className='badge';
+    ph.style.background=M_BG[m.col]; ph.style.color=M_COL[m.col]; ph.style.borderColor=M_BDR[m.col];
+    ph.textContent=m.phase; hdr.appendChild(ph);
+    const tt=document.createElement('span'); tt.className='month-title'; tt.textContent=m.title; hdr.appendChild(tt);
+    const tog=document.createElement('span'); tog.className='toggle-lbl'; tog.id='tog-'+mi; tog.textContent='▾ '+m.posts.length+' posts'; hdr.appendChild(tog);
+    block.appendChild(hdr);
+    const theme=document.createElement('div'); theme.className='month-theme'; theme.textContent=m.theme; block.appendChild(theme);
+    const pd=document.createElement('div'); pd.className='month-posts'; pd.id='posts-'+mi;
+    m.posts.forEach(p=>{
+      const card=document.createElement('div'); card.className='post-card';
+      const meta=document.createElement('div'); meta.className='post-meta';
+      const t=document.createElement('span'); t.className='type-'+p.type; t.textContent=p.type; meta.appendChild(t);
+      card.appendChild(meta);
+      const ti=document.createElement('div'); ti.className='post-title'; ti.textContent=p.title; card.appendChild(ti);
+      const ho=document.createElement('div'); ho.className='post-hook'; ho.textContent=p.hook; card.appendChild(ho);
+      const tags=document.createElement('div'); tags.className='post-tags';
+      p.tags.forEach(tag=>{const s=document.createElement('span');s.className='post-tag';s.textContent=tag;tags.appendChild(s);});
+      card.appendChild(tags); pd.appendChild(card);
+    });
+    block.appendChild(pd); root.appendChild(block);
+  });
+}
+
+function toggle(i){
+  const p=document.getElementById('posts-'+i);
+  const t=document.getElementById('tog-'+i);
+  const open=p.classList.toggle('open');
+  t.textContent=(open?'▴':'▾')+' '+MONTHS[i].posts.length+' posts';
+}
+
+function showTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('active');b.removeAttribute('aria-current');});
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active'); btn.setAttribute('aria-current','page');
+}
+
+buildFlywheel(); buildTimeline();
 </script>
 </body>
 </html>
