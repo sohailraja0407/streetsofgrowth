@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -268,7 +269,7 @@ body {
   border-radius: var(--radius-md);
   border: 1px solid #E2E4E6;
   cursor: pointer; margin-bottom: 0.5rem;
-  background: #fff; transition: all .15s;
+  background: #fff; transition: border-color .15s, background-color .15s;
 }
 .fw-step:hover { border-color: var(--sog-purple); background: var(--purple-10); }
 .fw-step.active { border-color: var(--sog-purple); background: var(--purple-10); }
@@ -284,7 +285,7 @@ body {
   border-radius: var(--radius-lg);
   padding: 1rem 1.25rem;
   min-height: 120px;
-  border-left: 3px solid var(--sog-purple);
+  border-top: 4px solid var(--sog-purple);
 }
 .fw-detail h4 { font-size: 13px; font-weight: 700; color: var(--sog-purple); margin-bottom: 0.5rem; }
 .fw-detail p  { font-size: 13px; color: var(--charcoal-70); line-height: 1.6; font-weight: 400; }
@@ -335,16 +336,16 @@ body {
   padding: 0.75rem 1rem;
   margin-bottom: 1.25rem;
   font-size: 12px; color: var(--charcoal-70); line-height: 1.6;
-  border-left: 3px solid var(--sog-teal);
+  border-top: 4px solid var(--sog-teal);
 }
 
 /* ═══════════════════════════════════════
    OUTREACH STEPS
 ═══════════════════════════════════════ */
 .outreach-step {
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  border-radius: var(--radius-md);
   border: 1px solid #E2E4E6;
-  border-left-width: 3px;
+  border-top-width: 4px;
   padding: 0.8rem 1rem;
   margin-bottom: 0.6rem;
   background: #fff;
@@ -532,28 +533,28 @@ body {
       </div>
 
       <p class="section-label">Outreach sequence</p>
-      <div class="outreach-step" style="border-left-color:var(--sog-teal);">
+      <div class="outreach-step" style="border-top-color:var(--sog-teal);">
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;">
           <span class="badge bdg-teal">Step 1</span>
           <strong style="font-size:13px;">Mohammad posts his certificate on LinkedIn</strong>
         </div>
         <div style="font-size:12px;color:var(--charcoal-70);line-height:1.5;">Tags @Anthropic directly. Frames it as "the first young person from a SoG cohort to complete Claude 101." Personal and specific — not promotional. SoG staff engage within the hour.</div>
       </div>
-      <div class="outreach-step" style="border-left-color:var(--sog-purple);">
+      <div class="outreach-step" style="border-top-color:var(--sog-purple);">
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;">
           <span class="badge bdg-purple">Step 2</span>
           <strong style="font-size:13px;">SoG reshares with organisational framing</strong>
         </div>
         <div style="font-size:12px;color:var(--charcoal-70);line-height:1.5;">SoG's page shares Mohammad's post with a brief statement about the co-designed programme. Tags Anthropic's company page. Links to any published write-up.</div>
       </div>
-      <div class="outreach-step" style="border-left-color:var(--sog-orange);">
+      <div class="outreach-step" style="border-top-color:var(--sog-orange);">
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;">
           <span class="badge bdg-coral">Step 3</span>
           <strong style="font-size:13px;">Direct outreach to Anthropic comms</strong>
         </div>
         <div style="font-size:12px;color:var(--charcoal-70);line-height:1.5;">SoG emails Anthropic's communications team directly. Subject: "Young person co-designs AI literacy programme with SoG — certificate issued." Attaches the post link, programme summary, and certificate. Asks specifically for a comment or repost.</div>
       </div>
-      <div class="outreach-step" style="border-left-color:#7a6500;">
+      <div class="outreach-step" style="border-top-color:#7a6500;">
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;">
           <span class="badge bdg-amber">Step 4</span>
           <strong style="font-size:13px;">Sector press creates external signal</strong>
