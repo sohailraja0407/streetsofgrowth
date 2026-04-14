@@ -5,72 +5,275 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Streets of Growth — Phase 3 Digital Frameworks</title>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Open Sans', sans-serif; background: #F5F5F7; color: #323E48; min-height: 100vh; display: flex; flex-direction: column; }
-.site-header { background: #fff; padding: 14px 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #0095A9; }
-.site-header img { height: 32px; width: auto; }
-.header-badge { background: #625D9C; color: #fff; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 20px; letter-spacing: .05em; white-space: nowrap; }
+
+/* ═══════════════════════════════════════
+   SKIP NAV
+═══════════════════════════════════════ */
+#skip-link {
+  position: absolute; top: -100%; left: 16px;
+  background: #625D9C; color: #fff;
+  padding: 8px 16px; border-radius: 6px;
+  font-weight: 600; text-decoration: none;
+  z-index: 999; transition: top 0.15s;
+  font-family: 'Open Sans', sans-serif; font-size: 14px;
+}
+#skip-link:focus { top: 16px; }
+
+/* ═══════════════════════════════════════
+   RESET & TOKENS
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Primary Brand */
+  --sog-purple:    #625D9C;
+  --sog-blue:      #4197CB;
+  --sog-sky:       #5EB3E4;
+  --sog-teal:      #0095A9;
+  --sog-green:     #00AF9A;
+  --sog-charcoal:  #323E48;
+  /* Secondary */
+  --sog-red:       #F32735;
+  --sog-orange:    #FF6C0E;
+  --sog-yellow:    #F2CD00;
+  --sog-off-white: #F5F5F7;
+  /* Tints */
+  --purple-10: #F0EFF6; --purple-20: #E0DFEB; --purple-40: #C0BED7; --purple-70: #918DB9;
+  --blue-10:   #ECF5FA; --blue-20:   #D9EAF5; --blue-40:   #B3D5EA; --blue-70:   #7AB7DB;
+  --sky-10:    #EFF8FD; --sky-40:    #BFE1F4;
+  --teal-10:   #E6F5F7; --teal-20:   #CCEAEE; --teal-40:   #99D5DD; --teal-70:   #4DB5C3;
+  --green-10:  #E6F7F5; --green-20:  #CCEFEB; --green-40:  #99DFD7;
+  --charcoal-10: #EBECED; --charcoal-20: #D6D8DA; --charcoal-40: #ADB2B6; --charcoal-70: #70787F;
+  /* Radius */
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+  /* Spacing */
+  --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; --space-8: 32px;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  background: var(--sog-off-white);
+  color: var(--sog-charcoal);
+  font-size: 14px; line-height: 1.6;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+
+:focus-visible { outline: 2px solid var(--sog-purple); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* ═══════════════════════════════════════
+   TOPBAR — white, sticky
+═══════════════════════════════════════ */
+.topbar {
+  background: #ffffff;
+  border-bottom: 1px solid #E2E4E6;
+  padding: 11px 24px;
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo-full { height: 28px; display: block; }
+.logo-mark { height: 32px; display: none; }
+@media (max-width: 600px) {
+  .logo-full { display: none; }
+  .logo-mark { display: block; }
+}
+
+/* Header badge — purple brand value */
+.header-badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 10px;
+  background: var(--purple-10); color: var(--sog-purple);
+  border: 1.5px solid var(--purple-40);
+  border-radius: var(--radius-sm);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════
+   MAIN + CONTAINER
+═══════════════════════════════════════ */
 main { flex: 1; padding: 3rem 1.5rem; }
 .container { max-width: 680px; margin: 0 auto; }
+
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
 .hero { text-align: center; margin-bottom: 2.5rem; }
-.hero h1 { font-size: 24px; font-weight: 700; color: #323E48; margin-bottom: .5rem; }
-.hero-rule { width: 40px; height: 3px; background: #625D9C; border-radius: 2px; margin: .9rem auto; }
-.hero-intro { font-size: 14px; color: #555; line-height: 1.8; font-weight: 400; max-width: 580px; margin: 0 auto 1rem; }
-.aim-badge { display: inline-block; background: #EEEDFE; color: #625D9C; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 1.5rem; }
-.concept-box { background: #fff; border: 1px solid #e8e8e8; border-radius: 16px; padding: 1.5rem 1.75rem; margin-bottom: 2rem; border-left: 4px solid #0095A9; }
-.concept-box h2 { font-size: 15px; font-weight: 700; color: #0095A9; margin-bottom: .75rem; }
-.concept-box p { font-size: 13px; color: #555; line-height: 1.8; margin-bottom: .75rem; font-weight: 400; }
-.concept-box p:last-child { margin-bottom: 0; }
-.concept-box strong { color: #323E48; font-weight: 700; }
-.flywheel-visual { background: #F5F5F7; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1rem 0; }
-.flywheel-visual h3 { font-size: 11px; font-weight: 700; color: #625D9C; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 1rem; }
-.fw-step-row { display: flex; align-items: flex-start; gap: .75rem; margin-bottom: .35rem; }
-.fw-step-num { width: 22px; height: 22px; border-radius: 50%; background: #625D9C; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-.fw-step-text { font-size: 12px; color: #555; line-height: 1.6; font-weight: 400; }
-.fw-step-text strong { color: #323E48; font-weight: 700; }
-.fw-arrow { color: #0095A9; font-size: 13px; font-weight: 700; margin: .15rem 0 .15rem 11px; }
-.section-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #888; margin-bottom: 1rem; }
+.hero h1 { font-size: 24px; font-weight: 700; color: var(--sog-charcoal); margin-bottom: .5rem; }
+.hero-rule { width: 40px; height: 3px; background: var(--sog-purple); border-radius: 2px; margin: .9rem auto; }
+.hero-intro {
+  font-size: 14px; color: var(--charcoal-70); line-height: 1.8;
+  font-weight: 400; max-width: 580px; margin: 0 auto 1rem;
+}
+.hero-intro strong { color: var(--sog-charcoal); font-weight: 700; }
+
+/* AIM+ badge */
+.aim-badge {
+  display: inline-flex; align-items: center;
+  background: var(--purple-10); color: var(--sog-purple);
+  border: 1.5px solid var(--purple-40);
+  font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: var(--radius-sm);
+  margin-bottom: 1.5rem;
+}
+
+/* ═══════════════════════════════════════
+   SECTION LABEL
+═══════════════════════════════════════ */
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--sog-purple);
+  margin-bottom: 1rem;
+}
+
+/* ═══════════════════════════════════════
+   FRAMEWORK CARDS (linked)
+═══════════════════════════════════════ */
 .cards { display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 2rem; }
-.card { background: #fff; border: 1px solid #e8e8e8; border-radius: 16px; padding: 1.4rem; text-decoration: none; color: inherit; transition: border-color .2s, transform .15s; display: block; }
-.card:hover { border-color: #0095A9; transform: translateY(-2px); }
+.card {
+  background: #fff;
+  border: 1px solid #E2E4E6;
+  border-radius: var(--radius-xl);
+  padding: 1.4rem;
+  text-decoration: none; color: inherit;
+  transition: border-color .15s, box-shadow .15s;
+  display: block;
+  box-shadow: 0 1px 4px rgba(50,62,72,0.07);
+}
+.card:hover {
+  border-color: var(--sog-purple);
+  box-shadow: 0 4px 16px rgba(98,93,156,0.12);
+}
 .card-top { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
-.card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.card-icon {
+  width: 48px; height: 48px; border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
 .card-label { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; margin-bottom: .2rem; }
-.card-title { font-size: 15px; font-weight: 700; color: #323E48; line-height: 1.3; margin-bottom: .3rem; }
-.card-desc { font-size: 12px; color: #777; line-height: 1.7; font-weight: 400; }
-.card-arrow { font-size: 20px; color: #ccc; flex-shrink: 0; margin-top: 2px; }
-.card-divider { border: none; border-top: 1px solid #f0f0f0; margin: 0 0 .85rem; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--sog-charcoal); line-height: 1.3; margin-bottom: .3rem; }
+.card-desc  { font-size: 12px; color: var(--charcoal-70); line-height: 1.7; font-weight: 400; }
+.card-arrow { font-size: 20px; color: var(--charcoal-20); flex-shrink: 0; margin-top: 2px; transition: color .15s; }
+.card:hover .card-arrow { color: var(--sog-purple); }
+.card-divider { border: none; border-top: 1px solid #E2E4E6; margin: 0 0 .85rem; }
+
+/* ═══════════════════════════════════════
+   TAGS — unified badge system
+═══════════════════════════════════════ */
 .tags { display: flex; flex-wrap: wrap; gap: .4rem; }
-.tag { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: .03em; }
-.tag-purple { background: #EEEDFE; color: #625D9C; }
-.tag-teal { background: #E1F5EE; color: #0F6E56; }
-.tag-blue { background: #E6F1FB; color: #185FA5; }
-.tag-amber { background: #FAEEDA; color: #854F0B; }
-.tag-coral { background: #FAECE7; color: #993C1D; }
-.tag-green { background: #EAF3DE; color: #3B6D11; }
-.note-box { background: #EEEDFE; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 2rem; }
-.note-box p { font-size: 12px; color: #4a4580; line-height: 1.7; font-weight: 400; }
-.note-box strong { color: #625D9C; font-weight: 700; }
-.site-footer { background: #323E48; padding: 1rem 1.5rem; text-align: center; border-top: 3px solid #0095A9; }
-.site-footer p { font-size: 11px; color: #aaa; }
+.tag {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: var(--radius-sm);
+  letter-spacing: .03em; border: 1.5px solid transparent;
+}
+.tag-purple { background: var(--purple-10); color: var(--sog-purple); border-color: var(--purple-40); }
+.tag-teal   { background: var(--teal-10);   color: var(--sog-teal);   border-color: var(--teal-40); }
+.tag-blue   { background: var(--blue-10);   color: var(--sog-blue);   border-color: var(--blue-40); }
+.tag-amber  { background: rgba(242,205,0,0.12); color: #7a6500; border-color: rgba(242,205,0,0.4); }
+.tag-coral  { background: rgba(255,108,14,0.08); color: var(--sog-orange); border-color: rgba(255,108,14,0.3); }
+.tag-green  { background: var(--green-10);  color: var(--sog-green);  border-color: var(--green-40); }
+
+/* ═══════════════════════════════════════
+   NOTE BOX
+═══════════════════════════════════════ */
+.note-box {
+  background: var(--purple-10);
+  border: 1px solid var(--purple-20);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem; margin-bottom: 2rem;
+}
+.note-box p { font-size: 12px; color: var(--sog-charcoal); line-height: 1.7; font-weight: 400; }
+.note-box strong { color: var(--sog-purple); font-weight: 700; }
+
+/* ═══════════════════════════════════════
+   CONCEPT BOX — left accent border
+═══════════════════════════════════════ */
+.concept-box {
+  background: #fff;
+  border: 1px solid #E2E4E6;
+  border-top: 4px solid var(--sog-teal);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 4px rgba(50,62,72,0.06);
+}
+.concept-box h2 { font-size: 15px; font-weight: 700; color: var(--sog-teal); margin-bottom: .75rem; }
+.concept-box p  { font-size: 13px; color: var(--charcoal-70); line-height: 1.8; margin-bottom: .75rem; font-weight: 400; }
+.concept-box p:last-child { margin-bottom: 0; }
+.concept-box strong { color: var(--sog-charcoal); font-weight: 700; }
+
+/* ═══════════════════════════════════════
+   FLYWHEEL VISUAL
+═══════════════════════════════════════ */
+.flywheel-visual {
+  background: var(--sog-off-white);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem; margin: 1rem 0;
+  border: 1px solid #E2E4E6;
+}
+.flywheel-visual h3 {
+  font-size: 11px; font-weight: 700; color: var(--sog-purple);
+  letter-spacing: .07em; text-transform: uppercase; margin-bottom: 1rem;
+}
+.fw-step-row { display: flex; align-items: flex-start; gap: .75rem; margin-bottom: .35rem; }
+.fw-step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--sog-purple); color: #fff;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.fw-step-text { font-size: 12px; color: var(--charcoal-70); line-height: 1.6; font-weight: 400; }
+.fw-step-text strong { color: var(--sog-charcoal); font-weight: 700; }
+.fw-arrow { color: var(--sog-teal); font-size: 13px; font-weight: 700; margin: .15rem 0 .15rem 11px; }
+
+/* ═══════════════════════════════════════
+   FOOTER — gradient-authority
+═══════════════════════════════════════ */
+.site-footer {
+  background: linear-gradient(135deg, #323E48 0%, #625D9C 100%);
+  padding: 1.25rem 1.5rem; text-align: center;
+}
+.site-footer p { font-size: 11px; color: rgba(255,255,255,0.65); font-family: 'Open Sans', sans-serif; }
+
 </style>
 </head>
 <body>
 
-<header class="site-header">
-  <img src="https://sohailraja0407.github.io/streetsofgrowth/SOG%20Logo-Light%20Background-Transparent%20Background.png" alt="Streets of Growth">
-  <div class="header-badge">AIM+ Phase 3 Frameworks</div>
+<a href="#main-content" id="skip-link">Skip to main content</a>
+
+<!-- TOPBAR -->
+<header class="topbar" role="banner">
+  <img class="logo-full"
+       src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTAyMy41IiBoZWlnaHQ9IjEzMiIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMTAyMy41IDEzMiI+CiAgPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI5LjUuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDIuMS4wIEJ1aWxkIDEzNykgIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsOiAjNDE5N2NiOwogICAgICB9CgogICAgICAuc3QxIHsKICAgICAgICBmaWxsOiAjNWViM2U0OwogICAgICB9CgogICAgICAuc3QyIHsKICAgICAgICBmaWxsOiAjMDA5NWE5OwogICAgICB9CgogICAgICAuc3QzIHsKICAgICAgICBmaWxsOiAjNjI1ZDljOwogICAgICB9CgogICAgICAuc3Q0IHsKICAgICAgICBmaWxsOiAjMzIzZTQ4OwogICAgICB9CgogICAgICAuc3Q1IHsKICAgICAgICBmaWxsOiAjMDBhZjlhOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8Zz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMjE1LjEsNzMuOWMtMTAuMi0zLjYtMjEuOC05LjEtMjEuOC0yMi4xczguOC0xOS43LDIyLjgtMTkuNywyMi43LDExLDIyLjcsMTFsLTguMyw4LjJzLTUuOC03LjktMTQuNC03LjktMTAuNiwzLjctMTAuNiw4LjQsNS41LDgsMTUsMTEuNWMxMC42LDQsMTkuNSw4LjgsMTkuNSwyMS40cy0xMS4xLDE5LjQtMjQuMywxOS40LTI1LjUtMTQuMi0yNS41LTE0LjJsOS03LjZzNiwxMC40LDE2LjUsMTAuNCwxMi4xLTIuNCwxMi4xLTguMS00LjUtOC0xMi43LTEwLjhaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0yNDcuMSw1NS44aDkuM3YtMTRoMTEuOXYxNGgxNC4ydjEwLjdoLTE0LjJ2MTljMCw1LjgsMyw3LjUsNi4yLDcuNXM1LTEuNyw1LTEuN2w0LjQsOS43cy00LjUsMy4xLTExLjMsMy4xLTE2LjEtNi43LTE2LjEtMTYuN3YtMjAuOWgtOS4zdi0xMC43WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMzI0LjYsNTYuMWwtNC4yLDEwLjdzLTIuMi0xLjEtNS43LTEuMWMtNy4zLDAtMTAuNSw2LjQtMTAuNSw2LjR2MzAuOGgtMTEuOXYtNDcuMmgxMS4zdjYuOXM0LjEtOC4xLDEyLjgtOC4xLDguMiwxLjUsOC4yLDEuNVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTM3My40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNMzYxLjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQyNi40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNNDE0LjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQzMS40LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik00ODAuMyw4N3M2LjMsNi44LDE0LjIsNi44LDktMS40LDktNC4zLTIuMi0zLjctOS40LTUuMmMtOS40LTItMTcuNS02LTE3LjUtMTQuOXM3LjQtMTQuNywyMC4zLTE0LjcsMTcuNyw1LjgsMTcuNyw1LjhsLTYsOC43cy01LjQtNC4xLTExLjctNC4xLTguNiwxLjYtOC42LDQuNSwzLjIsMy42LDExLjEsNS4zYzkuNCwyLDE2LDUuMSwxNiwxNC44cy04LjYsMTQuNS0yMC42LDE0LjUtMjEuMy04LjYtMjEuMy04LjZsNi43LTguN1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwMS4xLDc5LjRjMCwxMy44LTExLjEsMjQuOC0yNS4yLDI0LjhzLTI1LjItMTAuOS0yNS4yLTI0LjgsMTEuMS0yNC44LDI1LjItMjQuOCwyNS4yLDEwLjgsMjUuMiwyNC44Wk01ODguOSw3OS40YzAtNy40LTUtMTMuNi0xMy0xMy42cy0xMyw2LjMtMTMsMTMuNiw1LDEzLjYsMTMsMTMuNiwxMy02LjMsMTMtMTMuNloiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwNS41LDU1LjhoOS40di0xMS41YzAtMTMuMSw5LjMtMTcuNywxNi45LTE3LjdzMTAuNCwyLjUsMTAuNCwyLjVsLTQuNSwxMHMtMS44LTEuNC00LjgtMS40LTYuMiwxLjMtNi4yLDcuMnYxMC45aDExLjV2MTAuN2gtMTEuNXYzNi40aC0xMS45di0zNi40aC05LjR2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik03MjQuMSw4OS43di0xNC43aC0xNS44di0xMS4xaDI3LjZ2MzEuNnMtOC45LDguOC0yNS44LDguOC0zNi42LTE1LjQtMzYuNi0zNiwxNS43LTM2LDM2LjEtMzYsMjUuOCwxMC40LDI1LjgsMTAuNGwtOC4yLDhzLTUuOC03LjMtMTcuNi03LjMtMjQsMTEuNC0yNCwyNC45LDEwLjQsMjQuOSwyNC41LDI0LjksMTQtMy40LDE0LTMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTc3OS4zLDU2LjFsLTQuMiwxMC43cy0yLjItMS4xLTUuNy0xLjFjLTcuMywwLTEwLjUsNi40LTEwLjUsNi40djMwLjhoLTExLjl2LTQ3LjJoMTEuM3Y2LjlzNC4xLTguMSwxMi44LTguMSw4LjIsMS41LDguMiwxLjVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik04MzEsNzkuNGMwLDEzLjgtMTEuMSwyNC44LTI1LjIsMjQuOHMtMjUuMi0xMC45LTI1LjItMjQuOCwxMS4xLTI0LjgsMjUuMi0yNC44LDI1LjIsMTAuOCwyNS4yLDI0LjhaTTgxOC45LDc5LjRjMC03LjQtNS0xMy42LTEzLTEzLjZzLTEzLDYuMy0xMywxMy42LDUsMTMuNiwxMywxMy42LDEzLTYuMywxMy0xMy42WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNODQ2LDU1LjhsOS43LDI0LjIsMTAuMi0yNC4yaDEwbDkuOSwyNC4yLDEwLjEtMjQuMmgxMi4xbC0yMi44LDQ5LjUtMTUuMS0zMy42LTE0LjksMzMuNi0yMi44LTQ5LjVoMTMuM1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTkxMC45LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0xMDAwLDcyLjV2MzAuNWgtMTEuOXYtMjcuNmMwLTYuOC00LjItOS43LTkuMy05LjdzLTkuNCw2LjItOS40LDYuMnYzMWgtMTEuOVYyNy44aDExLjl2MzMuN3M0LjItNi45LDEzLjMtNi45LDE3LjMsNi41LDE3LjMsMTcuOFoiLz4KICAgIDwvZz4KICAgIDxnPgogICAgICA8Zz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjEyNi45IDU4LjcgMTI2LjkgMTE3LjMgMTkuOSAxMTcuMyAxOS45IDEwMi41IDI1LjIgMTAyLjUgMTIuNiA4MC43IDAgMTAyLjUgNS4zIDEwMi41IDUuMyAxMzIgMTkuOSAxMzIgMTkuOSAxMzIgMTI2LjkgMTMyIDE0MS41IDExNy4zIDE0MS41IDU4LjcgMTI2LjkgNTguNyIvPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMTQxLjUgMjkuNSAxNDEuNSAwIDEyNi45IDAgMTI2LjkgMCAxOS45IDAgNS4zIDE0LjcgNS4zIDczLjMgMTkuOSA3My4zIDE5LjkgMTQuNyAxMjYuOSAxNC43IDEyNi45IDI5LjUgMTIxLjYgMjkuNSAxMzQuMiA1MS4zIDE0Ni44IDI5LjUgMTQxLjUgMjkuNSIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDEiIHg9IjYzLjkiIHk9IjU4LjciIHdpZHRoPSI0OC41IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cmVjdCBjbGFzcz0ic3Q1IiB4PSIzNC42IiB5PSI4OCIgd2lkdGg9Ijc3LjgiIGhlaWdodD0iMTQuNyIvPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDMiIHg9IjM0LjYiIHk9IjI5LjMiIHdpZHRoPSI3Ny44IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjQ5LjMgNTguNyAzNC42IDczLjMgMzQuNiAyOS4zIDQ5LjMgNDQgNDkuMyA1OC43Ii8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9InN0MiIgcG9pbnRzPSIxMTIuNCAxMDIuNyA5Ny43IDg4IDk3LjcgNzMuMyAxMTIuNCA1OC43IDExMi40IDEwMi43Ii8+CiAgICAgIDwvZz4KICAgIDwvZz4KICA8L2c+CiAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTEwMjMuNSw5NC4zYzAsNC43LTMuNyw4LjMtOC40LDguM3MtOC41LTMuNy04LjUtOC4zLDMuOC04LjIsOC41LTguMiw4LjQsMy43LDguNCw4LjJaTTEwMDguNyw5NC4zYzAsMy43LDIuNyw2LjYsNi40LDYuNnM2LjMtMi45LDYuMy02LjUtMi43LTYuNi02LjMtNi42LTYuNCwzLTYuNCw2LjZaTTEwMTMuOCw5OC42aC0xLjl2LTguMmMuOC0uMiwxLjgtLjMsMy4yLS4zczIuMy4zLDIuOS42Yy41LjQuOCwxLC44LDEuOHMtLjcsMS42LTEuNywxLjloMGMuOC40LDEuMywxLDEuNSwyLjEuMywxLjMuNCwxLjguNiwyLjFoLTIuMWMtLjItLjMtLjQtMS4xLS43LTItLjEtLjktLjctMS4zLTEuNy0xLjNoLS45djMuM1pNMTAxMy44LDk0aC45YzEuMSwwLDEuOS0uNCwxLjktMS4ycy0uNi0xLjMtMS44LTEuMy0uOSwwLTEuMS4xdjIuNFoiLz4KPC9zdmc+"
+       alt="Streets of Growth" height="28">
+  <svg class="logo-mark" xmlns="http://www.w3.org/2000/svg" width="147" height="132" viewBox="0 0 147 132" aria-hidden="true">
+    <defs><style>.st0{fill:#4197cb}.st1{fill:#5eb3e4}.st2{fill:#0095a9}.st3{fill:#625d9c}.st4{fill:#323e48}.st5{fill:#00af9a}</style></defs>
+    <g><g>
+      <polygon class="st4" points="126.9 58.7 126.9 117.3 19.9 117.3 19.9 102.5 25.2 102.5 12.6 80.7 0 102.5 5.3 102.5 5.3 132 19.9 132 19.9 132 126.9 132 141.5 117.3 141.5 58.7 126.9 58.7"/>
+      <polygon class="st4" points="141.5 29.5 141.5 0 126.9 0 126.9 0 19.9 0 5.3 14.7 5.3 73.3 19.9 73.3 19.9 14.7 126.9 14.7 126.9 29.5 121.6 29.5 134.2 51.3 146.8 29.5 141.5 29.5"/>
+    </g><g>
+      <rect class="st1" x="63.9" y="58.7" width="48.5" height="14.7"/>
+      <rect class="st5" x="34.6" y="88" width="77.8" height="14.7"/>
+      <rect class="st3" x="34.6" y="29.3" width="77.8" height="14.7"/>
+      <polygon class="st0" points="49.3 58.7 34.6 73.3 34.6 29.3 49.3 44 49.3 58.7"/>
+      <polygon class="st2" points="112.4 102.7 97.7 88 97.7 73.3 112.4 58.7 112.4 102.7"/>
+    </g></g>
+  </svg>
+  <span class="header-badge">AIM+ Phase 3 Frameworks</span>
 </header>
 
-<main>
+<!-- MAIN -->
+<main id="main-content">
   <div class="container">
 
     <div class="hero">
       <h1>Young people &amp; digital tools</h1>
       <div class="hero-rule"></div>
-      <div class="aim-badge">AIM+ · Maintain &amp; Exit · Phase 3</div>
+      <div class="aim-badge">AIM+ &nbsp;·&nbsp; Maintain &amp; Exit &nbsp;·&nbsp; Phase 3</div>
       <p class="hero-intro">These are working frameworks — practical examples of how young people at the <strong>Maintain &amp; Exit</strong> stage of Streets of Growth's AIM+ programme can use digital tools to build real, verifiable employability skills and a professional presence that employers notice. Each framework is designed to support lasting <strong>Education, Employment and Training (EET)</strong> outcomes — the goal at the heart of Phase 3.</p>
     </div>
 
@@ -80,9 +283,9 @@ main { flex: 1; padding: 3rem 1.5rem; }
 
       <a class="card" href="./Linkedin/index.html">
         <div class="card-top">
-          <div class="card-icon" style="background:#625D9C;">Li</div>
+          <div class="card-icon" style="background:var(--sog-purple);">Li</div>
           <div style="flex:1;">
-            <div class="card-label" style="color:#625D9C;">Yasmin · AIM+ Phase 3 · LinkedIn journey</div>
+            <div class="card-label" style="color:var(--sog-purple);">Yasmin &nbsp;·&nbsp; AIM+ Phase 3 &nbsp;·&nbsp; LinkedIn journey</div>
             <div class="card-title">My journey to employment with Streets of Growth</div>
             <div class="card-desc">A 6-month posting plan showing how a young person at the Maintain &amp; Exit stage can build a professional presence on LinkedIn — from a first post to a capstone story that employers and funders can see. Includes a flywheel diagram, monthly post ideas with hooks, and a practical guide for SoG staff on how to support without taking over.</div>
           </div>
@@ -103,9 +306,9 @@ main { flex: 1; padding: 3rem 1.5rem; }
 
       <a class="card" href="./claude101YP/index.html">
         <div class="card-top">
-          <div class="card-icon" style="background:#0095A9;">AI</div>
+          <div class="card-icon" style="background:var(--sog-teal);">AI</div>
           <div style="flex:1;">
-            <div class="card-label" style="color:#0095A9;">Mohammad · AIM+ Phase 3 · Claude 101</div>
+            <div class="card-label" style="color:var(--sog-teal);">Mohammad &nbsp;·&nbsp; AIM+ Phase 3 &nbsp;·&nbsp; Claude 101</div>
             <div class="card-title">Co-designing an AI literacy programme for Phase 3</div>
             <div class="card-desc">A three-tier AI literacy curriculum co-designed by a young person at Phase 3 — covering CV drafting, job board skills, Canva, LinkedIn, and advanced tools. Mohammad earned the first certificate and now acts as a peer trainer, making the programme self-sustaining. Includes a strategy for engaging Anthropic publicly to validate the certificate as a real employability credential.</div>
           </div>
@@ -171,8 +374,8 @@ main { flex: 1; padding: 3rem 1.5rem; }
   </div>
 </main>
 
-<footer class="site-footer">
-  <p>Streets of Growth · Registered Charity No. 1198741 · AIM+ Phase 3 Digital Frameworks</p>
+<footer class="site-footer" role="contentinfo">
+  <p>Streets of Growth &nbsp;·&nbsp; Registered Charity No. 1198741 &nbsp;·&nbsp; AIM+ Phase 3 Digital Frameworks</p>
 </footer>
 
 </body>
