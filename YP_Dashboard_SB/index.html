@@ -1,1 +1,2428 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streets of Growth — Young People Programme Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <!-- ═══════════════════════════════════════════
+       SKIP NAV — required on every SoG page
+  ═══════════════════════════════════════════ -->
+  <style>
+    #skip-link {
+      position: absolute; top: -100%; left: 16px;
+      background: #625D9C; color: #fff;
+      padding: 8px 16px; border-radius: 6px;
+      font-weight: 600; text-decoration: none;
+      z-index: 999; transition: top 0.15s;
+      font-family: 'Open Sans', sans-serif;
+    }
+    #skip-link:focus { top: 16px; }
+  </style>
+
+  <style>
+    /* ═══════════════════════════════════════════
+       AUTH SCREEN
+    ═══════════════════════════════════════════ */
+    #auth-screen {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #625D9C 0%, #0095A9 100%);
+      padding: 24px;
+    }
+    #auth-screen.hidden { display: none; }
+    .auth-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #E2E4E6;
+      box-shadow: 0 20px 60px rgba(50,62,72,0.18);
+      padding: 48px 40px 40px;
+      width: 100%; max-width: 420px;
+      text-align: center;
+    }
+    .auth-logo { margin-bottom: 32px; }
+    .auth-logo img { height: 28px; }
+    .auth-divider {
+      width: 48px; height: 3px;
+      background: linear-gradient(90deg, #625D9C 0%, #0095A9 100%);
+      border-radius: 2px; margin: 20px auto 28px;
+    }
+    .auth-title {
+      font-size: 20px; font-weight: 700;
+      color: #323E48; margin-bottom: 8px;
+    }
+    .auth-subtitle {
+      font-size: 13px; color: #70787F;
+      margin-bottom: 28px; line-height: 1.5;
+    }
+    .auth-label {
+      display: block; text-align: left;
+      font-size: 12px; font-weight: 600;
+      color: #323E48; margin-bottom: 6px;
+      letter-spacing: 0.02em;
+    }
+    .auth-input {
+      width: 100%; height: 38px;
+      border: 1px solid #E2E4E6;
+      border-radius: 8px;
+      padding: 0 12px; font-size: 14px;
+      font-family: 'Open Sans', sans-serif;
+      color: #323E48; background: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      margin-bottom: 20px;
+    }
+    .auth-input:focus {
+      outline: 2px solid var(--sog-purple);
+      outline-offset: 2px;
+      border-color: #625D9C;
+      box-shadow: 0 0 0 2px rgba(0,149,169,0.15);
+    }
+    .auth-btn {
+      width: 100%; height: 40px;
+      background: linear-gradient(135deg, #625D9C 0%, #0095A9 100%);
+      color: #fff; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 700;
+      font-family: 'Open Sans', sans-serif;
+      cursor: pointer; letter-spacing: 0.02em;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .auth-btn:hover { opacity: 0.9; }
+    .auth-btn:active { transform: scale(0.99); }
+    .auth-btn:focus { outline: 2px solid var(--sog-purple); outline-offset: 2px; }
+    .auth-btn:disabled { opacity: 0.6; cursor: default; }
+    .auth-message {
+      margin-top: 16px; font-size: 13px; line-height: 1.5;
+      border-radius: 8px; padding: 10px 14px;
+      display: none;
+    }
+    .auth-message.success {
+      display: block; background: #E6F7F5;
+      color: #007264; border: 1px solid #99DFD7;
+    }
+    .auth-message.error {
+      display: block; background: #FEE8EA;
+      color: #C41E2A; border: 1px solid #F9A3A8;
+    }
+    .auth-footer {
+      margin-top: 28px; font-size: 11px;
+      color: #ADB2B6; line-height: 1.5;
+    }
+    /* Sign-out button in topbar */
+    .btn-signout {
+      display: flex; align-items: center; gap: 6px;
+      height: 30px; padding: 0 12px;
+      border: 1px solid #E2E4E6; border-radius: 6px;
+      background: #fff; color: #70787F;
+      font-size: 12px; font-weight: 600;
+      font-family: 'Open Sans', sans-serif;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-signout:hover { border-color: var(--sog-purple); color: var(--sog-purple); }
+    .btn-signout:focus { outline: 2px solid var(--sog-purple); outline-offset: 2px; }
+  </style>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ═══════════════════════════════════════════
+       SoG DESIGN TOKENS — full :root block
+    ═══════════════════════════════════════════ */
+    :root {
+      /* Primary Brand */
+      --sog-purple:   #625D9C;
+      --sog-blue:     #4197CB;
+      --sog-sky:      #5EB3E4;
+      --sog-teal:     #0095A9;
+      --sog-green:    #00AF9A;
+      --sog-charcoal: #323E48;
+
+      /* Secondary */
+      --sog-red:       #F32735;
+      --sog-orange:    #FF6C0E;
+      --sog-yellow:    #F2CD00;
+      --sog-off-white: #F5F5F7;
+
+      /* Tints */
+      --purple-10: #F0EFF6; --purple-20: #E0DFEB; --purple-40: #C0BED7; --purple-70: #918DB9;
+      --blue-10:   #ECF5FA; --blue-20:   #D9EAF5; --blue-40:   #B3D5EA; --blue-70:   #7AB7DB;
+      --sky-10:    #EFF8FD; --sky-20:    #DFF0FA; --sky-40:    #BFE1F4; --sky-70:    #8FCAED;
+      --teal-10:   #E6F5F7; --teal-20:   #CCEAEE; --teal-40:   #99D5DD; --teal-70:   #4DB5C3;
+      --green-10:  #E6F7F5; --green-20:  #CCEFEB; --green-40:  #99DFD7; --green-70:  #4DC7B9;
+      --charcoal-10: #EBECED; --charcoal-20: #D6D8DA; --charcoal-40: #ADB2B6; --charcoal-70: #70787F;
+
+      /* Shades */
+      --purple-s1: #534F85; --purple-s2: #403C65; --purple-s3: #2C2A46; --purple-s4: #191727;
+      --blue-s1:   #3780AD; --blue-s2:   #2A6284; --blue-s3:   #1D445B; --blue-s4:   #102633;
+      --teal-s1:   #007F90; --teal-s2:   #00616E; --teal-s3:   #00434C; --teal-s4:   #00252A;
+      --green-s1:  #009583; --green-s2:  #007264; --green-s3:  #004F45; --green-s4:  #002C27;
+
+      /* Radius */
+      --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+
+      /* Spacing */
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-6: 24px; --space-8: 32px; --space-12: 48px;
+    }
+
+    /* ═══════════════════════════════════════════
+       BASE
+    ═══════════════════════════════════════════ */
+    body {
+      font-family: 'Open Sans', sans-serif;
+      font-size: 14px;
+      color: var(--sog-charcoal);
+      line-height: 1.6;
+      background: var(--sog-off-white);
+    }
+
+    /* Focus ring */
+    :focus-visible { outline: 2px solid var(--sog-purple); outline-offset: 2px; }
+    :focus:not(:focus-visible) { outline: none; }
+
+    /* ═══════════════════════════════════════════
+       TOPBAR — white, sticky
+    ═══════════════════════════════════════════ */
+    .topbar {
+      background: #ffffff;
+      border-bottom: 1px solid #E2E4E6;
+      padding: 11px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar-divider { width: 1px; height: 28px; background: #E2E4E6; }
+    .topbar-title { font-size: 14px; font-weight: 600; color: var(--sog-charcoal); }
+    .topbar-meta { font-size: 12px; color: var(--charcoal-70); }
+
+    /* Logo */
+    .logo-full { height: 28px; display: block; }
+    .logo-mark { height: 32px; display: none; }
+    @media (max-width: 600px) {
+      .logo-full { display: none; }
+      .logo-mark { display: block; }
+      .topbar-title { display: none; }
+      .topbar-divider { display: none; }
+    }
+
+    /* ═══════════════════════════════════════════
+       NAV BAR — off-white, record selector
+    ═══════════════════════════════════════════ */
+    .nav {
+      background: var(--sog-off-white);
+      border-bottom: 1px solid #E2E4E6;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      min-height: 48px;
+    }
+    .nav-label {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--charcoal-70);
+    }
+    .record-select {
+      padding: 5px 30px 5px 12px;
+      border: 1.5px solid #E2E4E6;
+      border-radius: var(--radius-md);
+      background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2370787F'/%3E%3C/svg%3E") no-repeat right 10px center;
+      color: var(--sog-charcoal); font-size: 13px; font-weight: 600;
+      font-family: 'Open Sans', sans-serif;
+      cursor: pointer; appearance: none; min-width: 100px;
+      transition: border-color .15s;
+    }
+    .record-select:hover, .record-select:focus { border-color: var(--sog-purple); }
+
+    /* Badges — unified system */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: var(--radius-sm);
+      font-size: 10px; font-weight: 700; white-space: nowrap;
+      line-height: 1.4; border: 1.5px solid transparent;
+      font-family: 'Open Sans', sans-serif;
+    }
+    .badge-phase1   { color: #7a6500; background: rgba(242,205,0,0.15); border-color: rgba(242,205,0,0.4); }
+    .badge-phase2   { color: var(--sog-blue);   background: var(--blue-10);   border-color: var(--blue-40); }
+    .badge-phase3   { color: var(--sog-teal);   background: var(--teal-10);   border-color: var(--teal-40); }
+    .badge-active   { color: var(--sog-green);  background: var(--green-10);  border-color: var(--green-40); }
+    .badge-at-risk  { color: var(--sog-orange); background: rgba(255,108,14,0.08); border-color: rgba(255,108,14,0.3); }
+    .badge-high-risk{ color: var(--sog-red);    background: rgba(243,39,53,0.08);  border-color: rgba(243,39,53,0.25); }
+    .badge-dynamic  { color: var(--sog-teal);   background: var(--teal-10);   border-color: var(--teal-40); }
+    .badge-professional { color: var(--sog-purple); background: var(--purple-10); border-color: var(--purple-40); }
+    .badge-belonging    { color: var(--sog-blue);   background: var(--blue-10);   border-color: var(--blue-40); }
+
+    .nav-badge-wrap { display: flex; align-items: center; gap: 8px; }
+    .nav-eng-label { font-size: 12px; color: var(--charcoal-70); }
+
+    .apricot-link {
+      margin-left: auto;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 13px; border: 1.5px solid var(--sog-purple);
+      border-radius: var(--radius-md); color: var(--sog-purple);
+      text-decoration: none; font-size: 12px; font-weight: 600;
+      transition: all .15s; background: transparent;
+    }
+    .apricot-link:hover { background: var(--purple-10); }
+
+    /* ═══════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════ */
+    .main { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; max-width: 1600px; }
+
+    /* ═══════════════════════════════════════════
+       SECTION DIVIDER HEADERS
+    ═══════════════════════════════════════════ */
+    .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .section-header h2 {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.7px; color: var(--sog-purple); white-space: nowrap;
+    }
+    .section-header::after {
+      content: ''; flex: 1; height: 2px;
+      background: linear-gradient(90deg, var(--purple-20), transparent);
+    }
+
+    /* ═══════════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════════ */
+    .card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid #E2E4E6;
+      box-shadow: 0 1px 4px rgba(50,62,72,0.08);
+      overflow: hidden;
+    }
+    .card-head {
+      padding: 11px 16px;
+      border-bottom: 1px solid #E2E4E6;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--sog-purple);
+      background: var(--sog-off-white);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-head .material-icons-outlined,
+    .card-head .material-icons-round { font-size: 16px; color: var(--sog-purple); }
+    .card-body { padding: 16px; }
+
+    /* ═══════════════════════════════════════════
+       KPI CARDS — 4px TOP border
+    ═══════════════════════════════════════════ */
+    .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    .kpi-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid #E2E4E6;
+      border-top: 4px solid var(--sog-purple);
+      box-shadow: 0 1px 4px rgba(50,62,72,0.08);
+      padding: 16px 18px;
+    }
+    .kpi-card.teal   { border-top-color: var(--sog-teal); }
+    .kpi-card.orange { border-top-color: var(--sog-orange); }
+    .kpi-card.blue   { border-top-color: var(--sog-blue); }
+    .kpi-card.green  { border-top-color: var(--sog-green); }
+    .kpi-card.red    { border-top-color: var(--sog-red); }
+    .kpi-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--charcoal-70);
+    }
+    .kpi-value {
+      font-size: 28px; font-weight: 700; color: var(--sog-charcoal);
+      line-height: 1.1; margin-top: 4px;
+    }
+    .kpi-sub { font-size: 11px; color: var(--charcoal-70); margin-top: 3px; }
+
+    /* ═══════════════════════════════════════════
+       ALERTS BAR
+    ═══════════════════════════════════════════ */
+    .alerts-bar {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid #E2E4E6;
+      box-shadow: 0 1px 4px rgba(50,62,72,0.08);
+      overflow: hidden;
+    }
+    .alerts-head {
+      padding: 10px 16px;
+      background: var(--sog-off-white);
+      border-bottom: 1px solid #E2E4E6;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--sog-charcoal);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .alert-count-badge {
+      background: var(--sog-red); color: #ffffff;
+      border-radius: 10px; padding: 1px 8px; font-size: 10px;
+    }
+    .alerts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .alert-item {
+      padding: 11px 15px;
+      border-right: 1px solid var(--charcoal-10);
+      border-bottom: 1px solid var(--charcoal-10);
+      display: flex; align-items: flex-start; gap: 9px;
+    }
+    .alert-icon-wrap {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .alert-icon-wrap.red    { background: rgba(243,39,53,0.10); }
+    .alert-icon-wrap.orange { background: rgba(255,108,14,0.10); }
+    .alert-icon-wrap.green  { background: var(--green-10); }
+    .alert-icon-wrap .material-icons-round { font-size: 16px; }
+    .alert-icon-wrap.red    .material-icons-round { color: var(--sog-red); }
+    .alert-icon-wrap.orange .material-icons-round { color: var(--sog-orange); }
+    .alert-icon-wrap.green  .material-icons-round { color: var(--sog-green); }
+    .alert-label  { font-size: 12px; font-weight: 600; color: var(--sog-charcoal); }
+    .alert-detail { font-size: 11px; color: var(--charcoal-70); margin-top: 1px; }
+    .alert-action { font-size: 11px; color: var(--charcoal-40); margin-top: 1px; }
+
+    /* ═══════════════════════════════════════════
+       GRID ROWS
+    ═══════════════════════════════════════════ */
+    .row { display: grid; gap: 16px; }
+    .row-3 { grid-template-columns: repeat(3, 1fr); }
+
+    /* ═══════════════════════════════════════════
+       STAT GRID
+    ═══════════════════════════════════════════ */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+    .stat-lbl  { font-size: 11px; color: var(--charcoal-70); font-weight: 400; }
+    .stat-val  { font-size: 14px; font-weight: 700; color: var(--sog-charcoal); }
+    .stat-val.blue   { color: var(--sog-blue); }
+    .stat-val.green  { color: var(--sog-green); }
+    .stat-val.red    { color: var(--sog-red); }
+    .stat-val.orange { color: var(--sog-orange); }
+    .divider { height: 1px; background: #E2E4E6; margin: 12px 0; }
+
+    /* ═══════════════════════════════════════════
+       SESSION BARS
+    ═══════════════════════════════════════════ */
+    .session-bars { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+    .session-row  { display: flex; align-items: center; gap: 8px; }
+    .session-lbl  { font-size: 12px; color: var(--charcoal-70); width: 120px; flex-shrink: 0; }
+    .bar-track    { flex: 1; background: var(--charcoal-10); border-radius: 4px; height: 7px; overflow: hidden; }
+    .bar-fill     { height: 100%; border-radius: 4px; transition: width .4s; }
+    .session-count{ font-size: 12px; font-weight: 700; color: var(--sog-charcoal); width: 20px; text-align: right; }
+
+    /* ═══════════════════════════════════════════
+       SCORE CIRCLES
+    ═══════════════════════════════════════════ */
+    .score-circles { display: flex; gap: 14px; justify-content: center; padding: 10px 0; }
+    .score-circle  { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .circle-outer  { width: 66px; height: 66px; border-radius: 50%; border: 5px solid var(--sog-blue); display: flex; align-items: center; justify-content: center; }
+    .circle-num    { font-size: 19px; font-weight: 700; color: var(--sog-charcoal); }
+    .circle-lbl    { font-size: 11px; color: var(--charcoal-70); text-align: center; }
+    .score-note    { font-size: 11px; text-align: center; color: var(--charcoal-70); margin-top: 6px; }
+
+    /* ═══════════════════════════════════════════
+       TOOL ROWS
+    ═══════════════════════════════════════════ */
+    .tool-rows { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+    .tool-row  { display: flex; align-items: center; gap: 8px; }
+    .tool-lbl  { font-size: 12px; color: var(--charcoal-70); flex: 1; }
+    .tool-count{ font-size: 12px; font-weight: 700; color: var(--sog-charcoal); width: 22px; text-align: right; }
+
+    /* ═══════════════════════════════════════════
+       RISK LEGEND
+    ═══════════════════════════════════════════ */
+    .risk-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    .risk-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--charcoal-70); }
+    .risk-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .risk-dot.low    { background: var(--sog-green); }
+    .risk-dot.medium { background: var(--sog-orange); }
+    .risk-dot.high   { background: var(--sog-red); }
+
+    /* ═══════════════════════════════════════════
+       EFFECTIVENESS CHART
+    ═══════════════════════════════════════════ */
+    .eff-intro { font-size: 12px; color: var(--charcoal-70); line-height: 1.6; }
+    .eff-er-note {
+      font-size: 11px; color: var(--sog-orange); font-style: italic;
+      margin-top: 5px; padding: 5px 10px;
+      background: rgba(255,108,14,0.06);
+      border-left: 3px solid var(--sog-orange);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+    .eff-axis-notes {
+      display: flex; flex-wrap: wrap; gap: 8px 20px;
+      font-size: 11px; color: var(--charcoal-70);
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid #E2E4E6;
+    }
+    .eff-axis-notes span { display: flex; align-items: center; gap: 5px; }
+    .eff-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    /* ═══════════════════════════════════════════
+       TIMELINE CARD
+    ═══════════════════════════════════════════ */
+    .timeline-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid #E2E4E6;
+      box-shadow: 0 1px 4px rgba(50,62,72,0.08);
+      overflow: hidden;
+    }
+    .timeline-head {
+      padding: 11px 18px;
+      background: var(--sog-off-white);
+      border-bottom: 1px solid #E2E4E6;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .timeline-title {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--sog-purple);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .timeline-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .ctrl-label { font-size: 11px; color: var(--charcoal-40); }
+
+    /* Type pills — using SoG badge-aligned colours */
+    .type-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid transparent;
+      transition: all .15s; user-select: none;
+      font-family: 'Open Sans', sans-serif;
+    }
+    .type-pill.int-pill  { background: var(--purple-10); color: var(--sog-purple); border-color: var(--purple-40); }
+    .type-pill.gs-pill   { background: var(--green-10);  color: var(--sog-green);  border-color: var(--green-40); }
+    .type-pill.ss-pill   { background: rgba(255,108,14,0.08); color: var(--sog-orange); border-color: rgba(255,108,14,0.3); }
+    .type-pill.se-pill   { background: var(--teal-10);   color: var(--sog-teal);   border-color: var(--teal-40); }
+    .type-pill.ps-pill   { background: var(--blue-10);   color: var(--sog-blue);   border-color: var(--blue-40); }
+    .type-pill.dimmed    { opacity: .35; }
+    .dot-legend { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .reset-types-btn {
+      padding: 3px 9px; border: 1px solid #E2E4E6; border-radius: var(--radius-md);
+      background: #ffffff; color: var(--sog-purple); font-size: 11px; font-weight: 600;
+      cursor: pointer; font-family: 'Open Sans', sans-serif; transition: all .15s;
+    }
+    .reset-types-btn:hover { background: var(--purple-10); border-color: var(--purple-40); }
+
+    .timeline-body { display: flex; flex-direction: column; }
+    .chart-area { padding: 16px 18px 8px; }
+    .main-chart-wrap { position: relative; height: 280px; cursor: pointer; }
+
+    /* Mode bar (breadcrumb) */
+    .mode-bar {
+      padding: 8px 18px;
+      background: var(--purple-10);
+      border-top: 1px solid var(--purple-20);
+      display: flex; align-items: center; gap: 10px; min-height: 36px;
+    }
+    .mode-bar.hidden { display: none; }
+    .breadcrumb-trail { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--charcoal-70); }
+    .bc-link { color: var(--sog-purple); cursor: pointer; font-weight: 600; text-decoration: underline; }
+    .bc-sep  { color: var(--charcoal-40); }
+    .bc-cur  { color: var(--sog-charcoal); font-weight: 700; }
+    .clear-btn {
+      margin-left: auto; padding: 3px 10px;
+      border: 1px solid var(--purple-40); border-radius: var(--radius-md);
+      background: #ffffff; color: var(--sog-purple);
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      font-family: 'Open Sans', sans-serif; transition: all .15s;
+    }
+    .clear-btn:hover { background: var(--purple-10); }
+
+    /* Detail panel */
+    .detail-panel {
+      border-top: 1px solid #E2E4E6;
+      padding: 14px 18px;
+      background: var(--sog-off-white);
+      animation: slideIn .15s ease;
+    }
+    .detail-panel.hidden { display: none; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .detail-inner { display: grid; grid-template-columns: auto 1fr; gap: 0; }
+    .detail-left {
+      padding-right: 20px;
+      border-right: 2px solid #E2E4E6;
+      margin-right: 20px;
+      min-width: 160px;
+    }
+    .detail-date { font-size: 15px; font-weight: 700; color: var(--sog-charcoal); }
+    .detail-type-badge {
+      display: inline-block; margin-top: 5px;
+      padding: 3px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 700;
+    }
+    .detail-metrics { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-start; }
+    .dm-item .dm-lbl {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.4px; color: var(--charcoal-40);
+    }
+    .dm-item .dm-val { font-size: 14px; font-weight: 700; color: var(--sog-charcoal); }
+    .tools-section { margin-top: 10px; border-top: 1px solid #E2E4E6; padding-top: 10px; }
+    .tools-section-lbl {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.4px; color: var(--charcoal-40); margin-bottom: 6px;
+    }
+    .tool-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 11px; margin: 2px;
+      border-radius: 14px;
+      background: var(--teal-10); border: 1.5px solid var(--teal-40);
+      color: var(--sog-teal); font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all .15s;
+    }
+    .tool-badge:hover { background: var(--teal-20); border-color: var(--sog-teal); }
+    .no-tools { font-size: 12px; color: var(--charcoal-40); font-style: italic; }
+
+    /* Tool drill-down */
+    .tool-drilldown { padding: 14px 18px; border-top: 1px solid #E2E4E6; }
+    .tool-drilldown.hidden { display: none; }
+    .tool-drilldown-title { font-size: 13px; font-weight: 700; color: var(--sog-purple); margin-bottom: 12px; }
+    .tool-sub-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .tool-sub-chart-wrap { position: relative; height: 160px; }
+    .tool-sessions-list { max-height: 160px; overflow-y: auto; }
+    .tool-session-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px 0; border-bottom: 1px solid #E2E4E6; font-size: 12px;
+    }
+    .tool-session-row:last-child { border-bottom: none; }
+    .tool-session-date { color: var(--charcoal-70); font-weight: 600; }
+    .tool-session-meta { color: var(--charcoal-40); font-size: 11px; }
+
+    /* ═══════════════════════════════════════════
+       DATA TABLE — in-card style
+    ═══════════════════════════════════════════ */
+    .tbl-wrap { overflow-x: auto; max-height: 340px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead th {
+      position: sticky; top: 0;
+      background: var(--purple-10);
+      color: var(--sog-purple);
+      border-bottom: 2px solid var(--sog-purple);
+      padding: 8px 10px; text-align: left;
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) { background: var(--sog-off-white); }
+    tbody tr:hover { background: var(--teal-10); }
+    tbody td { padding: 6px 10px; border-bottom: 1px solid #E2E4E6; vertical-align: middle; }
+
+    /* Type badges — using unified system */
+    .type-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: var(--radius-sm);
+      font-size: 10px; font-weight: 700; white-space: nowrap;
+      line-height: 1.4; border: 1.5px solid transparent;
+    }
+    .type-badge.intervention { color: var(--sog-purple); background: var(--purple-10); border-color: var(--purple-40); }
+    .type-badge.group        { color: var(--sog-green);  background: var(--green-10);  border-color: var(--green-40); }
+    .type-badge.safety       { color: var(--sog-orange); background: rgba(255,108,14,0.08); border-color: rgba(255,108,14,0.3); }
+    .type-badge.efficacy     { color: var(--sog-teal);   background: var(--teal-10);   border-color: var(--teal-40); }
+    .type-badge.phase        { color: var(--sog-blue);   background: var(--blue-10);   border-color: var(--blue-40); }
+
+    /* Risk chips */
+    .risk-chip { display: inline-block; padding: 2px 7px; border-radius: var(--radius-sm); font-size: 11px; font-weight: 700; }
+    .risk-low  { background: var(--green-10); color: var(--sog-green); border: 1.5px solid var(--green-40); }
+    .risk-med  { background: rgba(255,108,14,0.08); color: var(--sog-orange); border: 1.5px solid rgba(255,108,14,0.3); }
+    .risk-high { background: rgba(243,39,53,0.08); color: var(--sog-red); border: 1.5px solid rgba(243,39,53,0.25); }
+
+    /* ═══════════════════════════════════════════
+       HEATMAP — teal intensity scale
+    ═══════════════════════════════════════════ */
+    .hm-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 560px; }
+    .hm-label-col {
+      width: 160px; text-align: left; padding: 5px 10px;
+      font-weight: 600; color: var(--charcoal-70); white-space: nowrap;
+      position: sticky; left: 0; background: #ffffff; z-index: 2;
+      border-right: 2px solid #E2E4E6;
+    }
+    .hm-phase-header {
+      text-align: center; padding: 6px 4px;
+      font-size: 10px; font-weight: 700;
+      border: 1px solid #E2E4E6; letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .hm-phase-header.ph1 { background: var(--purple-10); color: var(--sog-purple); }
+    .hm-phase-header.ph2 { background: var(--blue-10);   color: var(--sog-blue); }
+    .hm-phase-header.ph3 { background: var(--teal-10);   color: var(--sog-teal); }
+    .hm-month {
+      text-align: center; padding: 4px 5px;
+      font-size: 10px; color: var(--charcoal-70);
+      border: 1px solid #E2E4E6; white-space: nowrap; min-width: 44px;
+    }
+    .hm-group-row td {
+      background: var(--sog-off-white); padding: 4px 10px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--charcoal-70);
+      border-top: 2px solid #E2E4E6; border-bottom: 1px solid #E2E4E6;
+    }
+    .hm-cell {
+      text-align: center; padding: 5px 4px;
+      border: 1px solid #E2E4E6;
+      font-weight: 700; font-size: 11px; min-width: 44px;
+    }
+    /* Teal intensity scale per design system */
+    .hm-0 { background: #ffffff; color: var(--charcoal-40); }
+    .hm-1 { background: var(--teal-10); color: var(--sog-charcoal); }
+    .hm-2 { background: var(--teal-20); color: var(--sog-charcoal); }
+    .hm-3 { background: var(--teal-40); color: #ffffff; }
+    .hm-4 { background: var(--sog-teal); color: #ffffff; }
+    .hm-total-row .hm-label-col { background: var(--sog-off-white); border-top: 2px solid #E2E4E6; font-weight: 700; color: var(--sog-charcoal); }
+    .hm-total-row .hm-cell { border-top: 2px solid #E2E4E6; }
+    .hm-legend {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px 0; font-size: 11px; color: var(--charcoal-70);
+    }
+    .hm-swatch { width: 13px; height: 13px; border-radius: 3px; display: inline-block; vertical-align: middle; }
+
+    /* ═══════════════════════════════════════════
+       SCORECARD — phase readiness
+    ═══════════════════════════════════════════ */
+    .scorecard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .sc-phase {
+      border: 1.5px solid #E2E4E6;
+      border-radius: var(--radius-lg);
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .sc-head { padding: 11px 14px; }
+    .sc-head.complete { background: var(--green-10); border-bottom: 2px solid var(--green-40); }
+    .sc-head.active   { background: var(--purple-10); border-bottom: 2px solid var(--sog-purple); }
+    .sc-head.upcoming { background: var(--sog-off-white); border-bottom: 1px solid #E2E4E6; }
+    .sc-title  { font-size: 13px; font-weight: 700; color: var(--sog-charcoal); }
+    .sc-dates  { font-size: 11px; color: var(--charcoal-70); margin-top: 2px; }
+    .sc-status { font-size: 12px; font-weight: 700; }
+    .sc-criteria { padding: 10px 14px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
+    .cr-row  { display: flex; align-items: flex-start; gap: 8px; }
+    .cr-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; color: var(--sog-charcoal); }
+    .cr-icon.material-icons-round.met    { color: var(--sog-green); }
+    .cr-icon.material-icons-round.partial{ color: var(--sog-orange); }
+    .cr-icon.material-icons-round.unmet  { color: var(--sog-red); }
+    .cr-lbl  { font-size: 11px; font-weight: 600; color: var(--sog-charcoal); line-height: 1.3; }
+    .cr-bar-wrap { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+    .cr-bar-track { flex: 1; height: 5px; background: var(--charcoal-20); border-radius: 3px; overflow: hidden; }
+    .cr-bar-fill  { height: 100%; border-radius: 3px; transition: width .5s; }
+    .cr-val  { font-size: 10px; color: var(--charcoal-70); white-space: nowrap; }
+    .sc-footer {
+      padding: 8px 14px; border-top: 1px solid #E2E4E6;
+      font-size: 11px; color: var(--charcoal-70);
+      background: var(--sog-off-white);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 1100px) {
+      .kpi-row { grid-template-columns: repeat(3, 1fr); }
+      .row-3 { grid-template-columns: 1fr; }
+      .main { padding: 14px 16px; }
+      .tool-sub-charts { grid-template-columns: 1fr; }
+      .detail-inner { grid-template-columns: 1fr; }
+      .detail-left { border-right: none; padding-right: 0; margin-right: 0; border-bottom: 1px solid #E2E4E6; padding-bottom: 10px; margin-bottom: 10px; }
+      .scorecard-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .kpi-row { grid-template-columns: 1fr 1fr; }
+      .timeline-controls { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Skip nav -->
+<a href="#main-content" id="skip-link">Skip to main content</a>
+
+<!-- ═══════════════════════════════════════════
+     AUTH SCREEN — shown until session confirmed
+═══════════════════════════════════════════ -->
+<div id="auth-screen" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTAyMy41IiBoZWlnaHQ9IjEzMiIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMTAyMy41IDEzMiI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgeyBmaWxsOiAjNDE5N2NiOyB9CiAgICAgIC5zdDEgeyBmaWxsOiAjNWViM2U0OyB9CiAgICAgIC5zdDIgeyBmaWxsOiAjMDA5NWE5OyB9CiAgICAgIC5zdDMgeyBmaWxsOiAjNjI1ZDljOyB9CiAgICAgIC5zdDQgeyBmaWxsOiAjMzIzZTQ4OyB9CiAgICAgIC5zdDUgeyBmaWxsOiAjMDBhZjlhOyB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8Zz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMjE1LjEsNzMuOWMtMTAuMi0zLjYtMjEuOC05LjEtMjEuOC0yMi4xczguOC0xOS43LDIyLjgtMTkuNywyMi43LDExLDIyLjcsMTFsLTguMyw4LjJzLTUuOC03LjktMTQuNC03LjktMTAuNiwzLjctMTAuNiw4LjQsNS41LDgsMTUsMTEuNWMxMC42LDQsMTkuNSw4LjgsMTkuNSwyMS40cy0xMS4xLDE5LjQtMjQuMywxOS40LTI1LjUtMTQuMi0yNS41LTE0LjJsOS03LjZzNiwxMC40LDE2LjUsMTAuNCwxMi4xLTIuNCwxMi4xLTguMS00LjUtOC0xMi43LTEwLjhaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0yNDcuMSw1NS44aDkuM3YtMTRoMTEuOXYxNGgxNC4ydjEwLjdoLTE0LjJ2MTljMCw1LjgsMyw3LjUsNi4yLDcuNXM1LTEuNyw1LTEuN2w0LjQsOS43cy00LjUsMy4xLTExLjMsMy4xLTE2LjEtNi43LTE2LjEtMTYuN3YtMjAuOWgtOS4zdi0xMC43WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMzI0LjYsNTYuMWwtNC4yLDEwLjdzLTIuMi0xLjEtNS43LTEuMWMtNy4zLDAtMTAuNSw2LjQtMTAuNSw2LjR2MzAuOGgtMTEuOXYtNDcuMmgxMS4zdjYuOXM0LjEtOC4xLDEyLjgtOC4xLDguMiwxLjUsOC4yLDEuNVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTM3My40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNMzYxLjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQyNi40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNNDE0LjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQzMS40LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik00ODAuMyw4N3M2LjMsNi44LDE0LjIsNi44LDktMS40LDktNC4zLTIuMi0zLjctOS40LTUuMmMtOS40LTItMTcuNS02LTE3LjUtMTQuOXM3LjQtMTQuNywyMC4zLTE0LjcsMTcuNyw1LjgsMTcuNyw1LjhsLTYsOC43cy01LjQtNC4xLTExLjctNC4xLTguNiwxLjYtOC42LDQuNSwzLjIsMy42LDExLjEsNS4zYzkuNCwyLDE2LDUuMSwxNiwxNC44cy04LjYsMTQuNS0yMC42LDE0LjUtMjEuMy04LjYtMjEuMy04LjZsNi43LTguN1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwMS4xLDc5LjRjMCwxMy44LTExLjEsMjQuOC0yNS4yLDI0LjhzLTI1LjItMTAuOS0yNS4yLTI0LjgsMTEuMS0yNC44LDI1LjItMjQuOCwyNS4yLDEwLjgsMjUuMiwyNC44Wk01ODguOSw3OS40YzAtNy40LTUtMTMuNi0xMy0xMy42cy0xMyw2LjMtMTMsMTMuNiw1LDEzLjYsMTMsMTMuNiwxMy02LjMsMTMtMTMuNloiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwNS41LDU1LjhoOS40di0xMS41YzAtMTMuMSw5LjMtMTcuNywxNi45LTE3LjdzMTAuNCwyLjUsMTAuNCwyLjVsLTQuNSwxMHMtMS44LTEuNC00LjgtMS40LTYuMiwxLjMtNi4yLDcuMnYxMC45aDExLjV2MTAuN2gtMTEuNXYzNi40aC0xMS45di0zNi40aC05LjR2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik03MjQuMSw4OS43di0xNC43aC0xNS44di0xMS4xaDI3LjZ2MzEuNnMtOC45LDguOC0yNS44LDguOC0zNi42LTE1LjQtMzYuNi0zNiwxNS43LTM2LDM2LjEtMzYsMjUuOCwxMC40LDI1LjgsMTAuNGwtOC4yLDhzLTUuOC03LjMtMTcuNi03LjMtMjQsMTEuNC0yNCwyNC45LDEwLjQsMjQuOSwyNC41LDI0LjksMTQtMy40LDE0LTMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTc3OS4zLDU2LjFsLTQuMiwxMC43cy0yLjItMS4xLTUuNy0xLjFjLTcuMywwLTEwLjUsNi40LTEwLjUsNi40djMwLjhoLTExLjl2LTQ3LjJoMTEuM3Y2LjlzNC4xLTguMSwxMi44LTguMSw4LjIsMS41LDguMiwxLjVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik04MzEsNzkuNGMwLDEzLjgtMTEuMSwyNC44LTI1LjIsMjQuOHMtMjUuMi0xMC45LTI1LjItMjQuOCwxMS4xLTI0LjgsMjUuMi0yNC44LDI1LjIsMTAuOCwyNS4yLDI0LjhaTTgxOC45LDc5LjRjMC03LjQtNS0xMy42LTEzLTEzLjZzLTEzLDYuMy0xMywxMy42LDUsMTMuNiwxMywxMy42LDEzLTYuMywxMy0xMy42WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNODQ2LDU1LjhsOS43LDI0LjIsMTAuMi0yNC4yaDEwbDkuOSwyNC4yLDEwLjEtMjQuMmgxMi4xbC0yMi44LDQ5LjUtMTUuMS0zMy42LTE0LjksMzMuNi0yMi44LTQ5LjVoMTMuM1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTkxMC45LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0xMDAwLDcyLjV2MzAuNWgtMTEuOXYtMjcuNmMwLTYuOC00LjItOS43LTkuMy05LjdzLTkuNCw2LjItOS40LDYuMnYzMWgtMTEuOVYyNy44aDExLjl2MzMuN3M0LjItNi45LDEzLjMtNi45LDE3LjMsNi41LDE3LjMsMTcuOFoiLz4KICAgIDwvZz4KICAgIDxnPgogICAgICA8Zz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjEyNi45IDU4LjcgMTI2LjkgMTE3LjMgMTkuOSAxMTcuMyAxOS45IDEwMi41IDI1LjIgMTAyLjUgMTIuNiA4MC43IDAgMTAyLjUgNS4zIDEwMi41IDUuMyAxMzIgMTkuOSAxMzIgMTkuOSAxMzIgMTI2LjkgMTMyIDE0MS41IDExNy4zIDE0MS41IDU4LjcgMTI2LjkgNTguNyIvPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMTQxLjUgMjkuNSAxNDEuNSAwIDEyNi45IDAgMTI2LjkgMCAxOS45IDAgNS4zIDE0LjcgNS4zIDczLjMgMTkuOSA3My4zIDE5LjkgMTQuNyAxMjYuOSAxNC43IDEyNi45IDI5LjUgMTIxLjYgMjkuNSAxMzQuMiA1MS4zIDE0Ni44IDI5LjUgMTQxLjUgMjkuNSIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDEiIHg9IjYzLjkiIHk9IjU4LjciIHdpZHRoPSI0OC41IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cmVjdCBjbGFzcz0ic3Q1IiB4PSIzNC42IiB5PSI4OCIgd2lkdGg9Ijc3LjgiIGhlaWdodD0iMTQuNyIvPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDMiIHg9IjM0LjYiIHk9IjI5LjMiIHdpZHRoPSI3Ny44IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjQ5LjMgNTguNyAzNC42IDczLjMgMzQuNiAyOS4zIDQ5LjMgNDQgNDkuMyA1OC43Ii8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9InN0MiIgcG9pbnRzPSIxMTIuNCAxMDIuNyA5Ny43IDg4IDk3LjcgNzMuMyAxMTIuNCA1OC43IDExMi40IDEwMi43Ii8+CiAgICAgIDwvZz4KICAgIDwvZz4KICA8L2c+CiAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTEwMjMuNSw5NC4zYzAsNC43LTMuNyw4LjMtOC40LDguM3MtOC41LTMuNy04LjUtOC4zLDMuOC04LjIsOC41LTguMiw4LjQsMy43LDguNCw4LjJaTTEwMDguNyw5NC4zYzAsMy43LDIuNyw2LjYsNi40LDYuNnM2LjMtMi45LDYuMy02LjUtMi43LTYuNi02LjMtNi42LTYuNCwzLTYuNCw2LjZaTTEwMTMuOCw5OC42aC0xLjl2LTguMmMuOC0uMiwxLjgtLjMsMy4yLS4zczIuMy4zLDIuOS42Yy41LjQuOCwxLC44LDEuOHMtLjcsMS42LTEuNywxLjloMGMuOC40LDEuMywxLDEuNSwyLjEuMywxLjMuNCwxLjguNiwyLjFoLTIuMWMtLjItLjMtLjQtMS4xLS43LTItLjEtLjktLjctMS4zLTEuNy0xLjNoLS45djMuM1pNMTAxMy44LDk0aC45YzEuMSwwLDEuOS0uNCwxLjktMS4ycy0uNi0xLjMtMS44LTEuMy0uOSwwLTEuMS4xdjIuNFoiLz4KPC9zdmc+" alt="Streets of Growth" height="28">
+    </div>
+    <div class="auth-divider"></div>
+    <h1 class="auth-title" id="auth-title">AIM+ Dashboard</h1>
+    <p class="auth-subtitle">Enter your email to receive a secure sign-in link. No password needed.</p>
+    <label class="auth-label" for="auth-email">Email address</label>
+    <input id="auth-email" class="auth-input" type="email" placeholder="you@streetsofgrowth.org.uk" autocomplete="email" required>
+    <button id="auth-send-btn" class="auth-btn" onclick="sendMagicLink()">Send magic link</button>
+    <div id="auth-message" class="auth-message" role="status" aria-live="polite"></div>
+    <p class="auth-footer">Access is restricted to authorised Streets of Growth staff.<br>Contact your administrator if you need access.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TOPBAR — white with SoG logo
+═══════════════════════════════════════════ -->
+<header class="topbar" role="banner">
+  <div class="topbar-left">
+    <!-- Full lockup (desktop) -->
+    <img class="logo-full" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTAyMy41IiBoZWlnaHQ9IjEzMiIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMTAyMy41IDEzMiI+CiAgPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI5LjUuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDIuMS4wIEJ1aWxkIDEzNykgIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsOiAjNDE5N2NiOwogICAgICB9CgogICAgICAuc3QxIHsKICAgICAgICBmaWxsOiAjNWViM2U0OwogICAgICB9CgogICAgICAuc3QyIHsKICAgICAgICBmaWxsOiAjMDA5NWE5OwogICAgICB9CgogICAgICAuc3QzIHsKICAgICAgICBmaWxsOiAjNjI1ZDljOwogICAgICB9CgogICAgICAuc3Q0IHsKICAgICAgICBmaWxsOiAjMzIzZTQ4OwogICAgICB9CgogICAgICAuc3Q1IHsKICAgICAgICBmaWxsOiAjMDBhZjlhOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8Zz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMjE1LjEsNzMuOWMtMTAuMi0zLjYtMjEuOC05LjEtMjEuOC0yMi4xczguOC0xOS43LDIyLjgtMTkuNywyMi43LDExLDIyLjcsMTFsLTguMyw4LjJzLTUuOC03LjktMTQuNC03LjktMTAuNiwzLjctMTAuNiw4LjQsNS41LDgsMTUsMTEuNWMxMC42LDQsMTkuNSw4LjgsMTkuNSwyMS40cy0xMS4xLDE5LjQtMjQuMywxOS40LTI1LjUtMTQuMi0yNS41LTE0LjJsOS03LjZzNiwxMC40LDE2LjUsMTAuNCwxMi4xLTIuNCwxMi4xLTguMS00LjUtOC0xMi43LTEwLjhaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0yNDcuMSw1NS44aDkuM3YtMTRoMTEuOXYxNGgxNC4ydjEwLjdoLTE0LjJ2MTljMCw1LjgsMyw3LjUsNi4yLDcuNXM1LTEuNyw1LTEuN2w0LjQsOS43cy00LjUsMy4xLTExLjMsMy4xLTE2LjEtNi43LTE2LjEtMTYuN3YtMjAuOWgtOS4zdi0xMC43WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMzI0LjYsNTYuMWwtNC4yLDEwLjdzLTIuMi0xLjEtNS43LTEuMWMtNy4zLDAtMTAuNSw2LjQtMTAuNSw2LjR2MzAuOGgtMTEuOXYtNDcuMmgxMS4zdjYuOXM0LjEtOC4xLDEyLjgtOC4xLDguMiwxLjUsOC4yLDEuNVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTM3My40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNMzYxLjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQyNi40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNNDE0LjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQzMS40LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik00ODAuMyw4N3M2LjMsNi44LDE0LjIsNi44LDktMS40LDktNC4zLTIuMi0zLjctOS40LTUuMmMtOS40LTItMTcuNS02LTE3LjUtMTQuOXM3LjQtMTQuNywyMC4zLTE0LjcsMTcuNyw1LjgsMTcuNyw1LjhsLTYsOC43cy01LjQtNC4xLTExLjctNC4xLTguNiwxLjYtOC42LDQuNSwzLjIsMy42LDExLjEsNS4zYzkuNCwyLDE2LDUuMSwxNiwxNC44cy04LjYsMTQuNS0yMC42LDE0LjUtMjEuMy04LjYtMjEuMy04LjZsNi43LTguN1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwMS4xLDc5LjRjMCwxMy44LTExLjEsMjQuOC0yNS4yLDI0LjhzLTI1LjItMTAuOS0yNS4yLTI0LjgsMTEuMS0yNC44LDI1LjItMjQuOCwyNS4yLDEwLjgsMjUuMiwyNC44Wk01ODguOSw3OS40YzAtNy40LTUtMTMuNi0xMy0xMy42cy0xMyw2LjMtMTMsMTMuNiw1LDEzLjYsMTMsMTMuNiwxMy02LjMsMTMtMTMuNloiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwNS41LDU1LjhoOS40di0xMS41YzAtMTMuMSw5LjMtMTcuNywxNi45LTE3LjdzMTAuNCwyLjUsMTAuNCwyLjVsLTQuNSwxMHMtMS44LTEuNC00LjgtMS40LTYuMiwxLjMtNi4yLDcuMnYxMC45aDExLjV2MTAuN2gtMTEuNXYzNi40aC0xMS45di0zNi40aC05LjR2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik03MjQuMSw4OS43di0xNC43aC0xNS44di0xMS4xaDI3LjZ2MzEuNnMtOC45LDguOC0yNS44LDguOC0zNi42LTE1LjQtMzYuNi0zNiwxNS43LTM2LDM2LjEtMzYsMjUuOCwxMC40LDI1LjgsMTAuNGwtOC4yLDhzLTUuOC03LjMtMTcuNi03LjMtMjQsMTEuNC0yNCwyNC45LDEwLjQsMjQuOSwyNC41LDI0LjksMTQtMy40LDE0LTMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTc3OS4zLDU2LjFsLTQuMiwxMC43cy0yLjItMS4xLTUuNy0xLjFjLTcuMywwLTEwLjUsNi40LTEwLjUsNi40djMwLjhoLTExLjl2LTQ3LjJoMTEuM3Y2LjlzNC4xLTguMSwxMi44LTguMSw4LjIsMS41LDguMiwxLjVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik04MzEsNzkuNGMwLDEzLjgtMTEuMSwyNC44LTI1LjIsMjQuOHMtMjUuMi0xMC45LTI1LjItMjQuOCwxMS4xLTI0LjgsMjUuMi0yNC44LDI1LjIsMTAuOCwyNS4yLDI0LjhaTTgxOC45LDc5LjRjMC03LjQtNS0xMy42LTEzLTEzLjZzLTEzLDYuMy0xMywxMy42LDUsMTMuNiwxMywxMy42LDEzLTYuMywxMy0xMy42WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNODQ2LDU1LjhsOS43LDI0LjIsMTAuMi0yNC4yaDEwbDkuOSwyNC4yLDEwLjEtMjQuMmgxMi4xbC0yMi44LDQ5LjUtMTUuMS0zMy42LTE0LjksMzMuNi0yMi44LTQ5LjVoMTMuM1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTkxMC45LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0xMDAwLDcyLjV2MzAuNWgtMTEuOXYtMjcuNmMwLTYuOC00LjItOS43LTkuMy05LjdzLTkuNCw2LjItOS40LDYuMnYzMWgtMTEuOVYyNy44aDExLjl2MzMuN3M0LjItNi45LDEzLjMtNi45LDE3LjMsNi41LDE3LjMsMTcuOFoiLz4KICAgIDwvZz4KICAgIDxnPgogICAgICA8Zz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjEyNi45IDU4LjcgMTI2LjkgMTE3LjMgMTkuOSAxMTcuMyAxOS45IDEwMi41IDI1LjIgMTAyLjUgMTIuNiA4MC43IDAgMTAyLjUgNS4zIDEwMi41IDUuMyAxMzIgMTkuOSAxMzIgMTkuOSAxMzIgMTI2LjkgMTMyIDE0MS41IDExNy4zIDE0MS41IDU4LjcgMTI2LjkgNTguNyIvPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMTQxLjUgMjkuNSAxNDEuNSAwIDEyNi45IDAgMTI2LjkgMCAxOS45IDAgNS4zIDE0LjcgNS4zIDczLjMgMTkuOSA3My4zIDE5LjkgMTQuNyAxMjYuOSAxNC43IDEyNi45IDI5LjUgMTIxLjYgMjkuNSAxMzQuMiA1MS4zIDE0Ni44IDI5LjUgMTQxLjUgMjkuNSIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDEiIHg9IjYzLjkiIHk9IjU4LjciIHdpZHRoPSI0OC41IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cmVjdCBjbGFzcz0ic3Q1IiB4PSIzNC42IiB5PSI4OCIgd2lkdGg9Ijc3LjgiIGhlaWdodD0iMTQuNyIvPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDMiIHg9IjM0LjYiIHk9IjI5LjMiIHdpZHRoPSI3Ny44IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjQ5LjMgNTguNyAzNC42IDczLjMgMzQuNiAyOS4zIDQ5LjMgNDQgNDkuMyA1OC43Ii8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9InN0MiIgcG9pbnRzPSIxMTIuNCAxMDIuNyA5Ny43IDg4IDk3LjcgNzMuMyAxMTIuNCA1OC43IDExMi40IDEwMi43Ii8+CiAgICAgIDwvZz4KICAgIDwvZz4KICA8L2c+CiAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTEwMjMuNSw5NC4zYzAsNC43LTMuNyw4LjMtOC40LDguM3MtOC41LTMuNy04LjUtOC4zLDMuOC04LjIsOC41LTguMiw4LjQsMy43LDguNCw4LjJaTTEwMDguNyw5NC4zYzAsMy43LDIuNyw2LjYsNi40LDYuNnM2LjMtMi45LDYuMy02LjUtMi43LTYuNi02LjMtNi42LTYuNCwzLTYuNCw2LjZaTTEwMTMuOCw5OC42aC0xLjl2LTguMmMuOC0uMiwxLjgtLjMsMy4yLS4zczIuMy4zLDIuOS42Yy41LjQuOCwxLC44LDEuOHMtLjcsMS42LTEuNywxLjloMGMuOC40LDEuMywxLDEuNSwyLjEuMywxLjMuNCwxLjguNiwyLjFoLTIuMWMtLjItLjMtLjQtMS4xLS43LTItLjEtLjktLjctMS4zLTEuNy0xLjNoLS45djMuM1pNMTAxMy44LDk0aC45YzEuMSwwLDEuOS0uNCwxLjktMS4ycy0uNi0xLjMtMS44LTEuMy0uOSwwLTEuMS4xdjIuNFoiLz4KPC9zdmc+" alt="Streets of Growth" height="28">
+    <!-- Mark only (mobile) -->
+    <svg class="logo-mark" xmlns="http://www.w3.org/2000/svg" width="147" height="132" viewBox="0 0 147 132">
+      <defs><style>.st0{fill:#4197cb}.st1{fill:#5eb3e4}.st2{fill:#0095a9}.st3{fill:#625d9c}.st4{fill:#323e48}.st5{fill:#00af9a}</style></defs>
+      <g><g>
+        <polygon class="st4" points="126.9 58.7 126.9 117.3 19.9 117.3 19.9 102.5 25.2 102.5 12.6 80.7 0 102.5 5.3 102.5 5.3 132 19.9 132 19.9 132 126.9 132 141.5 117.3 141.5 58.7 126.9 58.7"/>
+        <polygon class="st4" points="141.5 29.5 141.5 0 126.9 0 126.9 0 19.9 0 5.3 14.7 5.3 73.3 19.9 73.3 19.9 14.7 126.9 14.7 126.9 29.5 121.6 29.5 134.2 51.3 146.8 29.5 141.5 29.5"/>
+      </g><g>
+        <rect class="st1" x="63.9" y="58.7" width="48.5" height="14.7"/>
+        <rect class="st5" x="34.6" y="88" width="77.8" height="14.7"/>
+        <rect class="st3" x="34.6" y="29.3" width="77.8" height="14.7"/>
+        <polygon class="st0" points="49.3 58.7 34.6 73.3 34.6 29.3 49.3 44 49.3 58.7"/>
+        <polygon class="st2" points="112.4 102.7 97.7 88 97.7 73.3 112.4 58.7 112.4 102.7"/>
+      </g></g>
+    </svg>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="topbar-meta">Dashboard &nbsp;·&nbsp; <strong>24 Mar 2026</strong></div>
+    <button class="btn-signout" id="signout-btn" onclick="signOut()" title="Sign out">
+      <span class="material-icons-outlined" style="font-size:14px">logout</span>
+      Sign out
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     NAV BAR — off-white with record selector
+═══════════════════════════════════════════ -->
+<nav class="nav" role="navigation" aria-label="Dashboard controls">
+  <span class="nav-label">Record</span>
+  <select id="record-select" class="record-select" onchange="selectRecord(this.value)" aria-label="Select record">
+    <option>Loading…</option>
+  </select>
+  <div class="nav-badge-wrap">
+    <span class="badge badge-phase3" id="phase-badge">Phase 3</span>
+    <span class="nav-eng-label" id="eng-label">Engagement: 295 days</span>
+  </div>
+  <a id="apricot-link" href="#" target="_blank" rel="noopener" class="apricot-link">
+    <span class="material-icons-outlined" style="font-size:14px">open_in_new</span> Open in Apricot
+  </a>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════ -->
+<main class="main" id="main-content">
+
+  <!-- Alerts -->
+  <div class="alerts-bar" role="region" aria-label="Alerts and flags">
+    <div class="alerts-head">
+      <span class="material-icons-round" style="font-size:16px;color:var(--sog-orange)">warning</span>
+      Alerts &amp; Flags
+      <span class="alert-count-badge" id="alert-count">5 active</span>
+    </div>
+    <div class="alerts-grid" id="alerts-grid"></div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row" role="region" aria-label="Key performance indicators">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Interactions</div>
+      <div class="kpi-value" id="kpi-total">17</div>
+      <div class="kpi-sub" id="kpi-span-sub">over 295 days</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">Interventions</div>
+      <div class="kpi-value" id="kpi-int">11</div>
+      <div class="kpi-sub" id="kpi-risk-sub">Avg risk: 17.6</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Risk Trend</div>
+      <div class="kpi-value" id="kpi-trend" style="font-size:20px">↓ 28.4→5.6</div>
+      <div class="kpi-sub">Early avg → Recent avg</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Safety Score (YP)</div>
+      <div class="kpi-value" id="kpi-syp">96</div>
+      <div class="kpi-sub" id="kpi-scoach">Coach: 75 · Gap: 28%</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Self Efficacy</div>
+      <div class="kpi-value" id="kpi-se">40</div>
+      <div class="kpi-sub">out of 40 max</div>
+    </div>
+  </div>
+
+  <!-- Interactive Timeline -->
+  <div class="timeline-card" role="region" aria-label="Interactions timeline">
+    <div class="timeline-head">
+      <div class="timeline-title">
+        <span class="material-icons-outlined" style="font-size:16px">timeline</span>
+        All Interactions Over Time — click any point to explore
+      </div>
+      <div class="timeline-controls" id="type-filter-pills"></div>
+    </div>
+    <div class="timeline-body">
+      <div class="mode-bar hidden" id="mode-bar">
+        <div class="breadcrumb-trail" id="breadcrumb"></div>
+        <button class="clear-btn" onclick="clearDrillDown()">✕ Clear</button>
+      </div>
+      <div class="chart-area">
+        <div class="main-chart-wrap">
+          <canvas id="timelineChart"></canvas>
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:var(--charcoal-40);text-align:center" id="timeline-hint">
+          Bubble size = session duration &nbsp;·&nbsp; Click a point for details &nbsp;·&nbsp; Click a tool badge to see usage over time
+        </div>
+      </div>
+      <div class="detail-panel hidden" id="detail-panel" role="region" aria-label="Session detail">
+        <div class="detail-inner">
+          <div class="detail-left">
+            <div class="detail-date" id="dp-date">—</div>
+            <div><span class="detail-type-badge" id="dp-type-badge">—</span></div>
+            <div style="margin-top:8px;font-size:11px;color:var(--charcoal-40)" id="dp-record">Record ID: —</div>
+          </div>
+          <div style="flex:1">
+            <div class="detail-metrics" id="dp-metrics"></div>
+            <div class="tools-section" id="dp-tools-section">
+              <div class="tools-section-lbl">Intervention Tools Used — click a tool to see usage over time</div>
+              <div id="dp-tools-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tool-drilldown hidden" id="tool-drilldown">
+        <div class="tool-drilldown-title" id="tdd-title">Tool usage over time</div>
+        <div class="tool-sub-charts">
+          <div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--charcoal-40);margin-bottom:8px">Monthly usage count</div>
+            <div class="tool-sub-chart-wrap"><canvas id="toolTimeChart"></canvas></div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--charcoal-40);margin-bottom:8px">Sessions using this tool</div>
+            <div class="tool-sessions-list" id="tdd-sessions"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dosage Heatmap -->
+  <div class="card" role="region" aria-label="Interaction dosage heatmap">
+    <div class="card-head">
+      <span class="material-icons-outlined">grid_on</span>
+      Interaction Sub-type Dosage — monthly frequency by phase
+    </div>
+    <div id="heatmap-container" style="padding:0 0 12px;overflow-x:auto"></div>
+  </div>
+
+  <!-- Phase Readiness Scorecard -->
+  <div class="card" role="region" aria-label="Phase readiness scorecard">
+    <div class="card-head">
+      <span class="material-icons-outlined">task_alt</span>
+      Phase Readiness Scorecard
+    </div>
+    <div id="scorecard-container" style="padding:16px"></div>
+  </div>
+
+  <!-- Row 2: Summary | Risk chart | Sessions + Scores -->
+  <div class="row row-3">
+
+    <div class="card">
+      <div class="card-head"><span class="material-icons-outlined">summarize</span> Summary Statistics</div>
+      <div class="card-body">
+        <div class="stat-grid">
+          <div><div class="stat-lbl">Phase</div><div class="stat-val blue" id="s-phase">Phase 3</div></div>
+          <div><div class="stat-lbl">Total Interactions</div><div class="stat-val" id="s-total">17</div></div>
+          <div><div class="stat-lbl">Interventions</div><div class="stat-val" id="s-int">11</div></div>
+          <div><div class="stat-lbl">Group Sessions</div><div class="stat-val" id="s-gs">0</div></div>
+          <div><div class="stat-lbl">Safety Surveys</div><div class="stat-val" id="s-ss">1</div></div>
+          <div><div class="stat-lbl">Self Efficacy</div><div class="stat-val" id="s-se">1</div></div>
+          <div><div class="stat-lbl">Phase Sessions</div><div class="stat-val" id="s-ps">4</div></div>
+          <div><div class="stat-lbl">Engagement Span</div><div class="stat-val" id="s-span">295 days</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-grid">
+          <div><div class="stat-lbl">First Interaction</div><div class="stat-val" id="s-first" style="font-size:13px">14 May 2025</div></div>
+          <div><div class="stat-lbl">Last Interaction</div><div class="stat-val" id="s-last" style="font-size:13px">05 Mar 2026</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="material-icons-outlined">trending_down</span> Risk Value Over Time (Interventions)</div>
+      <div class="card-body" style="padding-bottom:8px">
+        <div style="height:200px;position:relative"><canvas id="riskChart"></canvas></div>
+        <div class="risk-legend">
+          <div class="risk-legend-item"><span class="risk-dot low"></span> Low (0–30)</div>
+          <div class="risk-legend-item"><span class="risk-dot medium"></span> Medium (31–55)</div>
+          <div class="risk-legend-item"><span class="risk-dot high"></span> High (56+)</div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--charcoal-70)">
+          Early avg: <strong id="early-avg">28.4</strong> &nbsp;|&nbsp;
+          Recent avg: <strong id="recent-avg">5.6</strong> &nbsp;|&nbsp;
+          Trend: <strong id="trend-dir" style="color:var(--sog-green)">↓ Improving</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="material-icons-outlined">bar_chart</span> Session Breakdown &amp; Assessment Scores</div>
+      <div class="card-body">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--charcoal-40);margin-bottom:7px">Session Types</div>
+        <div class="session-bars" id="session-bars"></div>
+        <div class="divider"></div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--charcoal-40);margin-bottom:7px">Assessment Scores</div>
+        <div class="score-circles" id="score-circles"></div>
+        <div class="score-note" id="score-note"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Row 3: Duration | Tools | Risk Metrics -->
+  <div class="row row-3">
+
+    <div class="card">
+      <div class="card-head"><span class="material-icons-outlined">schedule</span> Duration Statistics</div>
+      <div class="card-body">
+        <div class="stat-grid">
+          <div><div class="stat-lbl">Total (all types)</div><div class="stat-val" id="d-total">—</div></div>
+          <div><div class="stat-lbl">Avg per session</div><div class="stat-val" id="d-avg">—</div></div>
+          <div><div class="stat-lbl">Shortest</div><div class="stat-val green" id="d-min">—</div></div>
+          <div><div class="stat-lbl">Longest</div><div class="stat-val" id="d-max">—</div></div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--charcoal-40);margin-bottom:8px">By Type (mins)</div>
+        <div class="stat-grid">
+          <div><div class="stat-lbl">Interventions</div><div class="stat-val" id="d-int">—</div></div>
+          <div><div class="stat-lbl">Group Sessions</div><div class="stat-val" id="d-gs">—</div></div>
+          <div><div class="stat-lbl">Phase Sessions</div><div class="stat-val" id="d-ps">—</div></div>
+          <div><div class="stat-lbl">Avg Intervention</div><div class="stat-val" id="d-avg-int">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="material-icons-outlined">psychology</span> Intervention Tools Used</div>
+      <div class="card-body">
+        <div style="height:155px;position:relative"><canvas id="toolsChart"></canvas></div>
+        <div class="divider"></div>
+        <div class="tool-rows" id="tool-rows"></div>
+        <div style="margin-top:9px;font-size:11px;color:var(--charcoal-70)">
+          Most used: <strong id="most-used-tool">—</strong> &nbsp;|&nbsp; <span id="tools-pct">—</span> of interventions
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="material-icons-outlined">health_and_safety</span> Intervention Risk Metrics</div>
+      <div class="card-body">
+        <div class="stat-grid">
+          <div><div class="stat-lbl">Avg Risk Value</div><div class="stat-val orange" id="r-avg">—</div></div>
+          <div><div class="stat-lbl">Min Risk Value</div><div class="stat-val green" id="r-min">—</div></div>
+          <div><div class="stat-lbl">Max Risk Value</div><div class="stat-val red" id="r-max">—</div></div>
+          <div><div class="stat-lbl">Gaps &gt;30 days</div><div class="stat-val red" id="r-gaps">—</div></div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--charcoal-40);margin-bottom:7px">13 Risk Categories Assessed</div>
+        <div style="font-size:11px;color:var(--charcoal-70);line-height:1.75">
+          Alcohol Use · Cannabis Use · Other Drug Use · Gang Involvement · Illegal Activities ·
+          Negative Relationships · Exploitation · Weapon Carrying · Mental Wellbeing ·
+          Grooming · Drug Dealing · Trauma · Youth Violence
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--charcoal-40)">
+          Severity: Low (1) · Moderate (2) · High (3) · Very High (4) · Max = 52
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Programme Effectiveness -->
+  <div class="card" role="region" aria-label="Programme effectiveness chart">
+    <div class="card-head"><span class="material-icons-outlined">insights</span> Programme Effectiveness — Risk vs Positive Scores Over Time</div>
+    <div class="card-body">
+      <div class="eff-intro">
+        Risk dots (left axis, ↓ lower = safer) should trend <strong>down</strong> over time.
+        Safety, Self Efficacy &amp; the Composite score (right axis, ↑ higher = stronger) should trend <strong>up</strong>.
+        The <strong>Composite Effectiveness</strong> is coverage-weighted: raw average × √(active ÷ 5 dimensions).
+        Early readings are meaningful but grow stronger as more assessment types are recorded — hover points for breakdown.
+      </div>
+      <div class="eff-er-note">
+        <span class="material-icons-round" style="font-size:14px;vertical-align:middle">warning</span>
+        Emotional Regulation scores not yet in dataset — will be incorporated into the composite automatically once added.
+      </div>
+      <div style="position:relative;height:300px;margin-top:14px">
+        <canvas id="effectivenessChart"></canvas>
+      </div>
+      <div class="eff-axis-notes">
+        <span><span style="display:inline-block;width:14px;height:10px;background:rgba(255,108,14,0.65);border-radius:2px"></span> Risk value (left axis)</span>
+        <span><span class="eff-dot" style="background:#4197CB"></span> Safety Score – YP</span>
+        <span><span class="eff-dot" style="border:2px dashed #5EB3E4;background:transparent"></span> Safety Score – Coach</span>
+        <span><span style="display:inline-block;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid #0095A9"></span> Self Efficacy (normalised 0–100)</span>
+        <span><span class="eff-dot" style="background:#00AF9A"></span> <strong style="color:var(--sog-green)">Composite Effectiveness</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Interaction History -->
+  <div class="card" role="region" aria-label="Full interaction history">
+    <div class="card-head"><span class="material-icons-outlined">table_chart</span> Full Interaction History</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Type</th><th>Duration</th><th>Risk</th>
+            <th>Tools / Session Type</th><th>Safety YP</th><th>Safety Coach</th><th>Self Efficacy</th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT — SOG_COLORS, data, all render functions
+═══════════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════════════
+// SOG_COLORS — hex constants for Chart.js
+// (Chart.js cannot read CSS variables)
+// ═══════════════════════════════════════════
+const SOG_COLORS = {
+  purple:  '#625D9C', blue:    '#4197CB', sky:     '#5EB3E4',
+  teal:    '#0095A9', green:   '#00AF9A', charcoal:'#323E48',
+  red:     '#F32735', orange:  '#FF6C0E', yellow:  '#F2CD00',
+  purpleFill: 'rgba(98,93,156,0.15)',  blueFill: 'rgba(65,151,203,0.15)',
+  skyFill:    'rgba(94,179,228,0.15)', tealFill: 'rgba(0,149,169,0.15)',
+  greenFill:  'rgba(0,175,154,0.15)',  redFill:  'rgba(243,39,53,0.10)',
+};
+
+// Chart.js global defaults — set before any chart renders
+Chart.defaults.font.family = "'Open Sans', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#70787F';
+Chart.defaults.plugins.tooltip.backgroundColor = '#323E48';
+Chart.defaults.plugins.tooltip.titleFont = { weight: '700', size: 13 };
+Chart.defaults.plugins.tooltip.bodyFont  = { size: 12 };
+Chart.defaults.plugins.tooltip.padding   = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyleWidth = 10;
+
+// Risk band colour helper per SoG design system
+// 0–30 Low, 31–55 Medium, 56–75 Elevated, 76+ High
+function riskColour(v) {
+  if (typeof v !== 'number') return '#ADB2B6';
+  if (v <= 30) return SOG_COLORS.green;
+  if (v <= 55) return SOG_COLORS.orange;
+  if (v <= 75) return SOG_COLORS.orange;
+  return SOG_COLORS.red;
+}
+function riskBgColour(v) {
+  if (typeof v !== 'number') return 'rgba(173,178,182,0.3)';
+  if (v <= 30) return 'rgba(0,175,154,0.75)';
+  if (v <= 55) return 'rgba(255,108,14,0.75)';
+  return 'rgba(243,39,53,0.85)';
+}
+
+// ── Type config — SoG brand colours ──
+const TYPE_CFG = {
+  'Intervention':  { y:5, bg:SOG_COLORS.purpleFill, border:SOG_COLORS.purple, cls:'type-badge intervention', pill:'int-pill', dot:SOG_COLORS.purple, label:'Intervention'  },
+  'Group Session': { y:4, bg:SOG_COLORS.greenFill,  border:SOG_COLORS.green,  cls:'type-badge group',        pill:'gs-pill',  dot:SOG_COLORS.green,  label:'Group Session' },
+  'Phase Session': { y:3, bg:SOG_COLORS.blueFill,   border:SOG_COLORS.blue,   cls:'type-badge phase',        pill:'ps-pill',  dot:SOG_COLORS.blue,   label:'Phase Session' },
+  'Safety Survey': { y:2, bg:'rgba(255,108,14,0.15)', border:SOG_COLORS.orange, cls:'type-badge safety',      pill:'ss-pill',  dot:SOG_COLORS.orange, label:'Safety Survey' },
+  'Self Efficacy': { y:1, bg:SOG_COLORS.tealFill,   border:SOG_COLORS.teal,   cls:'type-badge efficacy',     pill:'se-pill',  dot:SOG_COLORS.teal,   label:'Self Efficacy' },
+};
+const TYPE_KEYS = Object.keys(TYPE_CFG);
+const TOOL_COLORS = [SOG_COLORS.purple, SOG_COLORS.blue, SOG_COLORS.teal, SOG_COLORS.green, SOG_COLORS.sky];
+
+function parseDate(str) {
+  const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+  const [d, m, y] = str.split(' ');
+  return new Date(+y, months[m], +d);
+}
+function monthKey(dateStr) {
+  const d = parseDate(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function monthLabel(key) {
+  const [y,m] = key.split('-');
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1] + ' ' + y.slice(2);
+}
+
+// ── Supabase auth ──
+const SUPA_URL = 'https://vsjyvqrjjnpyidovgdnz.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzanl2cXJqam5weWlkb3ZnZG56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTc4MjQsImV4cCI6MjA5MjE5MzgyNH0.4v98dXyFh0OYzzssbk_ew9rU2VVsYJiNXRiIeHL8rzw';
+
+const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+function showAuthScreen() {
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('auth-email').focus();
+}
+function hideAuthScreen() {
+  document.getElementById('auth-screen').classList.add('hidden');
+}
+
+async function sendMagicLink() {
+  const email = document.getElementById('auth-email').value.trim();
+  const msg   = document.getElementById('auth-message');
+  const btn   = document.getElementById('auth-send-btn');
+  msg.className = 'auth-message';
+  if (!email) { msg.textContent = 'Please enter your email address.'; msg.classList.add('error'); return; }
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: 'https://sohailraja0407.github.io/streetsofgrowth/YP_Dasboard_SB' }
+  });
+  if (error) {
+    msg.textContent = error.message; msg.classList.add('error');
+    btn.disabled = false; btn.textContent = 'Send magic link';
+  } else {
+    msg.textContent = 'Magic link sent! Check your inbox and click the link to sign in.';
+    msg.classList.add('success');
+    btn.textContent = 'Link sent';
+  }
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+  showAuthScreen();
+}
+
+async function supaFetch(table, params) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session ? session.access_token : SUPA_KEY;
+  const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${params || ''}`, {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
+  });
+  return r.json();
+}
+
+function isoToDisplay(iso) {
+  if (!iso) return '';
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const [y, m, d] = iso.split('-');
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+function computeAlerts(ints) {
+  const alerts = [];
+  const today = new Date();
+  const daysSince = iso => Math.round((today - new Date(iso + 'T00:00:00')) / 86400000);
+  const isoPlus = (iso, days) => {
+    const d = new Date(iso + 'T00:00:00');
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  };
+  const sorted = [...ints].sort((a, b) => a.interaction_date.localeCompare(b.interaction_date));
+  const interventions = sorted.filter(i => i.interaction_type === 'Intervention');
+  const lastInt  = interventions.slice(-1)[0];
+  const lastAny  = sorted.slice(-1)[0];
+  const latestSS = [...sorted.filter(i => i.interaction_type === 'Safety Survey')].slice(-1)[0];
+  const latestSE = [...sorted.filter(i => i.interaction_type === 'Self Efficacy')].slice(-1)[0];
+
+  if (lastInt) {
+    const d = daysSince(lastInt.interaction_date);
+    alerts.push({ sev: d > 30 ? 'red' : d > 14 ? 'orange' : 'green', label: 'Last Intervention',
+      detail: `${d} days since last`, action: `Last: ${isoToDisplay(lastInt.interaction_date)}` });
+  }
+  if (lastAny) {
+    const d = daysSince(lastAny.interaction_date);
+    alerts.push({ sev: d > 30 ? 'red' : d > 14 ? 'orange' : 'green', label: 'Last Interaction',
+      detail: `${d} days since last`, action: `Last: ${isoToDisplay(lastAny.interaction_date)}` });
+  }
+  if (latestSS) {
+    const d = daysSince(latestSS.interaction_date);
+    if (d > 90) {
+      alerts.push({ sev: 'red', label: 'Safety Survey Overdue',
+        detail: `Last: ${isoToDisplay(latestSS.interaction_date)}`, action: `${d} days ago` });
+    } else {
+      alerts.push({ sev: 'orange', label: 'Next Safety Survey Due', detail: 'Due soon',
+        action: `Next due: ${isoToDisplay(isoPlus(latestSS.interaction_date, 90))}` });
+    }
+    if (latestSS.safety_coach) {
+      const gap = Math.round(Math.abs(latestSS.safety_yp - latestSS.safety_coach) / latestSS.safety_coach * 100);
+      alerts.push({ sev: gap > 10 ? 'orange' : 'green', label: 'Safety Score Gap',
+        detail: `YP: ${latestSS.safety_yp} vs Coach: ${latestSS.safety_coach}`,
+        action: `${gap}% gap (threshold 10%)` });
+    }
+  } else {
+    alerts.push({ sev: 'red', label: 'Safety Survey Missing', detail: 'No safety survey recorded', action: 'Schedule ASAP' });
+  }
+  if (latestSE) {
+    const d = daysSince(latestSE.interaction_date);
+    if (d > 30) {
+      alerts.push({ sev: 'red', label: 'Self Efficacy Overdue',
+        detail: `Last: ${isoToDisplay(latestSE.interaction_date)}`,
+        action: `Due by: ${isoToDisplay(isoPlus(latestSE.interaction_date, 30))}` });
+    } else {
+      alerts.push({ sev: 'orange', label: 'Next Self Efficacy Due', detail: 'Due soon',
+        action: `Next due: ${isoToDisplay(isoPlus(latestSE.interaction_date, 30))}` });
+    }
+  } else {
+    alerts.push({ sev: 'red', label: 'Self Efficacy Missing', detail: 'No self-efficacy recorded', action: 'Schedule ASAP' });
+  }
+  const intTs = interventions.map(i => new Date(i.interaction_date + 'T00:00:00').getTime()).sort((a, b) => a - b);
+  let maxGap = 0, gapCount = 0;
+  for (let k = 1; k < intTs.length; k++) {
+    const g = Math.round((intTs[k] - intTs[k - 1]) / 86400000);
+    if (g > 30) { gapCount++; if (g > maxGap) maxGap = g; }
+  }
+  if (gapCount > 0) alerts.push({ sev: 'red', label: 'Intervention Gaps',
+    detail: `${gapCount} gap${gapCount > 1 ? 's' : ''} > 30 days`, action: `Longest: ${maxGap} days` });
+  const longSess = ints.filter(i => i.duration_mins && i.duration_mins > 120);
+  if (longSess.length > 0) {
+    const maxDur = Math.max(...longSess.map(i => i.duration_mins));
+    alerts.push({ sev: 'red', label: 'Long Session Flagged', detail: `Max: ${maxDur} mins`,
+      action: `${longSess.length} session${longSess.length > 1 ? 's' : ''} over 120 mins` });
+  }
+  return alerts;
+}
+
+function buildRecord(phase, rawInts) {
+  const ints = [...rawInts].sort((a, b) => a.interaction_date.localeCompare(b.interaction_date));
+  const interventions = ints.filter(i => i.interaction_type === 'Intervention');
+  const risks = interventions.filter(i => i.risk_value != null).map(i => Number(i.risk_value));
+  const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+  const earlyAvg = avg(risks.slice(0, 5));
+  const recentAvg = avg(risks.slice(-5));
+  const intTs = interventions.map(i => new Date(i.interaction_date + 'T00:00:00').getTime()).sort((a, b) => a - b);
+  let maxGap = 0, gapCount = 0;
+  for (let k = 1; k < intTs.length; k++) {
+    const g = Math.round((intTs[k] - intTs[k - 1]) / 86400000);
+    if (g > 30) { gapCount++; if (g > maxGap) maxGap = g; }
+  }
+  const toolCounts = { 'MI Techniques': 0, 'CBS Techniques (CBT)': 0, 'Goal Planning': 0, 'Wheel of Life': 0, 'Vision/Reality': 0 };
+  interventions.forEach(i => (i.tools || []).forEach(t => {
+    if (t.includes('MI Techniques')) toolCounts['MI Techniques']++;
+    else if (t.includes('CBS')) toolCounts['CBS Techniques (CBT)']++;
+    else if (t.includes('Goal Planning')) toolCounts['Goal Planning']++;
+    else if (t.includes('Wheel of Life')) toolCounts['Wheel of Life']++;
+    else if (t.includes('Vision/Reality')) toolCounts['Vision/Reality']++;
+  }));
+  const intWithTools = interventions.filter(i => (i.tools || []).length > 0);
+  const toolsMostUsed = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+  const toolsPct = intWithTools.length ? `${Math.round((toolCounts[toolsMostUsed] || 0) / intWithTools.length * 100)}%` : '0%';
+  const allDurs = ints.filter(i => i.duration_mins).map(i => i.duration_mins);
+  const intDurs = interventions.filter(i => i.duration_mins).map(i => i.duration_mins);
+  const latestSS = [...ints.filter(i => i.interaction_type === 'Safety Survey')].slice(-1)[0];
+  const latestSE = [...ints.filter(i => i.interaction_type === 'Self Efficacy')].slice(-1)[0];
+  const firstIso = ints[0]?.interaction_date;
+  const lastIso  = ints[ints.length - 1]?.interaction_date;
+  const spanDays = firstIso && lastIso
+    ? Math.round((new Date(lastIso + 'T00:00:00') - new Date(firstIso + 'T00:00:00')) / 86400000) : 0;
+  return {
+    phase,
+    first: isoToDisplay(firstIso),
+    last:  isoToDisplay(lastIso),
+    span:  `${spanDays} days`,
+    totals: {
+      total:         ints.length,
+      interventions: interventions.length,
+      groupSessions: ints.filter(i => i.interaction_type === 'Group Session').length,
+      safetySurveys: ints.filter(i => i.interaction_type === 'Safety Survey').length,
+      selfEfficacy:  ints.filter(i => i.interaction_type === 'Self Efficacy').length,
+      phaseSessions: ints.filter(i => i.interaction_type === 'Phase Session').length,
+    },
+    risk: {
+      avg:       risks.length ? Math.round(avg(risks) * 10) / 10 : 0,
+      min:       risks.length ? Math.min(...risks) : 0,
+      max:       risks.length ? Math.max(...risks) : 0,
+      earlyAvg:  earlyAvg  !== null ? Math.round(earlyAvg  * 10) / 10 : 0,
+      recentAvg: recentAvg !== null ? Math.round(recentAvg * 10) / 10 : 0,
+      trend:     earlyAvg !== null && recentAvg !== null
+        ? (recentAvg < earlyAvg ? '↓ Improving' : recentAvg > earlyAvg ? '↑ Worsening' : '→ Stable') : 'N/A',
+      gaps: gapCount > 0 ? `${gapCount} gap${gapCount > 1 ? 's' : ''} (longest ${maxGap}d)` : 'No gaps >30d',
+    },
+    assessment: {
+      safetyYP:     latestSS?.safety_yp    || 0,
+      safetyCoach:  latestSS?.safety_coach || 0,
+      safetyGapPct: latestSS?.safety_coach
+        ? Math.round(Math.abs(latestSS.safety_yp - latestSS.safety_coach) / latestSS.safety_coach * 100) : 0,
+      selfEfficacy: latestSE?.self_efficacy_score || 0,
+    },
+    duration: {
+      total:          allDurs.reduce((a, b) => a + b, 0),
+      avgPerSession:  allDurs.length ? Math.round(allDurs.reduce((a, b) => a + b, 0) / allDurs.length * 10) / 10 : 0,
+      shortest:       allDurs.length ? Math.min(...allDurs) : 0,
+      longest:        allDurs.length ? Math.max(...allDurs) : 0,
+      interventions:  intDurs.reduce((a, b) => a + b, 0),
+      groupSessions:  ints.filter(i => i.interaction_type === 'Group Session' && i.duration_mins).reduce((a, i) => a + i.duration_mins, 0),
+      phaseSessions:  ints.filter(i => i.interaction_type === 'Phase Session'  && i.duration_mins).reduce((a, i) => a + i.duration_mins, 0),
+      avgIntervention: intDurs.length ? Math.round(intDurs.reduce((a, b) => a + b, 0) / intDurs.length * 10) / 10 : 0,
+    },
+    tools: toolCounts,
+    toolsMostUsed,
+    toolsPct,
+    alerts: computeAlerts(ints),
+    interactions: ints.map(i => ({
+      date:        isoToDisplay(i.interaction_date),
+      type:        i.interaction_type,
+      dur:         i.duration_mins || null,
+      risk:        i.risk_value != null ? Number(i.risk_value) : null,
+      tools:       i.tools || [],
+      safetyYP:    i.safety_yp    || '',
+      safetyCoach: i.safety_coach || '',
+      se:          i.self_efficacy_score || '',
+    })),
+  };
+}
+
+async function loadFromSupabase() {
+  try {
+    const [phases, interactions] = await Promise.all([
+      supaFetch('yp_phases', 'select=record_id,phase&order=record_id'),
+      supaFetch('yp_interactions', 'select=*&order=interaction_date'),
+    ]);
+    const byRecord = {};
+    interactions.forEach(i => {
+      const id = String(i.record_id);
+      if (!byRecord[id]) byRecord[id] = [];
+      byRecord[id].push(i);
+    });
+    const withData = phases.filter(p => byRecord[String(p.record_id)]);
+    DATA = {};
+    withData.forEach(p => { DATA[String(p.record_id)] = buildRecord(p.phase, byRecord[String(p.record_id)]); });
+    const sel = document.getElementById('record-select');
+    sel.innerHTML = withData.map(p => `<option value="${p.record_id}">${p.record_id}</option>`).join('');
+    const firstId = String(withData[0].record_id);
+    updateApricotLink(firstId);
+    render(firstId);
+  } catch (err) {
+    console.error('Supabase load failed:', err);
+    document.getElementById('record-select').innerHTML = '<option>Error loading data</option>';
+  }
+}
+
+// ── DATA ──
+let DATA = {
+  '3374': {
+    phase: 'Phase 3', first: '14 May 2025', last: '05 Mar 2026', span: '295 days',
+    totals: { total:17, interventions:11, groupSessions:0, safetySurveys:1, selfEfficacy:1, phaseSessions:4 },
+    risk: { avg:17.6, min:3, max:30, earlyAvg:28.4, recentAvg:5.6, trend:'↓ Improving', gaps:'2 gaps (longest 128d)' },
+    assessment: { safetyYP:96, safetyCoach:75, safetyGapPct:28, selfEfficacy:40 },
+    duration: { total:1582, avgPerSession:105.5, shortest:5, longest:630, interventions:1250, groupSessions:0, phaseSessions:332, avgIntervention:113.6 },
+    tools: { 'MI Techniques':4, 'CBS Techniques (CBT)':7, 'Goal Planning':0, 'Wheel of Life':0, 'Vision/Reality':0 },
+    toolsMostUsed:'CBS Techniques (CBT)', toolsPct:'82%',
+    alerts: [
+      { sev:'red',    label:'Last Intervention',       detail:'61 days since last',         action:'Last: 22 Jan 2026' },
+      { sev:'red',    label:'Last Interaction',         detail:'19 days since last',         action:'Last: 05 Mar 2026' },
+      { sev:'red',    label:'Safety Survey Overdue',    detail:'Last: 29 Jan 2026',          action:'Due by: 08 Feb 2026' },
+      { sev:'red',    label:'Self Efficacy Overdue',    detail:'Last: 25 Feb 2026',          action:'Due by: 07 Mar 2026' },
+      { sev:'orange', label:'Safety Score Gap',         detail:'YP: 96 vs Coach: 75',        action:'28% gap (threshold 10%)' },
+      { sev:'orange', label:'Next Self Efficacy Due',   detail:'Due soon',                   action:'Next due: 27 Mar 2026' },
+      { sev:'red',    label:'Intervention Gaps',        detail:'2 gaps > 30 days',           action:'Longest: 128 days' },
+      { sev:'red',    label:'Long Session Flagged',     detail:'Max: 630 mins',              action:'1 session over 120 mins' },
+    ],
+    interactions: [
+      { date:'14 May 2025', type:'Intervention',  dur:75,   risk:29, tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'17 May 2025', type:'Intervention',  dur:15,   risk:24, tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'20 May 2025', type:'Intervention',  dur:5,    risk:29, tools:[], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'21 May 2025', type:'Intervention',  dur:30,   risk:30, tools:[], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'21 May 2025', type:'Intervention',  dur:60,   risk:30, tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'03 Jun 2025', type:'Intervention',  dur:120,  risk:24, tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'09 Oct 2025', type:'Intervention',  dur:60,   risk:3,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'22 Oct 2025', type:'Intervention',  dur:630,  risk:12, tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'05 Nov 2025', type:'Intervention',  dur:90,   risk:3,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'14 Nov 2025', type:'Intervention',  dur:90,   risk:3,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'22 Jan 2026', type:'Intervention',  dur:75,   risk:7,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'29 Jan 2026', type:'Safety Survey', dur:null, risk:null, tools:[], safetyYP:96, safetyCoach:75, se:'' },
+      { date:'25 Feb 2026', type:'Self Efficacy', dur:null, risk:null, tools:[], safetyYP:'', safetyCoach:'', se:40 },
+      { date:'25 Feb 2026', type:'Phase Session', dur:75,   risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'26 Feb 2026', type:'Phase Session', dur:82,   risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'04 Mar 2026', type:'Phase Session', dur:85,   risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'05 Mar 2026', type:'Phase Session', dur:90,   risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
+    ]
+  },
+  '2532': {
+    phase: 'Phase 3', first: '13 Feb 2025', last: '05 Mar 2026', span: '385 days',
+    totals: { total:30, interventions:17, groupSessions:7, safetySurveys:1, selfEfficacy:1, phaseSessions:4 },
+    risk: { avg:8.0, min:0, max:11, earlyAvg:7.8, recentAvg:7.0, trend:'↓ Improving', gaps:'1 gap (longest 46d)' },
+    assessment: { safetyYP:92, safetyCoach:85, safetyGapPct:8, selfEfficacy:32 },
+    duration: { total:3265, avgPerSession:117.0, shortest:35, longest:830, interventions:1960, groupSessions:1110, phaseSessions:332, avgIntervention:115.3 },
+    tools: { 'MI Techniques':9, 'CBS Techniques (CBT)':7, 'Goal Planning':2, 'Wheel of Life':1, 'Vision/Reality':1 },
+    toolsMostUsed:'MI Techniques', toolsPct:'76%',
+    alerts: [
+      { sev:'red',    label:'Last Intervention',       detail:'33 days since last',         action:'Last: 19 Feb 2026' },
+      { sev:'red',    label:'Last Interaction',         detail:'19 days since last',         action:'Last: 05 Mar 2026' },
+      { sev:'red',    label:'Safety Survey Overdue',    detail:'Last: 17 Dec 2025',          action:'97 days ago' },
+      { sev:'orange', label:'Next Self Efficacy Due',   detail:'Due soon',                   action:'Next due: 27 Mar 2026' },
+      { sev:'green',  label:'Safety Score Gap',         detail:'YP: 92 vs Coach: 85',        action:'8% gap — within threshold' },
+      { sev:'red',    label:'Long Sessions Flagged',    detail:'2 sessions over 120 mins',   action:'Max: 830 mins — check data' },
+      { sev:'green',  label:'Intervention Frequency',   detail:'Regular engagement',         action:'Multiple monthly contacts' },
+      { sev:'orange', label:'Self Efficacy Review',     detail:'Last: 25 Feb 2026',          action:'Next due: 27 Mar 2026' },
+    ],
+    interactions: [
+      { date:'13 Feb 2025', type:'Intervention',  dur:60,  risk:7,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'20 Feb 2025', type:'Intervention',  dur:75,  risk:10, tools:[], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'13 Mar 2025', type:'Intervention',  dur:60,  risk:6,  tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'26 Mar 2025', type:'Intervention',  dur:35,  risk:6,  tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'10 Apr 2025', type:'Intervention',  dur:790, risk:0,  tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'23 Apr 2025', type:'Intervention',  dur:830, risk:11, tools:['Wheel of Life','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'30 Apr 2025', type:'Intervention',  dur:70,  risk:11, tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'14 May 2025', type:'Intervention',  dur:90,  risk:9,  tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'28 May 2025', type:'Intervention',  dur:90,  risk:10, tools:['CBS Techniques (CBT)','Vision/Reality','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'02 Jun 2025', type:'Intervention',  dur:75,  risk:9,  tools:['CBS Techniques (CBT)','Goal Planning'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'18 Jul 2025', type:'Group Session', dur:90,  risk:null, tools:['Young Leaders/Social Action'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'25 Jul 2025', type:'Group Session', dur:60,  risk:null, tools:['Young Leaders/Social Action'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'25 Jul 2025', type:'Group Session', dur:150, risk:null, tools:['Young Leaders/Social Action'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'13 Aug 2025', type:'Group Session', dur:270, risk:null, tools:['Young Leaders/Social Action'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'26 Sep 2025', type:'Intervention',  dur:60,  risk:9,  tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'30 Sep 2025', type:'Group Session', dur:120, risk:null, tools:['Life Skills – Harm Reduction'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'21 Nov 2025', type:'Group Session', dur:120, risk:null, tools:['Life Skills – Harm Reduction'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'24 Nov 2025', type:'Intervention',  dur:90,  risk:8,  tools:['Goal Planning','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'05 Dec 2025', type:'Group Session', dur:180, risk:null, tools:['Life Skills – Harm Reduction'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'08 Dec 2025', type:'Intervention',  dur:90,  risk:4,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'17 Dec 2025', type:'Safety Survey', dur:null,risk:null, tools:[], safetyYP:92, safetyCoach:85, se:'' },
+      { date:'16 Jan 2026', type:'Intervention',  dur:90,  risk:9,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'23 Jan 2026', type:'Intervention',  dur:55,  risk:9,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'11 Feb 2026', type:'Intervention',  dur:90,  risk:5,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'19 Feb 2026', type:'Intervention',  dur:80,  risk:8,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'25 Feb 2026', type:'Self Efficacy', dur:null,risk:null, tools:[], safetyYP:'', safetyCoach:'', se:32 },
+      { date:'25 Feb 2026', type:'Phase Session', dur:75,  risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'26 Feb 2026', type:'Phase Session', dur:82,  risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'04 Mar 2026', type:'Phase Session', dur:85,  risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
+      { date:'05 Mar 2026', type:'Phase Session', dur:90,  risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let timelineChart = null, riskChartInst = null, toolsChartInst = null;
+let toolTimeChartInst2 = null, effectivenessChartInst = null;
+let currentId = '3374', activeTool = null, hiddenTypes = new Set();
+
+function durRadius(dur) {
+  if (!dur) return 7;
+  return Math.max(6, Math.min(Math.sqrt(dur) * 0.85, 22));
+}
+
+// ═══════════════════════════════════════════
+// PHASE PLUGIN (background shading)
+// ═══════════════════════════════════════════
+const phasePlugin = {
+  id: 'phaseBackground',
+  beforeDraw(chart, args, opts) {
+    const { ctx, chartArea, scales } = chart;
+    if (!opts.phases || !chartArea) return;
+    const toX = ts => {
+      const r = scales.x;
+      if (!r) return 0;
+      return r.getPixelForValue(ts);
+    };
+    const phaseColors = [
+      'rgba(98,93,156,0.04)',  // Phase 1 — purple tint
+      'rgba(65,151,203,0.04)', // Phase 2 — blue tint
+      'rgba(0,149,169,0.04)',  // Phase 3 — teal tint
+    ];
+    opts.phases.forEach((ph, i) => {
+      const x1 = Math.max(toX(ph.start), chartArea.left);
+      const x2 = ph.end === Infinity ? chartArea.right : Math.min(toX(ph.end), chartArea.right);
+      if (x2 <= x1) return;
+      ctx.save();
+      ctx.fillStyle = phaseColors[i] || 'rgba(0,0,0,0.02)';
+      ctx.fillRect(x1, chartArea.top, x2 - x1, chartArea.height);
+      ctx.restore();
+    });
+  }
+};
+
+// ═══════════════════════════════════════════
+// PHASE LOGIC
+// ═══════════════════════════════════════════
+function getPhases(firstStr, interactions) {
+  const firstTs = parseDate(firstStr).getTime();
+  const stage6 = interactions.find(i => i.type === 'Phase Session' && i.tools.some(t => t.includes('Stage 6')));
+  const stage6Ts = stage6 ? parseDate(stage6.date).getTime() : null;
+  const p1End = stage6Ts && (stage6Ts - firstTs) < 90 * 864e5 ? stage6Ts : firstTs + 90 * 864e5;
+  const p2End = stage6Ts && stage6Ts > p1End ? stage6Ts : p1End + 365 * 864e5;
+  return [
+    { start: firstTs, end: p1End, label: 'Phase 1' },
+    { start: p1End, end: p2End, label: stage6Ts && stage6Ts > p1End ? 'Phase 2 (early exit)' : 'Phase 2' },
+    { start: p2End, end: Infinity, label: 'Phase 3' },
+  ];
+}
+
+// ═══════════════════════════════════════════
+// TIMELINE (bubble chart)
+// ═══════════════════════════════════════════
+function renderTimeline(id, toolFilter) {
+  const d = DATA[id];
+  const phases = getPhases(d.first, d.interactions);
+
+  const filtered = d.interactions.filter(i => {
+    if (hiddenTypes.has(i.type)) return false;
+    if (toolFilter) return i.tools.some(t => t.includes(toolFilter.split(' ')[0]));
+    return true;
+  });
+
+  const datasets = TYPE_KEYS.map(type => {
+    const cfg = TYPE_CFG[type];
+    const pts = filtered.filter(i => i.type === type);
+    return {
+      label: cfg.label,
+      data: pts.map(r => ({
+        x: parseDate(r.date).getTime(),
+        y: cfg.y,
+        r: durRadius(r.dur),
+        _raw: r,
+      })),
+      backgroundColor: cfg.bg,
+      borderColor: cfg.border,
+      borderWidth: 2,
+    };
+  });
+
+  const ctx = document.getElementById('timelineChart').getContext('2d');
+  if (timelineChart) timelineChart.destroy();
+
+  timelineChart = new Chart(ctx, {
+    type: 'bubble',
+    plugins: [phasePlugin],
+    data: { datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        phaseBackground: { phases },
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: items => {
+              const r = items[0].raw._raw;
+              return `${r.date} — ${r.type}`;
+            },
+            label: items => {
+              const r = items[0].raw._raw;
+              const parts = [];
+              if (r.dur) parts.push(`Duration: ${r.dur} mins`);
+              if (r.risk !== null && r.risk !== '' && r.risk !== undefined) parts.push(`Risk: ${r.risk}`);
+              if (r.safetyYP) parts.push(`Safety YP: ${r.safetyYP}`);
+              if (r.safetyCoach) parts.push(`Safety Coach: ${r.safetyCoach}`);
+              if (r.se) parts.push(`Self Efficacy: ${r.se}/40`);
+              if (r.tools?.length) parts.push(`Tools: ${r.tools.slice(0,2).join(', ')}${r.tools.length>2?'…':''}`);
+              return parts;
+            }
+          }
+        }
+      },
+      onClick: (event, elements) => {
+        if (!elements.length) return;
+        const el = elements[0];
+        const pt = timelineChart.data.datasets[el.datasetIndex].data[el.index];
+        showPointDetail(pt._raw, id);
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          ticks: {
+            font: { size: 10 },
+            callback: v => new Date(v).toLocaleDateString('en-GB', { month:'short', year:'2-digit' }),
+            maxTicksLimit: 12,
+          },
+          grid: { color: 'rgba(98,93,156,0.08)' }
+        },
+        y: {
+          min: 0.4, max: 5.6,
+          ticks: {
+            font: { size: 11 },
+            callback: v => ({ 5:'Intervention', 4:'Group Session', 3:'Phase Session', 2:'Safety Survey', 1:'Self Efficacy' }[v] || ''),
+            stepSize: 1
+          },
+          grid: { color: 'rgba(98,93,156,0.06)' }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// POINT DETAIL
+// ═══════════════════════════════════════════
+function showPointDetail(raw, recordId) {
+  const panel = document.getElementById('detail-panel');
+  panel.classList.remove('hidden');
+  const cfg = TYPE_CFG[raw.type];
+
+  document.getElementById('dp-date').textContent = raw.date;
+  const badge = document.getElementById('dp-type-badge');
+  badge.textContent = raw.type;
+  badge.className = 'detail-type-badge ' + cfg.cls;
+  document.getElementById('dp-record').textContent = `Record ID: ${recordId}`;
+
+  const metrics = [];
+  if (raw.dur) metrics.push({ lbl:'Duration', val:`${raw.dur} mins` });
+  if (raw.risk !== null && raw.risk !== '' && raw.risk !== undefined) {
+    const col = riskColour(raw.risk);
+    metrics.push({ lbl:'Risk Value', val:`<span style="color:${col};font-weight:700">${raw.risk}</span>` });
+  }
+  if (raw.safetyYP)    metrics.push({ lbl:'Safety (YP)',    val:raw.safetyYP });
+  if (raw.safetyCoach) metrics.push({ lbl:'Safety (Coach)', val:raw.safetyCoach });
+  if (raw.se)          metrics.push({ lbl:'Self Efficacy',  val:`${raw.se} / 40` });
+
+  document.getElementById('dp-metrics').innerHTML = metrics.map(m =>
+    `<div class="dm-item"><div class="dm-lbl">${m.lbl}</div><div class="dm-val">${m.val}</div></div>`
+  ).join('');
+
+  const toolsSect = document.getElementById('dp-tools-section');
+  const toolsList = document.getElementById('dp-tools-list');
+  if (raw.type === 'Intervention') {
+    toolsSect.style.display = '';
+    if (raw.tools.length) {
+      toolsList.innerHTML = raw.tools.map(t =>
+        `<span class="tool-badge" onclick="drillDownTool('${t}', '${recordId}')">
+          <span class="material-icons-outlined" style="font-size:13px">build</span>${t}
+          <span style="font-size:10px;opacity:.6">→ view over time</span>
+        </span>`
+      ).join('');
+    } else {
+      toolsList.innerHTML = `<span class="no-tools">No intervention tools recorded for this session</span>`;
+    }
+  } else {
+    toolsSect.style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════
+// TOOL DRILL-DOWN
+// ═══════════════════════════════════════════
+function drillDownTool(toolName, recordId) {
+  activeTool = toolName;
+  const d = DATA[recordId];
+
+  document.getElementById('mode-bar').classList.remove('hidden');
+  document.getElementById('breadcrumb').innerHTML =
+    `<span class="bc-link" onclick="clearDrillDown()">All Interactions</span>
+     <span class="bc-sep">›</span>
+     <span class="bc-cur">${toolName}</span>`;
+
+  renderTimeline(recordId, toolName);
+
+  const tdd = document.getElementById('tool-drilldown');
+  tdd.classList.remove('hidden');
+  document.getElementById('tdd-title').textContent = `${toolName} — usage over time`;
+
+  const sessions = d.interactions.filter(i => i.tools.some(t => t.includes(toolName.split(' ')[0])));
+  document.getElementById('tdd-sessions').innerHTML = sessions.length
+    ? sessions.map(s => `
+        <div class="tool-session-row">
+          <div>
+            <span class="tool-session-date">${s.date}</span>
+            <span class="${TYPE_CFG[s.type]?.cls||''}" style="margin-left:6px;font-size:10px">${s.type}</span>
+          </div>
+          <div class="tool-session-meta">${s.dur ? s.dur+'m' : ''} ${s.risk != null && s.risk !== '' ? '· Risk: '+s.risk : ''}</div>
+        </div>`).join('')
+    : '<div style="font-size:12px;color:var(--charcoal-40);padding:10px">No sessions found for this tool</div>';
+
+  const monthCounts = {};
+  sessions.forEach(s => { const k = monthKey(s.date); monthCounts[k] = (monthCounts[k]||0)+1; });
+  const allMonths = Object.keys(monthCounts).sort();
+
+  const ctx2 = document.getElementById('toolTimeChart').getContext('2d');
+  if (toolTimeChartInst2) toolTimeChartInst2.destroy();
+  toolTimeChartInst2 = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: allMonths.map(monthLabel),
+      datasets: [{ label: toolName, data: allMonths.map(k=>monthCounts[k]),
+        backgroundColor: SOG_COLORS.blueFill, borderColor: SOG_COLORS.blue,
+        borderWidth: 2, borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: 'rgba(98,93,156,0.08)' } }
+      }
+    }
+  });
+
+  tdd.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function clearDrillDown() {
+  activeTool = null;
+  document.getElementById('mode-bar').classList.add('hidden');
+  document.getElementById('tool-drilldown').classList.add('hidden');
+  document.getElementById('detail-panel').classList.add('hidden');
+  if (toolTimeChartInst2) { toolTimeChartInst2.destroy(); toolTimeChartInst2 = null; }
+  renderTimeline(currentId, null);
+}
+
+// ═══════════════════════════════════════════
+// TYPE FILTER PILLS
+// ═══════════════════════════════════════════
+function renderTypePills() {
+  const container = document.getElementById('type-filter-pills');
+  container.innerHTML = '<span class="ctrl-label">Toggle types:</span>' +
+    TYPE_KEYS.map(type => {
+      const cfg = TYPE_CFG[type];
+      const dimmed = hiddenTypes.has(type) ? ' dimmed' : '';
+      return `<span class="type-pill ${cfg.pill}${dimmed}" onclick="toggleType('${type}')" role="button" aria-pressed="${!hiddenTypes.has(type)}">
+        <span class="dot-legend" style="background:${cfg.dot}"></span>${type}
+      </span>`;
+    }).join('') +
+    (hiddenTypes.size > 0 ? `<button class="reset-types-btn" onclick="resetTypes()">↺ Show all</button>` : '');
+}
+
+function toggleType(type) {
+  if (hiddenTypes.has(type)) hiddenTypes.delete(type); else hiddenTypes.add(type);
+  renderTypePills();
+  renderTimeline(currentId, activeTool);
+}
+function resetTypes() { hiddenTypes.clear(); renderTypePills(); renderTimeline(currentId, activeTool); }
+
+// ═══════════════════════════════════════════
+// RISK CHART (mixed bar + line)
+// per SoG spec: bars colour-coded by risk band, dashed purple trend line
+// ═══════════════════════════════════════════
+function renderRiskChart(d) {
+  const ctx = document.getElementById('riskChart').getContext('2d');
+  if (riskChartInst) riskChartInst.destroy();
+  const ints = d.interactions.filter(i => i.type === 'Intervention' && i.risk !== null && i.risk !== '');
+  riskChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ints.map(i => i.date.split(' ').slice(0,2).join(' ')),
+      datasets: [{
+        label: 'Risk', data: ints.map(i => i.risk),
+        backgroundColor: ints.map(i => riskBgColour(i.risk)),
+        borderColor: ints.map(i => riskColour(i.risk)),
+        borderWidth: 1.5, borderRadius: 3, borderSkipped: false,
+      }, {
+        type: 'line', label: 'Trend',
+        data: ints.map(i => i.risk),
+        borderColor: SOG_COLORS.purple, borderWidth: 2,
+        borderDash: [5, 3], pointRadius: 0, tension: 0.4, fill: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 45 } },
+        y: { beginAtZero: true, max: 35, grid: { color: 'rgba(98,93,156,0.08)' }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// TOOLS CHART (horizontal bar — blue, sorted)
+// ═══════════════════════════════════════════
+function renderToolsChart(d) {
+  const ctx = document.getElementById('toolsChart').getContext('2d');
+  if (toolsChartInst) toolsChartInst.destroy();
+  const entries = Object.entries(d.tools).sort((a,b) => b[1]-a[1]);
+  toolsChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: entries.map(([k]) => k.length > 22 ? k.slice(0,21)+'…' : k),
+      datasets: [{
+        data: entries.map(([,v]) => v),
+        backgroundColor: SOG_COLORS.blueFill,
+        borderColor: SOG_COLORS.blue,
+        borderWidth: 2, borderRadius: 4, borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, grid: { color: 'rgba(98,93,156,0.08)' }, ticks: { font: { size: 10 }, stepSize: 1 } },
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// SESSION BARS — SoG colour-mapped per type
+// ═══════════════════════════════════════════
+function renderSessionBars(d) {
+  const t = d.totals, max = t.total;
+  const rows = [
+    { label:'Interventions',  count:t.interventions,  color:SOG_COLORS.purple },
+    { label:'Group Sessions', count:t.groupSessions,  color:SOG_COLORS.green  },
+    { label:'Phase Sessions', count:t.phaseSessions,  color:SOG_COLORS.blue   },
+    { label:'Safety Survey',  count:t.safetySurveys,  color:SOG_COLORS.orange },
+    { label:'Self Efficacy',  count:t.selfEfficacy,   color:SOG_COLORS.teal   },
+  ];
+  document.getElementById('session-bars').innerHTML = rows.map(r => `
+    <div class="session-row">
+      <div class="session-lbl">${r.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${max?((r.count/max)*100).toFixed(1):0}%;background:${r.color}"></div></div>
+      <div class="session-count">${r.count}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// SCORE CIRCLES — SoG colours per assessment
+// ═══════════════════════════════════════════
+function renderScoreCircles(d) {
+  const a = d.assessment;
+  const gapColor = a.safetyGapPct > 10 ? 'var(--sog-orange)' : 'var(--sog-green)';
+  document.getElementById('score-circles').innerHTML = `
+    <div class="score-circle">
+      <div class="circle-outer" style="border-color:${SOG_COLORS.blue}"><span class="circle-num">${a.safetyYP}</span></div>
+      <div class="circle-lbl">Safety<br>YP</div>
+    </div>
+    <div class="score-circle">
+      <div class="circle-outer" style="border-color:${SOG_COLORS.sky}"><span class="circle-num">${a.safetyCoach}</span></div>
+      <div class="circle-lbl">Safety<br>Coach</div>
+    </div>
+    <div class="score-circle">
+      <div class="circle-outer" style="border-color:${SOG_COLORS.teal}"><span class="circle-num">${a.selfEfficacy}</span></div>
+      <div class="circle-lbl">Self<br>Efficacy</div>
+    </div>`;
+  document.getElementById('score-note').innerHTML =
+    `Safety gap: <strong style="color:${gapColor}">${a.safetyGapPct}%</strong> &nbsp;·&nbsp; Self Efficacy max = 40`;
+}
+
+// ═══════════════════════════════════════════
+// TOOL ROWS
+// ═══════════════════════════════════════════
+function renderToolRows(d) {
+  const entries = Object.entries(d.tools);
+  document.getElementById('tool-rows').innerHTML = entries.map(([k,v],i) => `
+    <div class="tool-row">
+      <div class="tool-lbl">${k}</div>
+      <div class="bar-track" style="max-width:70px">
+        <div class="bar-fill" style="width:${v>0?Math.min(v/10*100,100):0}%;background:${TOOL_COLORS[i%TOOL_COLORS.length]}"></div>
+      </div>
+      <div class="tool-count">${v}</div>
+    </div>`).join('');
+  document.getElementById('most-used-tool').textContent = d.toolsMostUsed;
+  document.getElementById('tools-pct').textContent = d.toolsPct;
+}
+
+// ═══════════════════════════════════════════
+// ALERTS — Material Icons, SoG severity colours
+// ═══════════════════════════════════════════
+function renderAlerts(d) {
+  const sevMap = {
+    red:    { cls:'red',    icon:'cancel' },
+    orange: { cls:'orange', icon:'warning' },
+    green:  { cls:'green',  icon:'check_circle' },
+  };
+  const reds = d.alerts.filter(a => a.sev === 'red').length;
+  document.getElementById('alert-count').textContent = `${reds} active`;
+  document.getElementById('alerts-grid').innerHTML = d.alerts.map(a => {
+    const s = sevMap[a.sev] || sevMap.orange;
+    return `<div class="alert-item">
+      <div class="alert-icon-wrap ${s.cls}">
+        <span class="material-icons-round">${s.icon}</span>
+      </div>
+      <div>
+        <div class="alert-label">${a.label}</div>
+        <div class="alert-detail">${a.detail}</div>
+        ${a.action ? `<div class="alert-action">${a.action}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// HISTORY TABLE
+// ═══════════════════════════════════════════
+function renderTable(d) {
+  document.getElementById('history-body').innerHTML = d.interactions.map(r => {
+    const rc = typeof r.risk==='number' ? (r.risk>55?'risk-high':r.risk>30?'risk-med':'risk-low') : '';
+    const typeCls = { 'Intervention':'intervention','Group Session':'group','Safety Survey':'safety','Self Efficacy':'efficacy','Phase Session':'phase' };
+    return `<tr>
+      <td>${r.date}</td>
+      <td><span class="type-badge ${typeCls[r.type]||''}">${r.type}</span></td>
+      <td>${r.dur ? r.dur+' m' : '—'}</td>
+      <td>${r.risk!==null&&r.risk!==''&&r.risk!==undefined ? `<span class="risk-chip ${rc}">${r.risk}</span>` : '—'}</td>
+      <td style="font-size:11px;max-width:180px">${r.tools.join(', ')||'—'}</td>
+      <td>${r.safetyYP||'—'}</td>
+      <td>${r.safetyCoach||'—'}</td>
+      <td>${r.se||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// KPI + SUMMARY TEXT
+// ═══════════════════════════════════════════
+function updateText(d) {
+  const t = d.totals, r = d.risk, a = d.assessment, dur = d.duration;
+  document.getElementById('kpi-total').textContent = t.total;
+  document.getElementById('kpi-span-sub').textContent = `over ${d.span}`;
+  document.getElementById('kpi-int').textContent = t.interventions;
+  document.getElementById('kpi-risk-sub').textContent = `Avg risk: ${r.avg}`;
+  document.getElementById('kpi-trend').textContent = `↓ ${r.earlyAvg}→${r.recentAvg}`;
+  document.getElementById('kpi-syp').textContent = a.safetyYP;
+  document.getElementById('kpi-scoach').textContent = `Coach: ${a.safetyCoach} · Gap: ${a.safetyGapPct}%`;
+  document.getElementById('kpi-se').textContent = a.selfEfficacy;
+
+  const phBadge = document.getElementById('phase-badge');
+  phBadge.textContent = d.phase;
+  phBadge.className = 'badge badge-' + (d.phase==='Phase 1'?'phase1':d.phase==='Phase 2'?'phase2':'phase3');
+  document.getElementById('eng-label').textContent = `Engagement: ${d.span}`;
+
+  document.getElementById('s-phase').textContent = d.phase;
+  document.getElementById('s-total').textContent = t.total;
+  document.getElementById('s-int').textContent = t.interventions;
+  document.getElementById('s-gs').textContent = t.groupSessions;
+  document.getElementById('s-ss').textContent = t.safetySurveys;
+  document.getElementById('s-se').textContent = t.selfEfficacy;
+  document.getElementById('s-ps').textContent = t.phaseSessions;
+  document.getElementById('s-span').textContent = d.span;
+  document.getElementById('s-first').textContent = d.first;
+  document.getElementById('s-last').textContent = d.last;
+  document.getElementById('early-avg').textContent = r.earlyAvg;
+  document.getElementById('recent-avg').textContent = r.recentAvg;
+  const td = document.getElementById('trend-dir');
+  td.textContent = r.trend;
+  td.style.color = r.recentAvg <= r.earlyAvg ? 'var(--sog-green)' : 'var(--sog-red)';
+  document.getElementById('d-total').textContent = `${dur.total} mins`;
+  document.getElementById('d-avg').textContent = `${dur.avgPerSession} mins`;
+  document.getElementById('d-min').textContent = `${dur.shortest} mins`;
+  document.getElementById('d-max').textContent = `${dur.longest} mins`;
+  document.getElementById('d-int').textContent = dur.interventions;
+  document.getElementById('d-gs').textContent = dur.groupSessions;
+  document.getElementById('d-ps').textContent = dur.phaseSessions;
+  document.getElementById('d-avg-int').textContent = `${dur.avgIntervention} mins`;
+  document.getElementById('r-avg').textContent = r.avg;
+  document.getElementById('r-min').textContent = r.min;
+  document.getElementById('r-max').textContent = r.max;
+  document.getElementById('r-gaps').textContent = r.gaps;
+}
+
+// ═══════════════════════════════════════════
+// EFFECTIVENESS CHART
+// ═══════════════════════════════════════════
+function renderEffectivenessChart(id) {
+  const d = DATA[id];
+  const ints = d.interactions;
+  const phases = getPhases(d.first, ints);
+  const maxRisk = 52;
+
+  const events = ints
+    .filter(i => {
+      if (i.type==='Intervention')  return i.risk!=null && i.risk!=='';
+      if (i.type==='Safety Survey') return i.safetyYP || i.safetyCoach;
+      if (i.type==='Self Efficacy') return i.se;
+      return false;
+    })
+    .map(i => ({
+      ts: parseDate(i.date).getTime(), type: i.type,
+      risk: i.type==='Intervention' ? i.risk : null,
+      safetyYP: i.safetyYP || null, safetyCoach: i.safetyCoach || null,
+      se: i.se ? Math.round(i.se / 40 * 100) : null,
+    }))
+    .sort((a,b) => a.ts - b.ts);
+
+  const TOTAL_DIMS = 5;
+  const DIM_LABELS = { riskEff:'Risk (inverted)', safetyYP:'Safety YP', safetyCoach:'Safety Coach', se:'Self Efficacy', er:'Emotional Regulation' };
+  const state = { riskEff:null, safetyYP:null, safetyCoach:null, se:null, er:null };
+  events.forEach(e => {
+    if (e.risk        !== null) state.riskEff    = Math.round((maxRisk-e.risk)/maxRisk*100);
+    if (e.safetyYP    !== null) state.safetyYP   = e.safetyYP;
+    if (e.safetyCoach !== null) state.safetyCoach = e.safetyCoach;
+    if (e.se          !== null) state.se         = e.se;
+    const active = Object.entries(state).filter(([,v]) => v !== null);
+    const vals = active.map(([,v]) => v);
+    const rawAvg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+    const coverage = vals.length / TOTAL_DIMS;
+    const weight = Math.sqrt(coverage);
+    e.composite = rawAvg !== null ? Math.round(rawAvg * weight) : null;
+    e.rawAvg = rawAvg !== null ? Math.round(rawAvg) : null;
+    e.dims = vals.length; e.coverage = Math.round(coverage*100);
+    e.weight = Math.round(weight*100);
+    e.dimLabels = active.map(([k]) => DIM_LABELS[k]);
+  });
+
+  const riskPts = events.filter(e=>e.risk!==null);
+  const rxs=riskPts.map(e=>e.ts), rys=riskPts.map(e=>e.risk), rn=rxs.length;
+  const rSumX=rxs.reduce((a,b)=>a+b,0), rSumY=rys.reduce((a,b)=>a+b,0);
+  const rSumXY=rxs.reduce((a,c,i)=>a+c*rys[i],0), rSumX2=rxs.reduce((a,c)=>a+c*c,0);
+  const rSlope=(rn*rSumXY-rSumX*rSumY)/(rn*rSumX2-rSumX*rSumX);
+  const rInt=(rSumY-rSlope*rSumX)/rn;
+
+  const ctx = document.getElementById('effectivenessChart').getContext('2d');
+  if (effectivenessChartInst) effectivenessChartInst.destroy();
+
+  effectivenessChartInst = new Chart(ctx, {
+    plugins: [phasePlugin],
+    data: {
+      datasets: [
+        {
+          type:'line', label:'Composite Effectiveness',
+          data: events.map(e=>({x:e.ts,y:e.composite})),
+          borderColor: SOG_COLORS.green, backgroundColor: SOG_COLORS.greenFill,
+          borderWidth:3, pointRadius:3, pointBackgroundColor:SOG_COLORS.green,
+          tension:0.35, fill:true, yAxisID:'yScore', order:4,
+        },
+        {
+          type:'line', label:'Risk Value',
+          data: riskPts.map(e=>({x:e.ts,y:e.risk})),
+          borderColor: 'rgba(255,108,14,0.7)', backgroundColor:'transparent',
+          borderWidth:2, tension:0.2,
+          pointRadius:7, pointStyle:'circle',
+          pointBackgroundColor: riskPts.map(e=>riskBgColour(e.risk)),
+          pointBorderColor: riskPts.map(e=>riskColour(e.risk)),
+          pointBorderWidth:2, yAxisID:'yRisk', order:3,
+        },
+        {
+          type:'line', label:'Safety Score (YP)',
+          data: events.filter(e=>e.safetyYP!==null).map(e=>({x:e.ts,y:e.safetyYP})),
+          borderColor:SOG_COLORS.blue, backgroundColor:SOG_COLORS.blueFill,
+          borderWidth:2.5, pointRadius:10, pointStyle:'circle',
+          tension:0, spanGaps:false, yAxisID:'yScore', order:2,
+        },
+        {
+          type:'line', label:'Safety Score (Coach)',
+          data: events.filter(e=>e.safetyCoach!==null).map(e=>({x:e.ts,y:e.safetyCoach})),
+          borderColor:SOG_COLORS.sky, backgroundColor:'rgba(94,179,228,0.12)',
+          borderDash:[5,3], borderWidth:2,
+          pointRadius:9, pointStyle:'rectRounded',
+          tension:0, spanGaps:false, yAxisID:'yScore', order:2,
+        },
+        {
+          type:'line', label:'Self Efficacy (normalised)',
+          data: events.filter(e=>e.se!==null).map(e=>({x:e.ts,y:e.se})),
+          borderColor:SOG_COLORS.teal, backgroundColor:SOG_COLORS.tealFill,
+          borderWidth:2.5, pointRadius:10, pointStyle:'triangle',
+          tension:0, spanGaps:false, yAxisID:'yScore', order:2,
+        },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:{duration:400},
+      plugins: {
+        phaseBackground: { phases },
+        legend: { display:true, position:'top', labels:{font:{size:11},padding:14} },
+        tooltip: {
+          callbacks: {
+            title: items => new Date(items[0].parsed.x).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+            afterBody: items => {
+              const e = events.find(ev=>ev.ts===items[0].parsed.x);
+              if (!e?.dims) return [];
+              return [
+                `Coverage: ${e.dims}/${TOTAL_DIMS} dimensions (weight: ${e.weight}%)`,
+                `Raw average: ${e.rawAvg}  →  Composite: ${e.composite}`,
+                ...(e.dimLabels||[]).map(l=>`  · ${l}`)
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type:'linear',
+          ticks:{ font:{size:10}, callback:v=>new Date(v).toLocaleDateString('en-GB',{month:'short',year:'2-digit'}), maxTicksLimit:12 },
+          grid:{ color:'rgba(98,93,156,0.08)' }
+        },
+        yRisk: {
+          type:'linear', position:'left', min:0, max:55,
+          title:{ display:true, text:'← Risk Value (lower = safer)', font:{size:10}, color:SOG_COLORS.orange },
+          ticks:{ font:{size:10}, color:SOG_COLORS.orange },
+          grid:{ color:'rgba(98,93,156,0.08)' }
+        },
+        yScore: {
+          type:'linear', position:'right', min:0, max:100,
+          title:{ display:true, text:'Score 0–100 (higher = stronger) →', font:{size:10}, color:SOG_COLORS.green },
+          ticks:{ font:{size:10}, color:SOG_COLORS.green },
+          grid:{ display:false }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// HEATMAP — teal intensity scale per SoG spec
+// ═══════════════════════════════════════════
+const HM_ROWS = [
+  { group:'Intervention Tools', key:'mi',     label:'MI Techniques',         match:i=>i.type==='Intervention'&&i.tools.some(t=>t.includes('MI')) },
+  { group:'Intervention Tools', key:'cbs',    label:'CBS Techniques (CBT)',  match:i=>i.type==='Intervention'&&i.tools.some(t=>t.includes('CBS')) },
+  { group:'Intervention Tools', key:'goal',   label:'Goal Planning',         match:i=>i.type==='Intervention'&&i.tools.some(t=>t.includes('Goal')) },
+  { group:'Intervention Tools', key:'wheel',  label:'Wheel of Life',         match:i=>i.type==='Intervention'&&i.tools.some(t=>t.includes('Wheel')) },
+  { group:'Intervention Tools', key:'vision', label:'Vision/Reality',        match:i=>i.type==='Intervention'&&i.tools.some(t=>t.includes('Vision')) },
+  { group:'Group Sessions',     key:'yl',     label:'Young Leaders',         match:i=>i.type==='Group Session'&&i.tools.some(t=>t.includes('Young')) },
+  { group:'Group Sessions',     key:'ls',     label:'Life Skills',           match:i=>i.type==='Group Session'&&i.tools.some(t=>t.includes('Life')) },
+  { group:'Phase Sessions',     key:'stage6', label:'Stage 6 (Maintaining)', match:i=>i.type==='Phase Session'&&i.tools.some(t=>t.includes('Stage 6')) },
+  { group:'Assessments',        key:'ss',     label:'Safety Survey',         match:i=>i.type==='Safety Survey' },
+  { group:'Assessments',        key:'se',     label:'Self Efficacy',         match:i=>i.type==='Self Efficacy' },
+];
+
+function hmClass(count) {
+  if (!count) return 'hm-0';
+  if (count === 1) return 'hm-1';
+  if (count === 2) return 'hm-2';
+  if (count === 3) return 'hm-3';
+  return 'hm-4';
+}
+
+function renderHeatmap(id) {
+  const d = DATA[id];
+  const phases = getPhases(d.first, d.interactions);
+  const start = parseDate(d.first), end = parseDate(d.last);
+  const months = [];
+  const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (cur <= new Date(end.getFullYear(), end.getMonth(), 1)) {
+    months.push({ y:cur.getFullYear(), m:cur.getMonth() });
+    cur.setMonth(cur.getMonth()+1);
+  }
+
+  function monthIdx(dateStr) {
+    const dt = parseDate(dateStr);
+    return months.findIndex(m => m.y===dt.getFullYear()&&m.m===dt.getMonth());
+  }
+  function phaseOf(m) {
+    const ts = new Date(m.y,m.m,15).getTime();
+    if (ts < phases[0].end) return 0;
+    if (phases[1].end===Infinity||ts<phases[1].end) return 1;
+    return 2;
+  }
+
+  const counts = {};
+  HM_ROWS.forEach(r => { counts[r.key]=new Array(months.length).fill(0); });
+  const totals = new Array(months.length).fill(0);
+  d.interactions.forEach(i => {
+    const mi = monthIdx(i.date);
+    if (mi < 0) return;
+    totals[mi]++;
+    HM_ROWS.forEach(r => { if (r.match(i)) counts[r.key][mi]++; });
+  });
+
+  const spans = [0,0,0];
+  months.forEach(m => spans[phaseOf(m)]++);
+  const phLabels = ['Phase 1', phases[1].label.includes('early')?'Phase 2 ⚡ Early Exit':'Phase 2', 'Phase 3'];
+  const groups = [...new Set(HM_ROWS.map(r=>r.group))];
+  const MLbl = m => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m.m]+" '"+String(m.y).slice(2);
+
+  let html = `<table class="hm-table"><thead><tr>
+    <th class="hm-label-col" rowspan="2">Sub-type</th>
+    ${[0,1,2].filter(p=>spans[p]>0).map(p=>`<th colspan="${spans[p]}" class="hm-phase-header ph${p+1}">${phLabels[p]}</th>`).join('')}
+  </tr><tr>
+    ${months.map(m=>`<th class="hm-month">${MLbl(m)}</th>`).join('')}
+  </tr></thead><tbody>`;
+
+  groups.forEach(g => {
+    html += `<tr class="hm-group-row"><td colspan="${months.length+1}">${g}</td></tr>`;
+    HM_ROWS.filter(r=>r.group===g).forEach(r => {
+      html += `<tr><td class="hm-label-col">${r.label}</td>${counts[r.key].map(c=>
+        `<td class="hm-cell ${hmClass(c)}">${c||''}</td>`
+      ).join('')}</tr>`;
+    });
+  });
+
+  html += `<tr class="hm-total-row">
+    <td class="hm-label-col">Total Interactions</td>
+    ${totals.map(c=>`<td class="hm-cell ${hmClass(c)}">${c||''}</td>`).join('')}
+  </tr></tbody></table>
+  <div class="hm-legend">
+    Intensity:
+    <span class="hm-swatch" style="background:#E6F5F7;border:1px solid #E2E4E6"></span>1
+    <span class="hm-swatch" style="background:#CCEAEE"></span>2
+    <span class="hm-swatch" style="background:#99D5DD"></span>3
+    <span class="hm-swatch" style="background:#0095A9"></span>4+
+  </div>`;
+
+  document.getElementById('heatmap-container').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// SCORECARD — Material Icons for met/partial/unmet
+// ═══════════════════════════════════════════
+function calcMaxGap(ints) {
+  const ts = ints.map(i=>parseDate(i.date).getTime()).sort((a,b)=>a-b);
+  let max=0;
+  for (let i=1;i<ts.length;i++) max=Math.max(max,Math.round((ts[i]-ts[i-1])/864e5));
+  return max;
+}
+
+function renderScorecard(id) {
+  const d = DATA[id];
+  const ints = d.interactions;
+  const phases = getPhases(d.first, ints);
+  const TODAY = new Date(2026,2,24).getTime();
+
+  const inPh = ph => ints.filter(i=>{ const ts=parseDate(i.date).getTime(); return ts>=ph.start&&(ph.end===Infinity?true:ts<ph.end); });
+  const ph1i=inPh(phases[0]), ph2i=inPh(phases[1]), ph3i=inPh(phases[2]);
+  const allRisks=ints.filter(i=>i.type==='Intervention'&&i.risk!==null&&i.risk!=='').map(i=>i.risk);
+  const avg=arr=>arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length):null;
+  const earlyAvg=avg(allRisks.slice(0,5)), recentAvg=avg(allRisks.slice(-5));
+
+  const p1Ints=ph1i.filter(i=>i.type==='Intervention').length;
+  const p1HasRisk=ph1i.some(i=>i.type==='Intervention'&&i.risk!==null&&i.risk!=='');
+  const p1Tools=ph1i.filter(i=>i.type==='Intervention'&&i.tools.length>0).length;
+  const p1MaxGap=calcMaxGap(ph1i); const p1Done=phases[1].start<=TODAY;
+
+  const p2MI=ph2i.filter(i=>i.type==='Intervention'&&i.tools.some(t=>t.includes('MI'))).length;
+  const p2CBS=ph2i.filter(i=>i.type==='Intervention'&&i.tools.some(t=>t.includes('CBS'))).length;
+  const p2SS=ph2i.some(i=>i.type==='Safety Survey');
+  const p2SE=ph2i.some(i=>i.type==='Self Efficacy');
+  const p2Stage6=ph2i.some(i=>i.type==='Phase Session'&&i.tools.some(t=>t.includes('Stage 6')));
+  const p2Risk=earlyAvg!==null&&recentAvg!==null&&recentAvg<earlyAvg;
+  const p2Done=phases[2].start<=TODAY;
+
+  const p3RiskOk=recentAvg!==null&&recentAvg<=10;
+  const p3SafetyOk=d.assessment.safetyYP>=80;
+  const p3SEOk=d.assessment.selfEfficacy>=30;
+  const p3S6Count=ph3i.filter(i=>i.type==='Phase Session'&&i.tools.some(t=>t.includes('Stage 6'))).length;
+  const p3Recent=Math.round((TODAY-parseDate(d.last).getTime())/864e5);
+  const p3Active=phases[2].start<=TODAY;
+
+  const fmtTs=ts=>ts===Infinity?'ongoing':new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+
+  function crBar(met, label, detail, current, target) {
+    const pct=target>0?Math.min((current/target)*100,100):(met?100:0);
+    const fillCol=met?SOG_COLORS.green:current>0?SOG_COLORS.orange:SOG_COLORS.red;
+    const iconCls=met?'met':current>0?'partial':'unmet';
+    const iconName=met?'check_circle':current>0?'pending':'cancel';
+    return `<div class="cr-row">
+      <span class="material-icons-round cr-icon ${iconCls}">${iconName}</span>
+      <div style="flex:1">
+        <div class="cr-lbl">${label}</div>
+        <div class="cr-bar-wrap">
+          <div class="cr-bar-track"><div class="cr-bar-fill" style="width:${pct}%;background:${fillCol}"></div></div>
+          <div class="cr-val">${detail}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+  function crBool(met, label, detail) {
+    const iconCls=met?'met':'unmet';
+    const iconName=met?'check_circle':'cancel';
+    return `<div class="cr-row">
+      <span class="material-icons-round cr-icon ${iconCls}">${iconName}</span>
+      <div>
+        <div class="cr-lbl">${label}</div>
+        <div class="cr-val">${detail}</div>
+      </div>
+    </div>`;
+  }
+
+  const p2EarlyNote = phases[1].label.includes('early')
+    ? `<div style="font-size:11px;color:${SOG_COLORS.orange};font-weight:600;margin-top:3px">⚡ Early exit — Stage 6 triggered</div>` : '';
+  const p1DurDays=Math.round((phases[0].end-phases[0].start)/864e5);
+  const p2DurDays=Math.round((phases[1].end-phases[1].start)/864e5);
+
+  const ph1HTML=`<div class="sc-phase">
+    <div class="sc-head ${p1Done?'complete':'active'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div class="sc-title">Phase 1</div><div class="sc-dates">${fmtTs(phases[0].start)} → ${fmtTs(phases[0].end)}</div></div>
+        <div class="sc-status" style="color:${p1Done?SOG_COLORS.green:SOG_COLORS.orange}">${p1Done?'✓ Complete':'● Active'}</div>
+      </div>
+    </div>
+    <div class="sc-criteria">
+      ${crBar(p1Ints>=3,'Interventions conducted',`${p1Ints} of 3 target`,p1Ints,3)}
+      ${crBool(p1HasRisk,'Risk baseline recorded',p1HasRisk?'Risk score captured':'Not yet recorded')}
+      ${crBar(p1Tools>=1,'Sessions using intervention tools',`${p1Tools} session(s)`,p1Tools,3)}
+      ${crBool(p1MaxGap<=30,'Consistent engagement (gap ≤ 30d)',`Max gap: ${p1MaxGap||0} days`)}
+    </div>
+    <div class="sc-footer">Window: ${p1DurDays} days &nbsp;·&nbsp; ${ph1i.length} total interaction(s)</div>
+  </div>`;
+
+  const ph2HTML=`<div class="sc-phase">
+    <div class="sc-head ${p2Done?'complete':'active'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div class="sc-title">Phase 2</div><div class="sc-dates">${fmtTs(phases[1].start)} → ${fmtTs(phases[1].end)}</div>${p2EarlyNote}</div>
+        <div class="sc-status" style="color:${p2Done?SOG_COLORS.green:SOG_COLORS.orange}">${p2Done?'✓ Complete':'● Active'}</div>
+      </div>
+    </div>
+    <div class="sc-criteria">
+      ${crBar(p2MI>=2,'MI Techniques sessions',`${p2MI} of 2 target`,p2MI,2)}
+      ${crBar(p2CBS>=2,'CBS Techniques sessions',`${p2CBS} of 2 target`,p2CBS,2)}
+      ${crBool(p2Risk,'Risk trend declining',earlyAvg?`${earlyAvg.toFixed(1)} → ${recentAvg.toFixed(1)}`:'Insufficient data')}
+      ${crBool(p2SS,'Safety Survey completed',p2SS?'On record':'Not recorded')}
+      ${crBool(p2SE,'Self Efficacy survey completed',p2SE?'On record':'Not recorded')}
+      ${crBool(p2Stage6,'Stage 6 Phase Session reached',p2Stage6?'⚡ Phase 3 readiness confirmed':'Not yet reached')}
+    </div>
+    <div class="sc-footer">Window: ${p2DurDays} days of max 365 &nbsp;·&nbsp; ${ph2i.length} total interaction(s)</div>
+  </div>`;
+
+  const ph3HTML=`<div class="sc-phase">
+    <div class="sc-head ${p3Active?'active':'upcoming'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div class="sc-title">Phase 3 — Maintenance</div><div class="sc-dates">${fmtTs(phases[2].start)} → ${fmtTs(phases[2].end)}</div></div>
+        <div class="sc-status" style="color:${p3Active?SOG_COLORS.blue:SOG_COLORS.charcoal}">${p3Active?'● Active':'○ Not started'}</div>
+      </div>
+    </div>
+    <div class="sc-criteria">
+      ${crBar(p3RiskOk,'Risk avg (last 5) ≤ 10',recentAvg!==null?`${recentAvg.toFixed(1)} (target ≤ 10)`:'No data',recentAvg!==null?Math.max(0,10-recentAvg):0,10)}
+      ${crBar(p3SafetyOk,'Safety Score YP ≥ 80',`${d.assessment.safetyYP||'—'} / 100`,d.assessment.safetyYP||0,100)}
+      ${crBar(p3SEOk,'Self Efficacy ≥ 30 / 40',`${d.assessment.selfEfficacy||'—'} / 40`,d.assessment.selfEfficacy||0,40)}
+      ${crBar(p3S6Count>=2,'Stage 6 sessions ≥ 2',`${p3S6Count} session(s)`,p3S6Count,2)}
+      ${crBool(p3Recent<=60,'Engagement maintained (≤ 60d)',`Last contact: ${p3Recent} days ago`)}
+    </div>
+    <div class="sc-footer">${p3Active?`${ph3i.length} interaction(s) in Phase 3`:'Phase 3 not yet started'}</div>
+  </div>`;
+
+  document.getElementById('scorecard-container').innerHTML =
+    `<div class="scorecard-grid">${ph1HTML}${ph2HTML}${ph3HTML}</div>`;
+}
+
+// ═══════════════════════════════════════════
+// MASTER RENDER
+// ═══════════════════════════════════════════
+function render(id) {
+  currentId = id;
+  activeTool = null;
+  hiddenTypes.clear();
+  document.getElementById('detail-panel').classList.add('hidden');
+  document.getElementById('tool-drilldown').classList.add('hidden');
+  document.getElementById('mode-bar').classList.add('hidden');
+  if (toolTimeChartInst2) { toolTimeChartInst2.destroy(); toolTimeChartInst2 = null; }
+  updateText(DATA[id]);
+  renderAlerts(DATA[id]);
+  renderTypePills();
+  renderTimeline(id, null);
+  renderRiskChart(DATA[id]);
+  renderToolsChart(DATA[id]);
+  renderSessionBars(DATA[id]);
+  renderScoreCircles(DATA[id]);
+  renderToolRows(DATA[id]);
+  renderTable(DATA[id]);
+  renderEffectivenessChart(id);
+  renderHeatmap(id);
+  renderScorecard(id);
+}
+
+const APRICOT_BASE = 'https://login.apricotsoftware.uk/document/edit/id/';
+function updateApricotLink(id) { document.getElementById('apricot-link').href = APRICOT_BASE + id; }
+
+function selectRecord(id) {
+  document.getElementById('record-select').value = id;
+  updateApricotLink(id);
+  render(id);
+}
+
+// ── Init ──
+// Supabase JS v2 automatically detects magic-link tokens in the URL hash.
+// onAuthStateChange fires SIGNED_IN immediately when a valid hash is present.
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    // Clean up the hash from the URL after a magic-link redirect
+    if (window.location.hash.includes('access_token')) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    hideAuthScreen();
+    if (Object.keys(DATA).length === 0) loadFromSupabase();
+  } else if (event === 'SIGNED_OUT') {
+    showAuthScreen();
+  }
+});
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    hideAuthScreen();
+    loadFromSupabase();
+  } else {
+    showAuthScreen();
+  }
+})();
+</script>
+</body>
+</html>
