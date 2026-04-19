@@ -1157,7 +1157,7 @@ function monthLabel(key) {
 const SUPA_URL = 'https://vsjyvqrjjnpyidovgdnz.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzanl2cXJqam5weWlkb3ZnZG56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTc4MjQsImV4cCI6MjA5MjE5MzgyNH0.4v98dXyFh0OYzzssbk_ew9rU2VVsYJiNXRiIeHL8rzw';
 
-const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const supaClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 function showAuthScreen() {
   document.getElementById('auth-screen').classList.remove('hidden');
@@ -1174,7 +1174,7 @@ async function sendMagicLink() {
   msg.className = 'auth-message';
   if (!email) { msg.textContent = 'Please enter your email address.'; msg.classList.add('error'); return; }
   btn.disabled = true; btn.textContent = 'Sending…';
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await supaClient.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: 'https://sohailraja0407.github.io/streetsofgrowth/YP_Dashboard_SB' }
   });
@@ -1189,12 +1189,12 @@ async function sendMagicLink() {
 }
 
 async function signOut() {
-  await supabase.auth.signOut();
+  await supaClient.auth.signOut();
   showAuthScreen();
 }
 
 async function supaFetch(table, params) {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supaClient.auth.getSession();
   const token = session ? session.access_token : SUPA_KEY;
   const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${params || ''}`, {
     headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
@@ -2401,7 +2401,7 @@ function selectRecord(id) {
 // ── Init ──
 // Supabase JS v2 automatically detects magic-link tokens in the URL hash.
 // onAuthStateChange fires SIGNED_IN immediately when a valid hash is present.
-supabase.auth.onAuthStateChange((event, session) => {
+supaClient.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session) {
     // Clean up the hash from the URL after a magic-link redirect
     if (window.location.hash.includes('access_token')) {
@@ -2415,7 +2415,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 });
 
 (async () => {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supaClient.auth.getSession();
   if (session) {
     hideAuthScreen();
     loadFromSupabase();
