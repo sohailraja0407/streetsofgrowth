@@ -1033,7 +1033,7 @@ async function loadData(){
       }
       if (r.institution)  d.institution[r.institution]   = (d.institution[r.institution]||0) + 1;
       if (r.programme_phase) d.phase_view[r.programme_phase] = (d.phase_view[r.programme_phase]||0) + 1;
-      if (r.stage_of_change)  d.stage_of_change[r.stage_of_change] = (d.stage_of_change[r.stage_of_change]||0) + 1;
+      if (r.current_stage)  d.stage_of_change[r.current_stage] = (d.stage_of_change[r.current_stage]||0) + 1;
       if (r.current_age) {
         const ag = String(r.current_age);
         d.age_single[ag] = (d.age_single[ag]||0) + 1;
