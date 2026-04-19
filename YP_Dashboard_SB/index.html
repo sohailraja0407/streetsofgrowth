@@ -1176,7 +1176,7 @@ async function sendMagicLink() {
   btn.disabled = true; btn.textContent = 'Sending…';
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: 'https://sohailraja0407.github.io/streetsofgrowth/YP_Dasboard_SB' }
+    options: { emailRedirectTo: 'https://sohailraja0407.github.io/streetsofgrowth/YP_Dashboard_SB' }
   });
   if (error) {
     msg.textContent = error.message; msg.classList.add('error');
