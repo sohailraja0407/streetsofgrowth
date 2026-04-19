@@ -1173,6 +1173,10 @@ async function sendMagicLink() {
   const btn   = document.getElementById('auth-send-btn');
   msg.className = 'auth-message';
   if (!email) { msg.textContent = 'Please enter your email address.'; msg.classList.add('error'); return; }
+  if (!email.toLowerCase().endsWith('@streetsofgrowth.org')) {
+    msg.textContent = 'Access is restricted to @streetsofgrowth.org email addresses.';
+    msg.classList.add('error'); return;
+  }
   btn.disabled = true; btn.textContent = 'Sending…';
   const { error } = await supaClient.auth.signInWithOtp({
     email,
