@@ -328,6 +328,7 @@ canvas{max-width:100%}
   <div class="nav-tab" aria-current="false" onclick="switchTab('detailed')">Detailed View</div>
   <div class="nav-tab" aria-current="false" onclick="switchTab('lookup')">YP Lookup</div>
   <div class="nav-tab" aria-current="false" onclick="switchTab('referrals')">Referrals &amp; Risk</div>
+  <div class="nav-tab" aria-current="false" onclick="switchTab('outcomes')">Outcomes</div>
 </nav>
 
 <div class="controls">
@@ -372,6 +373,7 @@ canvas{max-width:100%}
   </div>
 </div>
 <div id="panel-referrals" class="panel"><div class="main" id="referralMain"></div></div>
+<div id="panel-outcomes"  class="panel"><div class="main" id="outcomesMain"></div></div>
 </div><!-- /main-content -->
 
 <!-- PROFILE OVERLAY -->
@@ -472,7 +474,7 @@ function barChart(id,labels,data,color){
 
 function switchTab(tab){
   curTab=tab;
-  ['overview','demographics','detailed','lookup','referrals'].forEach((t,i)=>{
+  ['overview','demographics','detailed','lookup','referrals','outcomes'].forEach((t,i)=>{
     const navTab=document.querySelectorAll('.nav-tab')[i];
     navTab.classList.toggle('active',t===tab);
     navTab.setAttribute('aria-current',t===tab?'page':'false');
@@ -498,6 +500,7 @@ function renderTab(){
   else if(curTab==='demographics')renderDemographics();
   else if(curTab==='detailed')renderDetailed();
   else if(curTab==='referrals')renderReferrals();
+  else if(curTab==='outcomes')renderOutcomes();
   else renderLookupTable();
 }
 
@@ -800,6 +803,222 @@ function renderReferrals(){
   }
 }
 
+// ── OUTCOMES TAB ──────────────────────────────────────────────────────────────
+//
+// NGSE bands (SoG-defined thresholds — not normative academic norms):
+//   Developing 8–19  |  Building 20–27  |  Established 28–34  |  Strong 35–40
+// Safety max score: 115 (23 items × 5). Deviation threshold: ±11.5 (10%).
+// ERQ composite = CRS + ES (provisional; subject to review).
+//
+function renderOutcomes(){
+  const el = document.getElementById('outcomesMain');
+
+  // Filter all survey data to current FY
+  const fy       = curFY;
+  const overview = (DATA.surveyOverview || []).filter(r => r.financial_year === fy);
+  const ngse     = (DATA.ngseLong       || []).filter(r => r.financial_year === fy);
+  const erq      = (DATA.erqLong        || []).filter(r => r.financial_year === fy);
+  const dev      = (DATA.safetyDev      || []).filter(r => r.financial_year === fy);
+  const activeCount = (DATA.surveyOverview || []).find(r => r.financial_year === fy)?.active_count
+                   || (DATA.surveyOverview || [])[0]?.active_count || '—';
+
+  const FORM_LABELS = {
+    'ngse':               'NGSE — Self-Efficacy',
+    'erq':                'ERQ — Emotional Regulation',
+    'safety_score':       'Sites of Safety (YP)',
+    'safety_score_coach': 'Sites of Safety (Coach)',
+  };
+
+  // ── Completion KPI cards ──
+  const completionCards = ['ngse','erq','safety_score','safety_score_coach'].map(ft => {
+    const row   = overview.find(r => r.form_type === ft) || {};
+    const pct   = row.pct_completed != null ? parseFloat(row.pct_completed).toFixed(1) : '—';
+    const n     = row.yp_completed  || 0;
+    const total = row.total_submissions || 0;
+    const last  = row.last_submission_date
+      ? new Date(row.last_submission_date + 'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})
+      : '—';
+    return `
+      <div class="card" style="min-width:180px;flex:1">
+        <div class="ct">${FORM_LABELS[ft]||ft}</div>
+        <div style="font-size:28px;font-weight:700;color:var(--sog-purple);margin:8px 0">${pct}%</div>
+        <div style="font-size:12px;color:var(--sog-charcoal)">${n} YP completed &nbsp;|&nbsp; ${total} submissions</div>
+        <div style="font-size:11px;color:var(--charcoal-40);margin-top:4px">Last submitted: ${last}</div>
+      </div>`;
+  }).join('');
+
+  // ── Average score KPI cards ──
+  const avgCards = ['ngse','erq','safety_score','safety_score_coach'].map(ft => {
+    const row = overview.find(r => r.form_type === ft) || {};
+    let detail = '';
+    if (ft === 'ngse') {
+      const avg = row.avg_total_score != null ? parseFloat(row.avg_total_score).toFixed(1) : '—';
+      detail = `<div style="font-size:24px;font-weight:700;color:var(--sog-blue);margin:8px 0">${avg} <span style="font-size:13px;font-weight:400;color:var(--charcoal-40)">/ 40</span></div>
+        <div style="font-size:11px;color:var(--charcoal-40)">Avg NGSE score (range 8–40)</div>`;
+    } else if (ft === 'erq') {
+      const crs = row.avg_crs_score != null ? parseFloat(row.avg_crs_score).toFixed(1) : '—';
+      const es  = row.avg_es_score  != null ? parseFloat(row.avg_es_score).toFixed(1)  : '—';
+      detail = `<div style="font-size:16px;font-weight:700;color:var(--sog-blue);margin:8px 0">CRS ${crs}<span style="font-size:11px;font-weight:400;color:var(--charcoal-40)">/42</span> &nbsp; ES ${es}<span style="font-size:11px;font-weight:400;color:var(--charcoal-40)">/28</span></div>
+        <div style="font-size:11px;color:var(--charcoal-40)">Avg CRS (reappraisal) &amp; ES (suppression)</div>`;
+    } else if (ft === 'safety_score' || ft === 'safety_score_coach') {
+      const avg = row.avg_total_score != null ? parseFloat(row.avg_total_score).toFixed(1) : '—';
+      const s1  = row.avg_s1 != null ? parseFloat(row.avg_s1).toFixed(1) : '—';
+      const s2  = row.avg_s2 != null ? parseFloat(row.avg_s2).toFixed(1) : '—';
+      const s3  = row.avg_s3 != null ? parseFloat(row.avg_s3).toFixed(1) : '—';
+      const s4  = row.avg_s4 != null ? parseFloat(row.avg_s4).toFixed(1) : '—';
+      detail = `<div style="font-size:24px;font-weight:700;color:var(--sog-blue);margin:8px 0">${avg} <span style="font-size:13px;font-weight:400;color:var(--charcoal-40)">/ 115</span></div>
+        <div style="font-size:11px;color:var(--charcoal-40)">S1 ${s1}/35 &nbsp; S2 ${s2}/35 &nbsp; S3 ${s3}/25 &nbsp; S4 ${s4}/20</div>`;
+    }
+    return `<div class="card" style="min-width:180px;flex:1"><div class="ct">${FORM_LABELS[ft]||ft} — Avg Score</div>${detail}</div>`;
+  }).join('');
+
+  // ── NGSE band distribution (FY filtered) ──
+  const BANDS = ['Developing','Building','Established','Strong'];
+  const BAND_COLOURS = {'Developing':'#e57373','Building':'#FFB74D','Established':'#4197CB','Strong':'#00AF9A'};
+  const bandCounts = {};
+  BANDS.forEach(b => bandCounts[b] = 0);
+  ngse.forEach(r => { if(r.ngse_band && bandCounts[r.ngse_band] !== undefined) bandCounts[r.ngse_band]++; });
+  const bandTotal = Object.values(bandCounts).reduce((a,b)=>a+b,0);
+  const bandBars = BANDS.map(b => {
+    const pct = bandTotal ? Math.round(bandCounts[b]/bandTotal*100) : 0;
+    return `<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+        <span>${b}</span><span style="color:var(--charcoal-40)">${bandCounts[b]} (${pct}%)</span>
+      </div>
+      <div style="background:#eee;border-radius:4px;height:10px">
+        <div style="width:${pct}%;background:${BAND_COLOURS[b]};height:10px;border-radius:4px;transition:width 0.4s"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── NGSE table — Record ID only, no names ──
+  const latestNgse = {};
+  ngse.forEach(r => {
+    if (!latestNgse[r.yp_id] || r.survey_date > latestNgse[r.yp_id].survey_date)
+      latestNgse[r.yp_id] = r;
+  });
+  const ngseRows = Object.values(latestNgse).sort((a,b)=>a.yp_id-b.yp_id);
+  const ngseTable = ngseRows.length ? dtable(
+    [{l:'Record ID'},{l:'Latest Score',r:true},{l:'Band'},{l:'Δ from prev',r:true},{l:'Submissions',r:true}],
+    ngseRows.map(r => [
+      String(r.yp_id),
+      r.ngse_score,
+      `<span style="color:${BAND_COLOURS[r.ngse_band]||'#999'};font-weight:600">${r.ngse_band}</span>`,
+      r.score_delta != null && r.submission_number > 1 ? (r.score_delta > 0 ? '+'+r.score_delta : r.score_delta) : '—',
+      r.submission_number,
+    ]),
+    ['Total YPs', ngseRows.length, '', '', '']
+  ) : nodata('No NGSE data for ' + fy);
+
+  // ── Safety deviation table — Record ID only ──
+  const devRows = dev.filter(r => r.significant_divergence);
+  const devTable = devRows.length ? dtable(
+    [{l:'Record ID'},{l:'YP Score',r:true},{l:'Coach Score',r:true},{l:'Deviation',r:true},{l:'Days Apart',r:true},{l:'Phase'},{l:'Date'}],
+    devRows.map(r => [
+      String(r.yp_id),
+      r.yp_total,
+      r.coach_total,
+      `<span style="color:#e57373;font-weight:600">${r.deviation > 0 ? '+' : ''}${r.deviation}</span>`,
+      Math.round(r.days_apart),
+      r.programme_phase || '—',
+      new Date(r.yp_submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    ]),
+    null
+  ) : `<div style="padding:12px;font-size:12px;color:var(--sog-green)">✓ No significant divergences for ${fy} — all matched pairs within ±11.5 points</div>`;
+
+  // ── ERQ table — Record ID only ──
+  const latestErq = {};
+  (DATA.erqLong||[]).filter(r=>r.financial_year===fy).forEach(r => {
+    if (!latestErq[r.yp_id] || r.survey_date > latestErq[r.yp_id].survey_date)
+      latestErq[r.yp_id] = r;
+  });
+  const erqRows = Object.values(latestErq).sort((a,b)=>a.yp_id-b.yp_id);
+  const erqTable = erqRows.length ? dtable(
+    [{l:'Record ID'},{l:'CRS Score',r:true},{l:'CRS Avg',r:true},{l:'ES Score',r:true},{l:'ES Avg',r:true},{l:'Composite',r:true}],
+    erqRows.map(r => [
+      String(r.yp_id),
+      r.crs_score, parseFloat(r.crs_avg).toFixed(2),
+      r.es_score,  parseFloat(r.es_avg).toFixed(2),
+      r.composite_score,
+    ]),
+    ['Total YPs', erqRows.length, '', '', '', '']
+  ) : nodata('No ERQ data for ' + fy);
+
+  // ── Placeholder programme-level benchmarks ──
+  const placeholder = `
+    <div style="border:2px dashed var(--sog-teal);border-radius:8px;padding:20px;background:#f0fafb;margin-bottom:24px">
+      <div style="font-size:12px;font-weight:700;color:var(--sog-teal);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">
+        Programme-Level Benchmarks — Placeholder
+      </div>
+      <div style="font-size:12px;color:var(--sog-charcoal);line-height:1.7">
+        These cards will show cohort and programme averages once sufficient data is available
+        (recommended minimum: 20+ YPs with 2+ survey submissions each).
+        <br><br>
+        <strong>Example — NGSE average trajectory:</strong> Entry avg 24.1 → Mid avg 27.8 → Exit avg 31.4 (+7.3 pts, +30%)
+        <br>
+        <strong>Example — Safety score (YP) entry avg:</strong> 71.2 / 115 &nbsp;|&nbsp; Exit avg: 88.4 / 115 (+24%)
+        <br>
+        <strong>Example — YP / Coach alignment:</strong> 84% of pairs within ±11.5 pt threshold
+      </div>
+    </div>`;
+
+  el.innerHTML = `
+    <div style="padding:0 0 40px">
+
+      <div class="sh" style="margin-bottom:4px">Outcomes &amp; Benchmarks — ${fy}</div>
+      <div style="font-size:12px;color:var(--charcoal-40);margin-bottom:20px">
+        Survey completion rates across all active YPs (${activeCount} active in ${fy}).
+        NGSE bands are SoG-defined thresholds, not normative academic norms. Record IDs shown — no YP names displayed.
+      </div>
+
+      <div style="font-size:11px;font-weight:700;color:var(--sog-charcoal);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Completion</div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:24px">
+        ${completionCards}
+      </div>
+
+      <div style="font-size:11px;font-weight:700;color:var(--sog-charcoal);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Average Scores</div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:32px">
+        ${avgCards}
+      </div>
+
+      ${placeholder}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px">
+
+        <div class="card">
+          <div class="ct">NGSE — Self-Efficacy Band Distribution</div>
+          <div style="font-size:11px;color:var(--charcoal-40);margin-bottom:12px">
+            Developing 8–19 &nbsp;|&nbsp; Building 20–27 &nbsp;|&nbsp; Established 28–34 &nbsp;|&nbsp; Strong 35–40
+          </div>
+          ${bandTotal ? bandBars : nodata('No NGSE data for ' + fy)}
+        </div>
+
+        <div class="card">
+          <div class="ct">Sites of Safety — Significant Divergences (YP vs Coach &gt;±11.5 pts)</div>
+          <div style="font-size:11px;color:var(--charcoal-40);margin-bottom:12px">
+            Matched pairs within 10 days &nbsp;|&nbsp; Threshold = 10% of max score (115 pts)
+          </div>
+          ${devTable}
+        </div>
+
+      </div>
+
+      <div class="card" style="margin-bottom:24px">
+        <div class="ct">NGSE — Latest Score per Record ID</div>
+        ${ngseTable}
+      </div>
+
+      <div class="card">
+        <div class="ct">ERQ — Latest Scores per Record ID (Cognitive Reappraisal &amp; Expressive Suppression)</div>
+        <div style="font-size:11px;color:var(--charcoal-40);margin-bottom:12px">
+          CRS range 6–42 (items 1,3,5,7,8,10) &nbsp;|&nbsp; ES range 4–28 (items 2,4,6,9) &nbsp;|&nbsp; Composite = CRS + ES (provisional)
+        </div>
+        ${erqTable}
+      </div>
+
+    </div>`;
+}
+
 function renderLookupTable(){applyLookupFilters();}
 
 function applyLookupFilters(){
@@ -1021,7 +1240,8 @@ function countBy(rows, key){
 async function loadData(){
   const VALID_FY = /^20\d{2}\/\d{2}$/;
   const [
-    kpisRes, sessionTypeRes, intRes, toolRes, grpRes, phRes, demoRes, ypRes, refDetailsRes
+    kpisRes, sessionTypeRes, intRes, toolRes, grpRes, phRes, demoRes, ypRes, refDetailsRes,
+    surveyOverviewRes, ngseLongRes, erqLongRes, safetyLongRes, safetyDevRes
   ] = await Promise.all([
     _sb.from('vw_fy_kpis').select('*').order('financial_year'),
     _sb.from('vw_fy_session_type_summary').select('*'),
@@ -1032,9 +1252,15 @@ async function loadData(){
     _sb.from('vw_demographics_by_fy').select('*').limit(5000),
     _sb.from('vw_yp_records').select('*').limit(2000),
     _sb.from('vw_referral_details').select('*').limit(2000),
+    _sb.from('vw_survey_completion_overview').select('*'),
+    _sb.from('vw_ngse_longitudinal').select('*').limit(2000),
+    _sb.from('vw_erq_longitudinal').select('*').limit(2000),
+    _sb.from('vw_safety_longitudinal').select('*').limit(2000),
+    _sb.from('vw_safety_deviation').select('*').limit(2000),
   ]);
 
-  for (const r of [kpisRes,sessionTypeRes,intRes,toolRes,grpRes,phRes,demoRes,ypRes,refDetailsRes]){
+  for (const r of [kpisRes,sessionTypeRes,intRes,toolRes,grpRes,phRes,demoRes,ypRes,refDetailsRes,
+                   surveyOverviewRes,ngseLongRes,erqLongRes,safetyLongRes,safetyDevRes]){
     if (r.error) throw new Error(r.error.message);
   }
 
@@ -1234,7 +1460,15 @@ async function loadData(){
     pm:      r.pm     || [],
   }));
 
-  return { fiscal_years, by_fy, yp, referrals: refDetailsRes.data || [] };
+  return {
+    fiscal_years, by_fy, yp,
+    referrals:       refDetailsRes.data      || [],
+    surveyOverview:  surveyOverviewRes.data   || [],
+    ngseLong:        ngseLongRes.data         || [],
+    erqLong:         erqLongRes.data          || [],
+    safetyLong:      safetyLongRes.data       || [],
+    safetyDev:       safetyDevRes.data        || [],
+  };
 }
 
 // ── BOOTSTRAP ─────────────────────────────────────────────────────────────
