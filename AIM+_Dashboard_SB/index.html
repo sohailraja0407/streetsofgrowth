@@ -327,6 +327,7 @@ canvas{max-width:100%}
   <div class="nav-tab" aria-current="false" onclick="switchTab('demographics')">Demographics</div>
   <div class="nav-tab" aria-current="false" onclick="switchTab('detailed')">Detailed View</div>
   <div class="nav-tab" aria-current="false" onclick="switchTab('lookup')">YP Lookup</div>
+  <div class="nav-tab" aria-current="false" onclick="switchTab('referrals')">Referrals &amp; Risk</div>
 </nav>
 
 <div class="controls">
@@ -370,6 +371,7 @@ canvas{max-width:100%}
     </div>
   </div>
 </div>
+<div id="panel-referrals" class="panel"><div class="main" id="referralMain"></div></div>
 </div><!-- /main-content -->
 
 <!-- PROFILE OVERLAY -->
@@ -470,7 +472,7 @@ function barChart(id,labels,data,color){
 
 function switchTab(tab){
   curTab=tab;
-  ['overview','demographics','detailed','lookup'].forEach((t,i)=>{
+  ['overview','demographics','detailed','lookup','referrals'].forEach((t,i)=>{
     const navTab=document.querySelectorAll('.nav-tab')[i];
     navTab.classList.toggle('active',t===tab);
     navTab.setAttribute('aria-current',t===tab?'page':'false');
@@ -495,6 +497,7 @@ function renderTab(){
   if(curTab==='overview')renderOverview();
   else if(curTab==='demographics')renderDemographics();
   else if(curTab==='detailed')renderDetailed();
+  else if(curTab==='referrals')renderReferrals();
   else renderLookupTable();
 }
 
@@ -651,6 +654,149 @@ function renderDetailed(){
   if(grpEntries.length){
     const leg=doughnutChart('grpChart',grpEntries,grpTotal);
     document.getElementById('grpLegend').innerHTML=leg;
+  }
+}
+
+function renderReferrals(){
+  const rows = DATA.referrals.filter(r => r.financial_year === curFY);
+  const el   = document.getElementById('referralMain');
+  if(!rows.length){ el.innerHTML=`<div style="padding:40px;text-align:center;color:var(--charcoal-40);font-size:13px">No referral data for ${curFY}</div>`; return; }
+
+  // ── KPIs ──
+  const total    = rows.length;
+  const withInt  = rows.filter(r=>r.has_interaction).length;
+  const noInt    = total - withInt;
+  const eligMet  = rows.filter(r=>r.eligibility_met===true).length;
+  const eligNot  = rows.filter(r=>r.eligibility_met===false).length;
+  const lastRef  = rows.map(r=>r.referral_date).sort().pop();
+  const fmtDate  = s=>s?new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'—';
+
+  // ── Risk breakdown ──
+  const RISK_FIELDS = [
+    {f:'criminal_exploitation_risk',  l:'Criminal Exploitation Eligibility'},
+    {f:'violence_outside_home_risk',  l:'Violence outside the home'},
+    {f:'grooming_risk',               l:'Grooming'},
+    {f:'gang_involvement_risk',       l:'Gang Involvement / Activity'},
+    {f:'weapon_carrying_risk',        l:'Weapon Carrying'},
+    {f:'drug_dealing_risk',           l:'Drug Dealing'},
+    {f:'sexual_exploitation_risk',    l:'Sexual Exploitation'},
+    {f:'county_lines_risk',           l:'County Lines'},
+    {f:'harmful_sexual_behaviour_risk',l:'Harmful Sexual Behaviour'},
+    {f:'sexual_violence_risk',        l:'Sexual Violence'},
+    {f:'modern_slavery_risk',         l:'Modern Slavery / Trafficking'},
+  ];
+  const riskGrp = v => {
+    if(!v) return null;
+    const lv=v.toLowerCase().trim();
+    if(lv==='group a') return 'A';
+    if(lv==='group b') return 'B';
+    return null;
+  };
+  const riskRows = RISK_FIELDS.map(({f,l})=>{
+    let a=0,b=0;
+    rows.forEach(r=>{ const g=riskGrp(r[f]); if(g==='A')a++; else if(g==='B')b++; });
+    return {l,a,b,tot:a+b};
+  }).filter(r=>r.tot>0).sort((x,y)=>y.tot-x.tot);
+  const riskTotA=riskRows.reduce((s,r)=>s+r.a,0);
+  const riskTotB=riskRows.reduce((s,r)=>s+r.b,0);
+
+  // ── Breakdown helpers ──
+  const countField = fn => {
+    const out={};
+    rows.forEach(r=>{ const v=fn(r); if(v!=null&&v!=='') out[v]=(out[v]||0)+1; });
+    return out;
+  };
+  const countMulti = field => {
+    const out={};
+    rows.forEach(r=>{ const val=r[field]; if(!val) return;
+      String(val).split('|').forEach(v=>{ v=v.trim(); if(v) out[v]=(out[v]||0)+1; }); });
+    return out;
+  };
+
+  const orgCounts    = countField(r=>r.referring_organisation);
+  const nrmCounts    = countField(r=>r.nrm_referral);
+  const ehcpCounts   = countField(r=>r.ehcp_in_place);
+  const carerCounts  = countField(r=>r.is_young_carer===true?'Yes':r.is_young_carer===false?'No':null);
+  const mhCounts     = countField(r=>r.mental_health_support);
+  const eetCounts    = countField(r=>r.eet_status);
+  const scCounts     = countMulti('social_care_status');
+  const knownCounts  = countMulti('known_to_social_care');
+  const phaseCounts  = countField(r=>r.programme_phase);
+  const stageCounts  = countField(r=>r.current_stage);
+  const genderCounts = countField(r=>r.gender);
+  const ethnCounts   = countField(r=>r.ethnicity);
+  const ageBandCounts= {};
+  rows.forEach(r=>{ if(r.age_at_referral){ const b=ageBand(r.age_at_referral); if(b) ageBandCounts[b]=(ageBandCounts[b]||0)+1; }});
+
+  const riskTableHTML = riskRows.length
+    ? dtable(
+        [{l:'Risk Category'},{l:'Grp A',r:true},{l:'Grp B',r:true},{l:'Total',r:true}],
+        riskRows.map(r=>[r.l,r.a,r.b,r.tot]),
+        ['Total',riskTotA,riskTotB,riskTotA+riskTotB]
+      )
+    : nodata('No risk data this FY');
+
+  const hasAny = obj => Object.keys(obj).length > 0;
+
+  el.innerHTML = `
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi">
+        <div class="kpi-lbl">Total Referrals</div><div class="kpi-val">${total}</div><div class="kpi-sub">${curFY}</div>
+        <div class="kpi-split">
+          <div><div class="ksv">${eligMet}</div><div class="ksl">Eligibility met</div></div>
+          <div><div class="ksv">${eligNot}</div><div class="ksl">Not met</div></div>
+        </div>
+      </div>
+      <div class="kpi tl"><div class="kpi-lbl">With Interaction</div><div class="kpi-val">${withInt}</div><div class="kpi-sub">referred YPs engaged</div></div>
+      <div class="kpi am"><div class="kpi-lbl">No Interaction</div><div class="kpi-val">${noInt}</div><div class="kpi-sub">referred but not yet engaged</div></div>
+      <div class="kpi" style="border-top-color:var(--sog-green)"><div class="kpi-lbl">Last Referral</div><div class="kpi-val" style="font-size:20px;line-height:1.3;margin-top:4px">${fmtDate(lastRef)}</div></div>
+    </div>
+
+    <div class="sh"><h2>Risk Factors</h2></div>
+    <div class="r2">
+      <div class="card">
+        <div class="ct">Risk by Category — Group A (Evidenced / Confirmed) &amp; Group B (Suspected / Vulnerable)</div>
+        ${riskTableHTML}
+      </div>
+      <div></div>
+    </div>
+
+    <div class="sh"><h2>Referral Details</h2></div>
+    <div class="r3">
+      <div class="card"><div class="ct">Referring Organisation</div>${barList(orgCounts,SOG.purple)}</div>
+      <div class="card"><div class="ct">NRM Referral</div>${hasAny(nrmCounts)?barList(nrmCounts,SOG.teal):nodata('Requires data refresh')}</div>
+      <div class="card"><div class="ct">Young Carer</div>${barList(carerCounts,SOG.gblue)}</div>
+    </div>
+    <div class="r3">
+      <div class="card"><div class="ct">EHCP in Place</div>${hasAny(ehcpCounts)?barList(ehcpCounts,SOG.green):nodata('Requires data refresh')}</div>
+      <div class="card"><div class="ct">Mental Health Support</div>${barList(mhCounts,SOG.teal)}</div>
+      <div class="card"><div class="ct">EET Status</div>${hasAny(eetCounts)?barList(eetCounts,SOG.purple):nodata('Requires data refresh')}</div>
+    </div>
+
+    <div class="sh"><h2>Social Care</h2></div>
+    <div class="r2">
+      <div class="card"><div class="ct">Social Care Status</div>${hasAny(scCounts)?barList(scCounts,SOG.purple):nodata('Requires data refresh')}</div>
+      <div class="card"><div class="ct">Known To</div>${hasAny(knownCounts)?barList(knownCounts,SOG.teal):nodata('Requires data refresh')}</div>
+    </div>
+
+    <div class="sh"><h2>Phase &amp; Stage (current)</h2></div>
+    <div class="r2">
+      <div class="card"><div class="ct">Phase View</div>${pillList(phaseCounts,PC)}</div>
+      <div class="card"><div class="ct">Stage of Change</div>${pillList(stageCounts,PC)}</div>
+    </div>
+
+    <div class="sh"><h2>Demographics</h2></div>
+    <div class="r3">
+      <div class="card"><div class="ct">Gender</div><div style="position:relative;height:130px;margin-bottom:8px"><canvas id="refGc" role="img" aria-label="Gender"></canvas></div><div id="refGl"></div></div>
+      <div class="card"><div class="ct">Age at Referral</div>${barList(ageBandCounts,SOG.purple)}</div>
+      <div class="card"><div class="ct">Ethnicity</div>${barList(ethnCounts,SOG.teal)}</div>
+    </div>`;
+
+  // Gender doughnut
+  const gEntries=Object.entries(genderCounts).filter(([,v])=>v>0);
+  if(gEntries.length){
+    const gTot=gEntries.reduce((s,[,v])=>s+v,0);
+    document.getElementById('refGl').innerHTML=doughnutChart('refGc',gEntries,gTot);
   }
 }
 
@@ -875,7 +1021,7 @@ function countBy(rows, key){
 async function loadData(){
   const VALID_FY = /^20\d{2}\/\d{2}$/;
   const [
-    kpisRes, sessionTypeRes, intRes, toolRes, grpRes, phRes, demoRes, ypRes
+    kpisRes, sessionTypeRes, intRes, toolRes, grpRes, phRes, demoRes, ypRes, refDetailsRes
   ] = await Promise.all([
     _sb.from('vw_fy_kpis').select('*').order('financial_year'),
     _sb.from('vw_fy_session_type_summary').select('*'),
@@ -885,9 +1031,10 @@ async function loadData(){
     _sb.from('vw_phase_stage_breakdown').select('*'),
     _sb.from('vw_demographics_by_fy').select('*').limit(5000),
     _sb.from('vw_yp_records').select('*').limit(2000),
+    _sb.from('vw_referral_details').select('*').limit(2000),
   ]);
 
-  for (const r of [kpisRes,sessionTypeRes,intRes,toolRes,grpRes,phRes,demoRes,ypRes]){
+  for (const r of [kpisRes,sessionTypeRes,intRes,toolRes,grpRes,phRes,demoRes,ypRes,refDetailsRes]){
     if (r.error) throw new Error(r.error.message);
   }
 
@@ -1087,7 +1234,7 @@ async function loadData(){
     pm:      r.pm     || [],
   }));
 
-  return { fiscal_years, by_fy, yp };
+  return { fiscal_years, by_fy, yp, referrals: refDetailsRes.data || [] };
 }
 
 // ── BOOTSTRAP ─────────────────────────────────────────────────────────────
