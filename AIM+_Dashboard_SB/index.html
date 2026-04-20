@@ -428,14 +428,14 @@ const dc=id=>{if(charts[id]){charts[id].destroy();delete charts[id];}};
 const nodata=msg=>`<p style="font-size:12px;color:var(--charcoal-40);padding:4px 0">${msg||'No data'}</p>`;
 
 function barList(data,color,limit=10){
-  const e=Object.entries(data).filter(([,v])=>v>0).slice(0,limit);
+  const e=Object.entries(data).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,limit);
   if(!e.length)return nodata();
   const mx=Math.max(...e.map(x=>x[1]));
   return '<div class="bl">'+e.map(([k,v])=>`<div class="br"><div class="bm"><span class="bn" title="${k}">${k}</span><span class="bc">${fmt(v)}</span></div><div class="bt"><div class="bf" style="width:${Math.round(v/mx*100)}%;background:${color}"></div></div></div>`).join('')+'</div>';
 }
 
 function pillList(data,cols){
-  const e=Object.entries(data).filter(([,v])=>v>0);
+  const e=Object.entries(data).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
   if(!e.length)return nodata();
   return '<div class="pl">'+e.map(([k,v],i)=>`<div class="pr-row"><span class="pla" title="${k}">${k}</span><span class="pv" style="background:${cols[i%cols.length]}">${v}</span></div>`).join('')+'</div>';
 }
@@ -511,7 +511,7 @@ function renderOverview(){
     </div>
     <div class="sh"><h2>Interaction Types &amp; Duration</h2></div>
     <div class="r3">
-      <div class="card"><div class="ct">No of YP by Type</div>${dtable([{l:'Type'},{l:'YP',r:true}],Object.entries(d.yp_by_type).map(([k,v])=>[k,v]),['Total',Object.values(d.yp_by_type).reduce((a,b)=>a+b,0)])}</div>
+      <div class="card"><div class="ct">No of YP by Type</div>${dtable([{l:'Type'},{l:'YP',r:true}],Object.entries(d.yp_by_type).map(([k,v])=>[k,v]),['Total',d.active_yp])}</div>
       <div class="card"><div class="ct">No of Interactions</div>${dtable([{l:'Type'},{l:'Interactions',r:true}],Object.entries(d.interactions_by_type).map(([k,v])=>[k,v]),['Total',ti])}</div>
       <div class="card"><div class="ct">Duration by Type</div>${dtable([{l:'Type'},{l:'Mins',r:true},{l:'Hrs',r:true}],Object.entries(d.duration_by_type).map(([k,v])=>[k,v.mins,v.hrs]),['Total',d.total_mins,d.total_hrs])}</div>
     </div>
@@ -581,7 +581,8 @@ function renderDetailed(){
     const prev=i>0?d.phase_stages[i-1].no_sessions:null;
     const drop=prev?Math.round((1-r.no_sessions/prev)*100):null;
     return `<div class="funnel-row">
-      <div class="funnel-bar" style="width:${Math.max(pct,12)}%">${r.stage}</div>
+      <div style="font-size:11px;font-weight:700;color:var(--sog-charcoal);margin-bottom:2px;padding-left:2px">${r.stage}</div>
+      <div class="funnel-bar" style="width:${Math.max(pct,12)}%"></div>
       <div class="funnel-meta">
         <span><strong>${fmt(r.no_sessions)}</strong> sessions &nbsp;·&nbsp; <strong>${fmt(r.no_yp)}</strong> YP</span>
         ${drop!==null?`<span class="funnel-drop">↓ ${drop}% drop from prev stage</span>`:''}
@@ -604,14 +605,14 @@ function renderDetailed(){
         :nodata()}
       </div>
       <div class="card">
-        <div class="ct">Tools / Techniques</div>
+        <div class="ct">Tools &amp; Techniques</div>
         ${toolEntries.length?`<div class="chart-companion">
           <div>
             <div class="companion-chart"><canvas id="toolChart" role="img" aria-label="Tool usage volume"></canvas></div>
           </div>
           <div class="companion-legend" id="toolLegend"></div>
         </div>
-        <div style="margin-top:14px">${dtable([{l:'Tool / Technique'},{l:'Uses',r:true},{l:'YP',r:true}],d.tools.map(r=>[r.name,r.tool_no,r.no_of_yp]),['Total',d.tool_totals.tool_no,d.tool_totals.no_of_yp])}</div>`
+        <div style="margin-top:14px">${dtable([{l:'Tools &amp; Techniques'},{l:'Uses',r:true},{l:'YP',r:true}],d.tools.map(r=>[r.name,r.tool_no,r.no_of_yp]),['Total',d.tool_totals.tool_no,d.tool_totals.no_of_yp])}</div>`
         :nodata()}
       </div>
     </div>
@@ -634,7 +635,7 @@ function renderDetailed(){
         <div class="funnel-wrap">${funnelHTML}</div>
       </div>
       <div class="card"><div class="ct">Phase Stage Session Codes</div>
-        ${d.phase_stage_codes.length?dtable([{l:'Stage'},{l:'Session Code'},{l:'Sessions',r:true}],d.phase_stage_codes.map(r=>[`<span class="${STAGE_SC[r.stage]||'badge badge-phase1'}">${r.stage}</span>`,r.session_code,r.no_sessions]),['Total','',d.phase_stage_codes.reduce((a,r)=>a+r.no_sessions,0)]):nodata('No phase session codes this FY')}
+        ${d.phase_stage_codes.length?dtable([{l:'Stage'},{l:'Session Code'},{l:'Attendees',r:true}],d.phase_stage_codes.map(r=>[`<span class="${STAGE_SC[r.stage]||'badge badge-phase1'}">${r.stage}</span>`,r.session_code,r.attendance_count]),['YP Attended','',d.yp_by_type['Phase Session']||0]):nodata('No phase session codes this FY')}
       </div>
     </div>`;
 
@@ -909,7 +910,7 @@ async function loadData(){
     by_fy[row.financial_year] = {
       active_yp:  row.active_yp,
       new_yp:     row.new_yp,
-      multi_yp:   row.multi_year_yp,
+      multi_yp:   row.active_yp - row.new_yp,
       total_mins: row.total_mins || 0,
       total_hrs:  parseFloat(row.total_hrs) || 0,
       yp_by_type:           { Intervention:0, 'Group Session':0, 'Phase Session':0, Outreach:0 },
@@ -950,7 +951,7 @@ async function loadData(){
     by_fy[fy].interventions = rows;
     by_fy[fy].inv_totals = {
       total_no: rows.reduce((a,r) => a + r.total_no, 0),
-      no_of_yp: Math.max(...rows.map(r => r.no_of_yp))
+      no_of_yp: 0  // set below after yp_by_type is populated
     };
   });
 
@@ -958,14 +959,14 @@ async function loadData(){
   const toolByFY = {};
   toolData.forEach(r => {
     if (!toolByFY[r.financial_year]) toolByFY[r.financial_year] = [];
-    toolByFY[r.financial_year].push({ name: r.tool_name, tool_no: r.tool_no, no_of_yp: r.no_of_yp });
+    toolByFY[r.financial_year].push({ name: r.tool_name, tool_no: r.tool_no, no_of_yp: r.no_of_yp, fy_tool_yp_total: r.fy_tool_yp_total });
   });
   Object.entries(toolByFY).forEach(([fy, rows]) => {
     if (!by_fy[fy]) return;
     by_fy[fy].tools = rows;
     by_fy[fy].tool_totals = {
       tool_no: rows.reduce((a,r) => a + r.tool_no, 0),
-      no_of_yp: Math.max(...rows.map(r => r.no_of_yp))
+      no_of_yp: rows[0]?.fy_tool_yp_total || Math.max(...rows.map(r => r.no_of_yp))
     };
   });
 
@@ -1008,12 +1009,19 @@ async function loadData(){
       const na = parseInt(a.stage.split(' ')[1]||0), nb = parseInt(b.stage.split(' ')[1]||0);
       return na - nb;
     });
-    // Codes table: one row per session module
+    // Codes table: one row per session module (attendance_count = YP attendance rows)
     by_fy[fy].phase_stage_codes = rows.map(r => ({
-      stage:        STAGE_NAMES[r.aim_stage] || `Stage ${r.aim_stage}`,
-      session_code: r.stage_module || '',
-      no_sessions:  r.no_sessions  || 0
+      stage:            STAGE_NAMES[r.aim_stage] || `Stage ${r.aim_stage}`,
+      session_code:     r.stage_module || '',
+      attendance_count: r.attendance_count || 0
     }));
+  });
+
+  // Fix totals.no_of_yp — use distinct YP count from session type summary
+  fiscal_years.forEach(fy => {
+    if (!by_fy[fy]) return;
+    by_fy[fy].inv_totals.no_of_yp  = by_fy[fy].yp_by_type['Intervention']    || by_fy[fy].inv_totals.no_of_yp;
+    by_fy[fy].grp_totals.no_of_yp  = by_fy[fy].yp_by_type['Group Session']   || by_fy[fy].grp_totals.no_of_yp;
   });
 
   // Demographics
