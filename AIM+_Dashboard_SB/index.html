@@ -286,7 +286,6 @@ body{font-family:'Open Sans',sans-serif;background:var(--sog-off-white);color:va
 
 @media(max-width:600px){.chart-companion,.grp-doughnut-wrap{grid-template-columns:1fr}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <a href="#main-content" id="skip-link">Skip to main content</a>
@@ -1212,10 +1211,31 @@ function buildProfileChart(r,zoom){
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeProfile();});
-// ── SUPABASE CONFIG ────────────────────────────────────────────────────────
-const _SB_URL  = 'https://febshlxboadaeafqafsr.supabase.co';
-const _SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlYnNobHhib2FkYWVhZnFhZnNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDk4MDUsImV4cCI6MjA5MjE4NTgwNX0.gLNUvDPa3Tp9D7R9ypZ6dbW41E-iFMglzBr8NQzyjFU';
-const _sb = supabase.createClient(_SB_URL, _SB_ANON);
+// ── SUPABASE EDGE FUNCTION CONFIG ──────────────────────────────────────────
+// No Supabase credentials in client-side code. All data fetches go through
+// the edge function which uses the service key server-side only.
+const EDGE_FUNCTION_URL = 'https://febshlxboadaeafqafsr.supabase.co/functions/v1/fetch-dashboard-data';
+
+// Returns AD token once AD auth is configured. For now returns a placeholder
+// so the dashboard works while AD setup is pending with tech support.
+function getADToken() {
+  return sessionStorage.getItem('adToken') || localStorage.getItem('adToken') || 'dashboard-pending-ad-setup';
+}
+
+async function fetchFromEdgeFunction(table) {
+  const res = await fetch(`${EDGE_FUNCTION_URL}?table=${encodeURIComponent(table)}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${getADToken()}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+    throw new Error(err.error || `Failed to fetch ${table}`);
+  }
+  return res.json();
+}
 
 function showLoading(){ document.getElementById('loadingOverlay').style.display='flex'; }
 function hideOverlays(){ document.getElementById('loadingOverlay').style.display='none'; }
@@ -1243,20 +1263,20 @@ async function loadData(){
     kpisRes, sessionTypeRes, intRes, toolRes, grpRes, phRes, demoRes, ypRes, refDetailsRes,
     surveyOverviewRes, ngseLongRes, erqLongRes, safetyLongRes, safetyDevRes
   ] = await Promise.all([
-    _sb.from('vw_fy_kpis').select('*').order('financial_year'),
-    _sb.from('vw_fy_session_type_summary').select('*'),
-    _sb.from('vw_intervention_breakdown').select('*'),
-    _sb.from('vw_tool_breakdown').select('*'),
-    _sb.from('vw_group_session_breakdown').select('*'),
-    _sb.from('vw_phase_stage_breakdown').select('*'),
-    _sb.from('vw_demographics_by_fy').select('*').limit(5000),
-    _sb.from('vw_yp_records').select('*').limit(2000),
-    _sb.from('vw_referral_details').select('*').limit(2000),
-    _sb.from('vw_survey_completion_overview').select('*'),
-    _sb.from('vw_ngse_longitudinal').select('*').limit(2000),
-    _sb.from('vw_erq_longitudinal').select('*').limit(2000),
-    _sb.from('vw_safety_longitudinal').select('*').limit(2000),
-    _sb.from('vw_safety_deviation').select('*').limit(2000),
+    fetchFromEdgeFunction('vw_fy_kpis').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_fy_session_type_summary').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_intervention_breakdown').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_tool_breakdown').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_group_session_breakdown').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_phase_stage_breakdown').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_demographics_by_fy').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_yp_records').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_referral_details').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_survey_completion_overview').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_ngse_longitudinal').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_erq_longitudinal').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_safety_longitudinal').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    fetchFromEdgeFunction('vw_safety_deviation').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
   ]);
 
   for (const r of [kpisRes,sessionTypeRes,intRes,toolRes,grpRes,phRes,demoRes,ypRes,refDetailsRes,
