@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <!-- ═══════════════════════════════════════════
        SKIP NAV — required on every SoG page
@@ -24,107 +23,6 @@
       font-family: 'Open Sans', sans-serif;
     }
     #skip-link:focus { top: 16px; }
-  </style>
-
-  <style>
-    /* ═══════════════════════════════════════════
-       AUTH SCREEN
-    ═══════════════════════════════════════════ */
-    #auth-screen {
-      position: fixed; inset: 0; z-index: 1000;
-      display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(135deg, #625D9C 0%, #0095A9 100%);
-      padding: 24px;
-    }
-    #auth-screen.hidden { display: none; }
-    .auth-card {
-      background: #ffffff;
-      border-radius: 16px;
-      border: 1px solid #E2E4E6;
-      box-shadow: 0 20px 60px rgba(50,62,72,0.18);
-      padding: 48px 40px 40px;
-      width: 100%; max-width: 420px;
-      text-align: center;
-    }
-    .auth-logo { margin-bottom: 32px; }
-    .auth-logo img { height: 28px; }
-    .auth-divider {
-      width: 48px; height: 3px;
-      background: linear-gradient(90deg, #625D9C 0%, #0095A9 100%);
-      border-radius: 2px; margin: 20px auto 28px;
-    }
-    .auth-title {
-      font-size: 20px; font-weight: 700;
-      color: #323E48; margin-bottom: 8px;
-    }
-    .auth-subtitle {
-      font-size: 13px; color: #70787F;
-      margin-bottom: 28px; line-height: 1.5;
-    }
-    .auth-label {
-      display: block; text-align: left;
-      font-size: 12px; font-weight: 600;
-      color: #323E48; margin-bottom: 6px;
-      letter-spacing: 0.02em;
-    }
-    .auth-input {
-      width: 100%; height: 38px;
-      border: 1px solid #E2E4E6;
-      border-radius: 8px;
-      padding: 0 12px; font-size: 14px;
-      font-family: 'Open Sans', sans-serif;
-      color: #323E48; background: #fff;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      margin-bottom: 20px;
-    }
-    .auth-input:focus {
-      outline: 2px solid var(--sog-purple);
-      outline-offset: 2px;
-      border-color: #625D9C;
-      box-shadow: 0 0 0 2px rgba(0,149,169,0.15);
-    }
-    .auth-btn {
-      width: 100%; height: 40px;
-      background: linear-gradient(135deg, #625D9C 0%, #0095A9 100%);
-      color: #fff; border: none; border-radius: 8px;
-      font-size: 14px; font-weight: 700;
-      font-family: 'Open Sans', sans-serif;
-      cursor: pointer; letter-spacing: 0.02em;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .auth-btn:hover { opacity: 0.9; }
-    .auth-btn:active { transform: scale(0.99); }
-    .auth-btn:focus { outline: 2px solid var(--sog-purple); outline-offset: 2px; }
-    .auth-btn:disabled { opacity: 0.6; cursor: default; }
-    .auth-message {
-      margin-top: 16px; font-size: 13px; line-height: 1.5;
-      border-radius: 8px; padding: 10px 14px;
-      display: none;
-    }
-    .auth-message.success {
-      display: block; background: #E6F7F5;
-      color: #007264; border: 1px solid #99DFD7;
-    }
-    .auth-message.error {
-      display: block; background: #FEE8EA;
-      color: #C41E2A; border: 1px solid #F9A3A8;
-    }
-    .auth-footer {
-      margin-top: 28px; font-size: 11px;
-      color: #ADB2B6; line-height: 1.5;
-    }
-    /* Sign-out button in topbar */
-    .btn-signout {
-      display: flex; align-items: center; gap: 6px;
-      height: 30px; padding: 0 12px;
-      border: 1px solid #E2E4E6; border-radius: 6px;
-      background: #fff; color: #70787F;
-      font-size: 12px; font-weight: 600;
-      font-family: 'Open Sans', sans-serif;
-      cursor: pointer; transition: border-color 0.15s, color 0.15s;
-    }
-    .btn-signout:hover { border-color: var(--sog-purple); color: var(--sog-purple); }
-    .btn-signout:focus { outline: 2px solid var(--sog-purple); outline-offset: 2px; }
   </style>
 
   <style>
@@ -742,25 +640,6 @@
 <a href="#main-content" id="skip-link">Skip to main content</a>
 
 <!-- ═══════════════════════════════════════════
-     AUTH SCREEN — shown until session confirmed
-═══════════════════════════════════════════ -->
-<div id="auth-screen" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTAyMy41IiBoZWlnaHQ9IjEzMiIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMTAyMy41IDEzMiI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgeyBmaWxsOiAjNDE5N2NiOyB9CiAgICAgIC5zdDEgeyBmaWxsOiAjNWViM2U0OyB9CiAgICAgIC5zdDIgeyBmaWxsOiAjMDA5NWE5OyB9CiAgICAgIC5zdDMgeyBmaWxsOiAjNjI1ZDljOyB9CiAgICAgIC5zdDQgeyBmaWxsOiAjMzIzZTQ4OyB9CiAgICAgIC5zdDUgeyBmaWxsOiAjMDBhZjlhOyB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8Zz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMjE1LjEsNzMuOWMtMTAuMi0zLjYtMjEuOC05LjEtMjEuOC0yMi4xczguOC0xOS43LDIyLjgtMTkuNywyMi43LDExLDIyLjcsMTFsLTguMyw4LjJzLTUuOC03LjktMTQuNC03LjktMTAuNiwzLjctMTAuNiw4LjQsNS41LDgsMTUsMTEuNWMxMC42LDQsMTkuNSw4LjgsMTkuNSwyMS40cy0xMS4xLDE5LjQtMjQuMywxOS40LTI1LjUtMTQuMi0yNS41LTE0LjJsOS03LjZzNiwxMC40LDE2LjUsMTAuNCwxMi4xLTIuNCwxMi4xLTguMS00LjUtOC0xMi43LTEwLjhaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0yNDcuMSw1NS44aDkuM3YtMTRoMTEuOXYxNGgxNC4ydjEwLjdoLTE0LjJ2MTljMCw1LjgsMyw3LjUsNi4yLDcuNXM1LTEuNyw1LTEuN2w0LjQsOS43cy00LjUsMy4xLTExLjMsMy4xLTE2LjEtNi43LTE2LjEtMTYuN3YtMjAuOWgtOS4zdi0xMC43WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMzI0LjYsNTYuMWwtNC4yLDEwLjdzLTIuMi0xLjEtNS43LTEuMWMtNy4zLDAtMTAuNSw2LjQtMTAuNSw2LjR2MzAuOGgtMTEuOXYtNDcuMmgxMS4zdjYuOXM0LjEtOC4xLDEyLjgtOC4xLDguMiwxLjUsOC4yLDEuNVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTM3My40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNMzYxLjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQyNi40LDc5LjJjMCwuOSwwLDIuNywwLDQuNWgtMzUuMmMuOSw0LjIsNS44LDkuNiwxMy4yLDkuNnMxMi45LTQuOCwxMi45LTQuOGw2LDlzLTcuNSw2LjgtMTguOSw2LjgtMjUuNC0xMC45LTI1LjQtMjQuOCwxMC0yNC44LDIzLjctMjQuOCwyMy44LDEwLDIzLjgsMjQuNlpNNDE0LjUsNzVjLS4yLTQuMS00LTkuNS0xMS44LTkuNXMtMTEuMSw1LjQtMTEuNSw5LjVoMjMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTQzMS40LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik00ODAuMyw4N3M2LjMsNi44LDE0LjIsNi44LDktMS40LDktNC4zLTIuMi0zLjctOS40LTUuMmMtOS40LTItMTcuNS02LTE3LjUtMTQuOXM3LjQtMTQuNywyMC4zLTE0LjcsMTcuNyw1LjgsMTcuNyw1LjhsLTYsOC43cy01LjQtNC4xLTExLjctNC4xLTguNiwxLjYtOC42LDQuNSwzLjIsMy42LDExLjEsNS4zYzkuNCwyLDE2LDUuMSwxNiwxNC44cy04LjYsMTQuNS0yMC42LDE0LjUtMjEuMy04LjYtMjEuMy04LjZsNi43LTguN1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwMS4xLDc5LjRjMCwxMy44LTExLjEsMjQuOC0yNS4yLDI0LjhzLTI1LjItMTAuOS0yNS4yLTI0LjgsMTEuMS0yNC44LDI1LjItMjQuOCwyNS4yLDEwLjgsMjUuMiwyNC44Wk01ODguOSw3OS40YzAtNy40LTUtMTMuNi0xMy0xMy42cy0xMyw2LjMtMTMsMTMuNiw1LDEzLjYsMTMsMTMuNiwxMy02LjMsMTMtMTMuNloiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTYwNS41LDU1LjhoOS40di0xMS41YzAtMTMuMSw5LjMtMTcuNywxNi45LTE3LjdzMTAuNCwyLjUsMTAuNCwyLjVsLTQuNSwxMHMtMS44LTEuNC00LjgtMS40LTYuMiwxLjMtNi4yLDcuMnYxMC45aDExLjV2MTAuN2gtMTEuNXYzNi40aC0xMS45di0zNi40aC05LjR2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik03MjQuMSw4OS43di0xNC43aC0xNS44di0xMS4xaDI3LjZ2MzEuNnMtOC45LDguOC0yNS44LDguOC0zNi42LTE1LjQtMzYuNi0zNiwxNS43LTM2LDM2LjEtMzYsMjUuOCwxMC40LDI1LjgsMTAuNGwtOC4yLDhzLTUuOC03LjMtMTcuNi03LjMtMjQsMTEuNC0yNCwyNC45LDEwLjQsMjQuOSwyNC41LDI0LjksMTQtMy40LDE0LTMuNFoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTc3OS4zLDU2LjFsLTQuMiwxMC43cy0yLjItMS4xLTUuNy0xLjFjLTcuMywwLTEwLjUsNi40LTEwLjUsNi40djMwLjhoLTExLjl2LTQ3LjJoMTEuM3Y2LjlzNC4xLTguMSwxMi44LTguMSw4LjIsMS41LDguMiwxLjVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik04MzEsNzkuNGMwLDEzLjgtMTEuMSwyNC44LTI1LjIsMjQuOHMtMjUuMi0xMC45LTI1LjItMjQuOCwxMS4xLTI0LjgsMjUuMi0yNC44LDI1LjIsMTAuOCwyNS4yLDI0LjhaTTgxOC45LDc5LjRjMC03LjQtNS0xMy42LTEzLTEzLjZzLTEzLDYuMy0xMywxMy42LDUsMTMuNiwxMywxMy42LDEzLTYuMywxMy0xMy42WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3Q0IiBkPSJNODQ2LDU1LjhsOS43LDI0LjIsMTAuMi0yNC4yaDEwbDkuOSwyNC4yLDEwLjEtMjQuMmgxMi4xbC0yMi44LDQ5LjUtMTUuMS0zMy42LTE0LjksMzMuNi0yMi44LTQ5LjVoMTMuM1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTkxMC45LDU1LjhoOS4zdi0xNGgxMS45djE0aDE0LjJ2MTAuN2gtMTQuMnYxOWMwLDUuOCwzLDcuNSw2LjIsNy41czUtMS43LDUtMS43bDQuNCw5LjdzLTQuNSwzLjEtMTEuMywzLjEtMTYuMS02LjctMTYuMS0xNi43di0yMC45aC05LjN2LTEwLjdaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0xMDAwLDcyLjV2MzAuNWgtMTEuOXYtMjcuNmMwLTYuOC00LjItOS43LTkuMy05LjdzLTkuNCw2LjItOS40LDYuMnYzMWgtMTEuOVYyNy44aDExLjl2MzMuN3M0LjItNi45LDEzLjMtNi45LDE3LjMsNi41LDE3LjMsMTcuOFoiLz4KICAgIDwvZz4KICAgIDxnPgogICAgICA8Zz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjEyNi45IDU4LjcgMTI2LjkgMTE3LjMgMTkuOSAxMTcuMyAxOS45IDEwMi41IDI1LjIgMTAyLjUgMTIuNiA4MC43IDAgMTAyLjUgNS4zIDEwMi41IDUuMyAxMzIgMTkuOSAxMzIgMTkuOSAxMzIgMTI2LjkgMTMyIDE0MS41IDExNy4zIDE0MS41IDU4LjcgMTI2LjkgNTguNyIvPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMTQxLjUgMjkuNSAxNDEuNSAwIDEyNi45IDAgMTI2LjkgMCAxOS45IDAgNS4zIDE0LjcgNS4zIDczLjMgMTkuOSA3My4zIDE5LjkgMTQuNyAxMjYuOSAxNC43IDEyNi45IDI5LjUgMTIxLjYgMjkuNSAxMzQuMiA1MS4zIDE0Ni44IDI5LjUgMTQxLjUgMjkuNSIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDEiIHg9IjYzLjkiIHk9IjU4LjciIHdpZHRoPSI0OC41IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cmVjdCBjbGFzcz0ic3Q1IiB4PSIzNC42IiB5PSI4OCIgd2lkdGg9Ijc3LjgiIGhlaWdodD0iMTQuNyIvPgogICAgICAgIDxyZWN0IGNsYXNzPSJzdDMiIHg9IjM0LjYiIHk9IjI5LjMiIHdpZHRoPSI3Ny44IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0ic3QwIiBwb2ludHM9IjQ5LjMgNTguNyAzNC42IDczLjMgMzQuNiAyOS4zIDQ5LjMgNDQgNDkuMyA1OC43Ii8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9InN0MiIgcG9pbnRzPSIxMTIuNCAxMDIuNyA5Ny43IDg4IDk3LjcgNzMuMyAxMTIuNCA1OC43IDExMi40IDEwMi43Ii8+CiAgICAgIDwvZz4KICAgIDwvZz4KICA8L2c+CiAgPHBhdGggY2xhc3M9InN0NCIgZD0iTTEwMjMuNSw5NC4zYzAsNC43LTMuNyw4LjMtOC40LDguM3MtOC41LTMuNy04LjUtOC4zLDMuOC04LjIsOC41LTguMiw4LjQsMy43LDguNCw4LjJaTTEwMDguNyw5NC4zYzAsMy43LDIuNyw2LjYsNi40LDYuNnM2LjMtMi45LDYuMy02LjUtMi43LTYuNi02LjMtNi42LTYuNCwzLTYuNCw2LjZaTTEwMTMuOCw5OC42aC0xLjl2LTguMmMuOC0uMiwxLjgtLjMsMy4yLS4zczIuMy4zLDIuOS42Yy41LjQuOCwxLC44LDEuOHMtLjcsMS42LTEuNywxLjloMGMuOC40LDEuMywxLDEuNSwyLjEuMywxLjMuNCwxLjguNiwyLjFoLTIuMWMtLjItLjMtLjQtMS4xLS43LTItLjEtLjktLjctMS4zLTEuNy0xLjNoLS45djMuM1pNMTAxMy44LDk0aC45YzEuMSwwLDEuOS0uNCwxLjktMS4ycy0uNi0xLjMtMS44LTEuMy0uOSwwLTEuMS4xdjIuNFoiLz4KPC9zdmc+" alt="Streets of Growth" height="28">
-    </div>
-    <div class="auth-divider"></div>
-    <h1 class="auth-title" id="auth-title">AIM+ Dashboard</h1>
-    <p class="auth-subtitle">Enter your email to receive a secure sign-in link. No password needed.</p>
-    <label class="auth-label" for="auth-email">Email address</label>
-    <input id="auth-email" class="auth-input" type="email" placeholder="you@streetsofgrowth.org.uk" autocomplete="email" required>
-    <button id="auth-send-btn" class="auth-btn" onclick="sendMagicLink()">Send magic link</button>
-    <div id="auth-message" class="auth-message" role="status" aria-live="polite"></div>
-    <p class="auth-footer">Access is restricted to authorised Streets of Growth staff.<br>Contact your administrator if you need access.</p>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
      TOPBAR — white with SoG logo
 ═══════════════════════════════════════════ -->
 <header class="topbar" role="banner">
@@ -782,13 +661,7 @@
       </g></g>
     </svg>
   </div>
-  <div style="display:flex;align-items:center;gap:16px;">
-    <div class="topbar-meta">Dashboard &nbsp;·&nbsp; <strong>24 Mar 2026</strong></div>
-    <button class="btn-signout" id="signout-btn" onclick="signOut()" title="Sign out">
-      <span class="material-icons-outlined" style="font-size:14px">logout</span>
-      Sign out
-    </button>
-  </div>
+  <div class="topbar-meta">Dashboard &nbsp;·&nbsp; <strong>24 Mar 2026</strong></div>
 </header>
 
 <!-- ═══════════════════════════════════════════
@@ -1153,56 +1026,26 @@ function monthLabel(key) {
   return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1] + ' ' + y.slice(2);
 }
 
-// ── Supabase auth ──
-const SUPA_URL = 'https://vsjyvqrjjnpyidovgdnz.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzanl2cXJqam5weWlkb3ZnZG56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTc4MjQsImV4cCI6MjA5MjE5MzgyNH0.4v98dXyFh0OYzzssbk_ew9rU2VVsYJiNXRiIeHL8rzw';
+// ── Supabase config ──
+const EDGE_FUNCTION_URL = 'https://vsjyvqrjjnpyidovgdnz.supabase.co/functions/v1/fetch-dashboard-data';
 
-const supaClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-
-function showAuthScreen() {
-  document.getElementById('auth-screen').classList.remove('hidden');
-  document.getElementById('auth-email').focus();
-}
-function hideAuthScreen() {
-  document.getElementById('auth-screen').classList.add('hidden');
-}
-
-async function sendMagicLink() {
-  const email = document.getElementById('auth-email').value.trim();
-  const msg   = document.getElementById('auth-message');
-  const btn   = document.getElementById('auth-send-btn');
-  msg.className = 'auth-message';
-  if (!email) { msg.textContent = 'Please enter your email address.'; msg.classList.add('error'); return; }
-  if (!email.toLowerCase().endsWith('@streetsofgrowth.org')) {
-    msg.textContent = 'Access is restricted to @streetsofgrowth.org email addresses.';
-    msg.classList.add('error'); return;
-  }
-  btn.disabled = true; btn.textContent = 'Sending…';
-  const { error } = await supaClient.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: 'https://sohailraja0407.github.io/streetsofgrowth/YP_Dashboard_SB' }
-  });
-  if (error) {
-    msg.textContent = error.message; msg.classList.add('error');
-    btn.disabled = false; btn.textContent = 'Send magic link';
-  } else {
-    msg.textContent = 'Magic link sent! Check your inbox and click the link to sign in.';
-    msg.classList.add('success');
-    btn.textContent = 'Link sent';
-  }
-}
-
-async function signOut() {
-  await supaClient.auth.signOut();
-  showAuthScreen();
+function getADToken() {
+  return sessionStorage.getItem('adToken') || localStorage.getItem('adToken') || 'dashboard-pending-ad-setup';
 }
 
 async function supaFetch(table, params) {
-  const { data: { session } } = await supaClient.auth.getSession();
-  const token = session ? session.access_token : SUPA_KEY;
-  const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${params || ''}`, {
-    headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
+  const url = `${EDGE_FUNCTION_URL}?table=${encodeURIComponent(table)}${params ? '&' + params : ''}`;
+  const r = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${getADToken()}`,
+      'Content-Type': 'application/json',
+    },
   });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+    throw new Error(err.error || `Failed to fetch ${table}`);
+  }
   return r.json();
 }
 
@@ -2403,30 +2246,7 @@ function selectRecord(id) {
 }
 
 // ── Init ──
-// Supabase JS v2 automatically detects magic-link tokens in the URL hash.
-// onAuthStateChange fires SIGNED_IN immediately when a valid hash is present.
-supaClient.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    // Clean up the hash from the URL after a magic-link redirect
-    if (window.location.hash.includes('access_token')) {
-      history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-    hideAuthScreen();
-    if (Object.keys(DATA).length === 0) loadFromSupabase();
-  } else if (event === 'SIGNED_OUT') {
-    showAuthScreen();
-  }
-});
-
-(async () => {
-  const { data: { session } } = await supaClient.auth.getSession();
-  if (session) {
-    hideAuthScreen();
-    loadFromSupabase();
-  } else {
-    showAuthScreen();
-  }
-})();
+loadFromSupabase();
 </script>
 </body>
 </html>
