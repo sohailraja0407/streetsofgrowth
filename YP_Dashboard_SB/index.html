@@ -1089,7 +1089,7 @@ function monthLabel(key) {
 // ── Supabase client ──
 const SUPABASE_URL  = 'https://vsjyvqrjjnpyidovgdnz.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzanl2cXJqam5weWlkb3ZnZG56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTc4MjQsImV4cCI6MjA5MjE5MzgyNH0.4v98dXyFh0OYzzssbk_ew9rU2VVsYJiNXRiIeHL8rzw';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 async function sendMagicLink() {
   const email = document.getElementById('login-email').value.trim();
@@ -1103,7 +1103,7 @@ async function sendMagicLink() {
   btn.disabled = true;
   msg.textContent = 'Sending…';
   msg.className = 'login-msg';
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await supabaseClient.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: window.location.href, shouldCreateUser: true },
   });
@@ -1118,7 +1118,7 @@ async function sendMagicLink() {
 }
 
 async function signOut() {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
 }
 
 function isoToDisplay(iso) {
@@ -1294,8 +1294,8 @@ function buildRecord(phase, rawInts) {
 async function loadFromSupabase() {
   try {
     const [{ data: phases, error: phaseErr }, { data: interactions, error: intErr }] = await Promise.all([
-      supabase.from('yp_phases').select('record_id, phase').order('record_id'),
-      supabase.from('yp_interactions').select('record_id, interaction_date, interaction_type, duration_mins, risk_value, tools, safety_yp, safety_coach, self_efficacy_score').order('interaction_date'),
+      supabaseClient.from('yp_phases').select('record_id, phase').order('record_id'),
+      supabaseClient.from('yp_interactions').select('record_id, interaction_date, interaction_type, duration_mins, risk_value, tools, safety_yp, safety_coach, self_efficacy_score').order('interaction_date'),
     ]);
     if (phaseErr)  throw new Error(phaseErr.message);
     if (intErr)    throw new Error(intErr.message);
@@ -2230,7 +2230,7 @@ function selectRecord(id) {
 }
 
 // ── Init ──
-supabase.auth.onAuthStateChange((event, session) => {
+supabaseClient.auth.onAuthStateChange((event, session) => {
   if (session) {
     document.getElementById('login-overlay').classList.add('hidden');
     document.getElementById('topbar-user').textContent = session.user?.email ?? '';
