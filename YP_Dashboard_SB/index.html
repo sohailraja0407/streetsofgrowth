@@ -1105,7 +1105,7 @@ async function sendMagicLink() {
   msg.className = 'login-msg';
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: window.location.href, shouldCreateUser: false },
+    options: { emailRedirectTo: window.location.href, shouldCreateUser: true },
   });
   if (error) {
     msg.textContent = error.message;
