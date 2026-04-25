@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ═══════════════════════════════════════════
        SKIP NAV — required on every SoG page
@@ -636,6 +637,62 @@
 </head>
 <body>
 
+<!-- ═══════════════════════════════════════════
+     LOGIN OVERLAY — shown when no active session
+═══════════════════════════════════════════ -->
+<style>
+  #login-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--sog-off-white);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #login-overlay.hidden { display: none; }
+  .login-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 24px rgba(50,62,72,0.12);
+    padding: 40px 48px;
+    max-width: 420px; width: 90%;
+    text-align: center;
+  }
+  .login-card h1 {
+    font-size: 20px; font-weight: 700;
+    color: var(--sog-purple); margin-bottom: 8px;
+  }
+  .login-card p { color: var(--charcoal-70); margin-bottom: 24px; font-size: 14px; }
+  .login-card input[type="email"] {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid #D6D8DA; border-radius: var(--radius-md);
+    font-family: 'Open Sans', sans-serif; font-size: 14px;
+    margin-bottom: 12px; outline: none; box-sizing: border-box;
+    transition: border-color 0.15s;
+  }
+  .login-card input[type="email"]:focus { border-color: var(--sog-purple); }
+  .login-btn {
+    width: 100%; padding: 11px;
+    background: var(--sog-purple); color: #fff;
+    border: none; border-radius: var(--radius-md);
+    font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .login-btn:hover:not(:disabled) { background: var(--purple-s1); }
+  .login-btn:disabled { background: var(--purple-40); cursor: not-allowed; }
+  .login-msg { margin-top: 14px; font-size: 13px; min-height: 20px; }
+  .login-msg.success { color: var(--sog-green); font-weight: 600; }
+  .login-msg.error   { color: var(--sog-red); }
+</style>
+
+<div id="login-overlay">
+  <div class="login-card">
+    <div style="font-size:22px;font-weight:700;color:var(--sog-purple);margin-bottom:4px">Streets of Growth</div>
+    <h1>Programme Dashboard</h1>
+    <p>Sign in with your Streets of Growth email.<br>We'll send you a secure link — no password needed.</p>
+    <input type="email" id="login-email" placeholder="you@streetsofgrowth.org" autocomplete="email">
+    <button class="login-btn" id="login-btn" onclick="sendMagicLink()">Send sign-in link</button>
+    <div class="login-msg" id="login-msg"></div>
+  </div>
+</div>
+
 <!-- Skip nav -->
 <a href="#main-content" id="skip-link">Skip to main content</a>
 
@@ -661,7 +718,10 @@
       </g></g>
     </svg>
   </div>
-  <div class="topbar-meta">Dashboard &nbsp;·&nbsp; <strong>24 Mar 2026</strong></div>
+  <div class="topbar-meta" style="display:flex;align-items:center;gap:12px">
+    <span>Dashboard &nbsp;·&nbsp; <span id="topbar-user" style="color:var(--sog-purple);font-weight:600"></span></span>
+    <button onclick="signOut()" style="background:none;border:1px solid #D6D8DA;border-radius:6px;padding:4px 10px;font-family:'Open Sans',sans-serif;font-size:12px;color:var(--charcoal-70);cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='var(--sog-purple)'" onmouseout="this.style.borderColor='#D6D8DA'">Sign out</button>
+  </div>
 </header>
 
 <!-- ═══════════════════════════════════════════
@@ -1026,27 +1086,39 @@ function monthLabel(key) {
   return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1] + ' ' + y.slice(2);
 }
 
-// ── Supabase config ──
-const EDGE_FUNCTION_URL = 'https://vsjyvqrjjnpyidovgdnz.supabase.co/functions/v1/fetch-dashboard-data';
+// ── Supabase client ──
+const SUPABASE_URL  = 'https://vsjyvqrjjnpyidovgdnz.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzanl2cXJqam5weWlkb3ZnZG56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTc4MjQsImV4cCI6MjA5MjE5MzgyNH0.4v98dXyFh0OYzzssbk_ew9rU2VVsYJiNXRiIeHL8rzw';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-function getADToken() {
-  return sessionStorage.getItem('adToken') || localStorage.getItem('adToken') || 'dashboard-pending-ad-setup';
+async function sendMagicLink() {
+  const email = document.getElementById('login-email').value.trim();
+  const btn   = document.getElementById('login-btn');
+  const msg   = document.getElementById('login-msg');
+  if (!email) {
+    msg.textContent = 'Please enter your email address.';
+    msg.className = 'login-msg error';
+    return;
+  }
+  btn.disabled = true;
+  msg.textContent = 'Sending…';
+  msg.className = 'login-msg';
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href, shouldCreateUser: false },
+  });
+  if (error) {
+    msg.textContent = error.message;
+    msg.className = 'login-msg error';
+    btn.disabled = false;
+  } else {
+    msg.textContent = 'Check your inbox — a sign-in link is on its way.';
+    msg.className = 'login-msg success';
+  }
 }
 
-async function supaFetch(table, params) {
-  const url = `${EDGE_FUNCTION_URL}?table=${encodeURIComponent(table)}${params ? '&' + params : ''}`;
-  const r = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${getADToken()}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!r.ok) {
-    const err = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
-    throw new Error(err.error || `Failed to fetch ${table}`);
-  }
-  return r.json();
+async function signOut() {
+  await supabase.auth.signOut();
 }
 
 function isoToDisplay(iso) {
@@ -1221,10 +1293,12 @@ function buildRecord(phase, rawInts) {
 
 async function loadFromSupabase() {
   try {
-    const [phases, interactions] = await Promise.all([
-      supaFetch('yp_phases', 'select=record_id,phase&order=record_id'),
-      supaFetch('yp_interactions', 'select=*&order=interaction_date'),
+    const [{ data: phases, error: phaseErr }, { data: interactions, error: intErr }] = await Promise.all([
+      supabase.from('yp_phases').select('record_id, phase').order('record_id'),
+      supabase.from('yp_interactions').select('record_id, interaction_date, interaction_type, duration_mins, risk_value, tools, safety_yp, safety_coach, self_efficacy_score').order('interaction_date'),
     ]);
+    if (phaseErr)  throw new Error(phaseErr.message);
+    if (intErr)    throw new Error(intErr.message);
     const byRecord = {};
     interactions.forEach(i => {
       const id = String(i.record_id);
@@ -1245,98 +1319,8 @@ async function loadFromSupabase() {
   }
 }
 
-// ── DATA ──
-let DATA = {
-  '3374': {
-    phase: 'Phase 3', first: '14 May 2025', last: '05 Mar 2026', span: '295 days',
-    totals: { total:17, interventions:11, groupSessions:0, safetySurveys:1, selfEfficacy:1, phaseSessions:4 },
-    risk: { avg:17.6, min:3, max:30, earlyAvg:28.4, recentAvg:5.6, trend:'↓ Improving', gaps:'2 gaps (longest 128d)' },
-    assessment: { safetyYP:96, safetyCoach:75, safetyGapPct:28, selfEfficacy:40 },
-    duration: { total:1582, avgPerSession:105.5, shortest:5, longest:630, interventions:1250, groupSessions:0, phaseSessions:332, avgIntervention:113.6 },
-    tools: { 'MI Techniques':4, 'CBS Techniques (CBT)':7, 'Goal Planning':0, 'Wheel of Life':0, 'Vision/Reality':0 },
-    toolsMostUsed:'CBS Techniques (CBT)', toolsPct:'82%',
-    alerts: [
-      { sev:'red',    label:'Last Intervention',       detail:'61 days since last',         action:'Last: 22 Jan 2026' },
-      { sev:'red',    label:'Last Interaction',         detail:'19 days since last',         action:'Last: 05 Mar 2026' },
-      { sev:'red',    label:'Safety Survey Overdue',    detail:'Last: 29 Jan 2026',          action:'Due by: 08 Feb 2026' },
-      { sev:'red',    label:'Self Efficacy Overdue',    detail:'Last: 25 Feb 2026',          action:'Due by: 07 Mar 2026' },
-      { sev:'orange', label:'Safety Score Gap',         detail:'YP: 96 vs Coach: 75',        action:'28% gap (threshold 10%)' },
-      { sev:'orange', label:'Next Self Efficacy Due',   detail:'Due soon',                   action:'Next due: 27 Mar 2026' },
-      { sev:'red',    label:'Intervention Gaps',        detail:'2 gaps > 30 days',           action:'Longest: 128 days' },
-      { sev:'red',    label:'Long Session Flagged',     detail:'Max: 630 mins',              action:'1 session over 120 mins' },
-    ],
-    interactions: [
-      { date:'14 May 2025', type:'Intervention',  dur:75,   risk:29, tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'17 May 2025', type:'Intervention',  dur:15,   risk:24, tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'20 May 2025', type:'Intervention',  dur:5,    risk:29, tools:[], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'21 May 2025', type:'Intervention',  dur:30,   risk:30, tools:[], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'21 May 2025', type:'Intervention',  dur:60,   risk:30, tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'03 Jun 2025', type:'Intervention',  dur:120,  risk:24, tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'09 Oct 2025', type:'Intervention',  dur:60,   risk:3,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'22 Oct 2025', type:'Intervention',  dur:630,  risk:12, tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'05 Nov 2025', type:'Intervention',  dur:90,   risk:3,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'14 Nov 2025', type:'Intervention',  dur:90,   risk:3,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'22 Jan 2026', type:'Intervention',  dur:75,   risk:7,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'29 Jan 2026', type:'Safety Survey', dur:null, risk:null, tools:[], safetyYP:96, safetyCoach:75, se:'' },
-      { date:'25 Feb 2026', type:'Self Efficacy', dur:null, risk:null, tools:[], safetyYP:'', safetyCoach:'', se:40 },
-      { date:'25 Feb 2026', type:'Phase Session', dur:75,   risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'26 Feb 2026', type:'Phase Session', dur:82,   risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'04 Mar 2026', type:'Phase Session', dur:85,   risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'05 Mar 2026', type:'Phase Session', dur:90,   risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
-    ]
-  },
-  '2532': {
-    phase: 'Phase 3', first: '13 Feb 2025', last: '05 Mar 2026', span: '385 days',
-    totals: { total:30, interventions:17, groupSessions:7, safetySurveys:1, selfEfficacy:1, phaseSessions:4 },
-    risk: { avg:8.0, min:0, max:11, earlyAvg:7.8, recentAvg:7.0, trend:'↓ Improving', gaps:'1 gap (longest 46d)' },
-    assessment: { safetyYP:92, safetyCoach:85, safetyGapPct:8, selfEfficacy:32 },
-    duration: { total:3265, avgPerSession:117.0, shortest:35, longest:830, interventions:1960, groupSessions:1110, phaseSessions:332, avgIntervention:115.3 },
-    tools: { 'MI Techniques':9, 'CBS Techniques (CBT)':7, 'Goal Planning':2, 'Wheel of Life':1, 'Vision/Reality':1 },
-    toolsMostUsed:'MI Techniques', toolsPct:'76%',
-    alerts: [
-      { sev:'red',    label:'Last Intervention',       detail:'33 days since last',         action:'Last: 19 Feb 2026' },
-      { sev:'red',    label:'Last Interaction',         detail:'19 days since last',         action:'Last: 05 Mar 2026' },
-      { sev:'red',    label:'Safety Survey Overdue',    detail:'Last: 17 Dec 2025',          action:'97 days ago' },
-      { sev:'orange', label:'Next Self Efficacy Due',   detail:'Due soon',                   action:'Next due: 27 Mar 2026' },
-      { sev:'green',  label:'Safety Score Gap',         detail:'YP: 92 vs Coach: 85',        action:'8% gap — within threshold' },
-      { sev:'red',    label:'Long Sessions Flagged',    detail:'2 sessions over 120 mins',   action:'Max: 830 mins — check data' },
-      { sev:'green',  label:'Intervention Frequency',   detail:'Regular engagement',         action:'Multiple monthly contacts' },
-      { sev:'orange', label:'Self Efficacy Review',     detail:'Last: 25 Feb 2026',          action:'Next due: 27 Mar 2026' },
-    ],
-    interactions: [
-      { date:'13 Feb 2025', type:'Intervention',  dur:60,  risk:7,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'20 Feb 2025', type:'Intervention',  dur:75,  risk:10, tools:[], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'13 Mar 2025', type:'Intervention',  dur:60,  risk:6,  tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'26 Mar 2025', type:'Intervention',  dur:35,  risk:6,  tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'10 Apr 2025', type:'Intervention',  dur:790, risk:0,  tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'23 Apr 2025', type:'Intervention',  dur:830, risk:11, tools:['Wheel of Life','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'30 Apr 2025', type:'Intervention',  dur:70,  risk:11, tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'14 May 2025', type:'Intervention',  dur:90,  risk:9,  tools:['MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'28 May 2025', type:'Intervention',  dur:90,  risk:10, tools:['CBS Techniques (CBT)','Vision/Reality','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'02 Jun 2025', type:'Intervention',  dur:75,  risk:9,  tools:['CBS Techniques (CBT)','Goal Planning'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'18 Jul 2025', type:'Group Session', dur:90,  risk:null, tools:['Young Leaders/Social Action'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'25 Jul 2025', type:'Group Session', dur:60,  risk:null, tools:['Young Leaders/Social Action'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'25 Jul 2025', type:'Group Session', dur:150, risk:null, tools:['Young Leaders/Social Action'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'13 Aug 2025', type:'Group Session', dur:270, risk:null, tools:['Young Leaders/Social Action'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'26 Sep 2025', type:'Intervention',  dur:60,  risk:9,  tools:['CBS Techniques (CBT)','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'30 Sep 2025', type:'Group Session', dur:120, risk:null, tools:['Life Skills – Harm Reduction'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'21 Nov 2025', type:'Group Session', dur:120, risk:null, tools:['Life Skills – Harm Reduction'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'24 Nov 2025', type:'Intervention',  dur:90,  risk:8,  tools:['Goal Planning','MI Techniques'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'05 Dec 2025', type:'Group Session', dur:180, risk:null, tools:['Life Skills – Harm Reduction'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'08 Dec 2025', type:'Intervention',  dur:90,  risk:4,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'17 Dec 2025', type:'Safety Survey', dur:null,risk:null, tools:[], safetyYP:92, safetyCoach:85, se:'' },
-      { date:'16 Jan 2026', type:'Intervention',  dur:90,  risk:9,  tools:['CBS Techniques (CBT)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'23 Jan 2026', type:'Intervention',  dur:55,  risk:9,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'11 Feb 2026', type:'Intervention',  dur:90,  risk:5,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'19 Feb 2026', type:'Intervention',  dur:80,  risk:8,  tools:[], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'25 Feb 2026', type:'Self Efficacy', dur:null,risk:null, tools:[], safetyYP:'', safetyCoach:'', se:32 },
-      { date:'25 Feb 2026', type:'Phase Session', dur:75,  risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'26 Feb 2026', type:'Phase Session', dur:82,  risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'04 Mar 2026', type:'Phase Session', dur:85,  risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
-      { date:'05 Mar 2026', type:'Phase Session', dur:90,  risk:null, tools:['Stage 6 Action (Maintaining)'], safetyYP:'', safetyCoach:'', se:'' },
-    ]
-  }
-};
+// ── DATA (populated from Supabase on sign-in) ──
+let DATA = {};
 
 // ═══════════════════════════════════════════
 // STATE
@@ -2246,7 +2230,16 @@ function selectRecord(id) {
 }
 
 // ── Init ──
-loadFromSupabase();
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('topbar-user').textContent = session.user?.email ?? '';
+    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') loadFromSupabase();
+  } else {
+    document.getElementById('login-overlay').classList.remove('hidden');
+    document.getElementById('topbar-user').textContent = '';
+  }
+});
 </script>
 </body>
 </html>
