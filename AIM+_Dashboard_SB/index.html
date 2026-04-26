@@ -1247,7 +1247,7 @@ async function sendMagicLink() {
   msg.textContent = 'Sending sign-in link…';
   const { error } = await supabaseClient.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: window.location.href, shouldCreateUser: true },
+    options: { emailRedirectTo: 'https://sohailraja0407.github.io/streetsofgrowth/AIM%2B_Dashboard_SB/', shouldCreateUser: true },
   });
   if (error) {
     msg.style.color = 'var(--sog-red)';
