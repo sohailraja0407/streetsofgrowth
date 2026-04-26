@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -351,6 +352,7 @@ canvas{max-width:100%}
   <div class="nav-tab" aria-current="false" onclick="switchTab('lookup')">YP Lookup</div>
   <div class="nav-tab" aria-current="false" onclick="switchTab('referrals')">Referrals &amp; Risk</div>
   <div class="nav-tab" aria-current="false" onclick="switchTab('outcomes')">Outcomes</div>
+  <div class="nav-tab" aria-current="false" onclick="switchTab('evaluation')">Evaluation</div>
 </nav>
 
 <div class="controls">
@@ -394,8 +396,9 @@ canvas{max-width:100%}
     </div>
   </div>
 </div>
-<div id="panel-referrals" class="panel"><div class="main" id="referralMain"></div></div>
-<div id="panel-outcomes"  class="panel"><div class="main" id="outcomesMain"></div></div>
+<div id="panel-referrals"  class="panel"><div class="main" id="referralMain"></div></div>
+<div id="panel-outcomes"   class="panel"><div class="main" id="outcomesMain"></div></div>
+<div id="panel-evaluation" class="panel"><div class="main" id="evalMain"></div></div>
 </div><!-- /main-content -->
 
 <!-- PROFILE OVERLAY -->
@@ -444,7 +447,7 @@ const RISK_COLORS={0:'rgba(200,200,200,0.2)',1:'#86efac',2:'#4ade80',3:'#fbbf24'
 const RISK_BORDERS={0:'#d1d5db',1:'#16a34a',2:'#15803d',3:'#d97706',4:'#dc2626',5:'#7c3aed'};
 const RISK_LABELS={0:'None',1:'Very Low',2:'Low',3:'Moderate',4:'High',5:'Very High'};
 let DATA = null;
-let curFY='',curTab='overview';
+let curFY='',curTab='overview',curCohort='__all__';
 const charts={};
 let activeProfileChart=null,curRecord=null,activeZoom='all';
 let lookupFiltered=[],sortCol='id',sortAsc=true;
@@ -496,7 +499,7 @@ function barChart(id,labels,data,color){
 
 function switchTab(tab){
   curTab=tab;
-  ['overview','demographics','detailed','lookup','referrals','outcomes'].forEach((t,i)=>{
+  ['overview','demographics','detailed','lookup','referrals','outcomes','evaluation'].forEach((t,i)=>{
     const navTab=document.querySelectorAll('.nav-tab')[i];
     navTab.classList.toggle('active',t===tab);
     navTab.setAttribute('aria-current',t===tab?'page':'false');
@@ -523,6 +526,7 @@ function renderTab(){
   else if(curTab==='detailed')renderDetailed();
   else if(curTab==='referrals')renderReferrals();
   else if(curTab==='outcomes')renderOutcomes();
+  else if(curTab==='evaluation')renderEvaluation();
   else renderLookupTable();
 }
 
@@ -722,6 +726,96 @@ function renderDetailed(){
     const leg=doughnutChart('grpChart',grpEntries,grpTotal);
     document.getElementById('grpLegend').innerHTML=leg;
   }
+}
+
+function setCohort(c){curCohort=c;renderEvaluation();}
+
+function renderEvaluation(){
+  const el=document.getElementById('evalMain');
+
+  // All cohorts present in the data (across all FYs — cohort is a YP property)
+  const allCohorts=[...new Set((DATA.phaseAssessment||[]).map(r=>r.cohort_group))]
+    .sort((a,b)=>{
+      if(a==='Not yet assigned')return 1;
+      if(b==='Not yet assigned')return -1;
+      return a.localeCompare(b);
+    });
+
+  // YP roster: active in current FY, filtered by selected cohort
+  const rosterYP=DATA.yp
+    .filter(r=>r.fys.includes(curFY))
+    .filter(r=>curCohort==='__all__'||r.cohort_group===curCohort)
+    .sort((a,b)=>(a.last_name||'').localeCompare(b.last_name||'')||(a.first_name||'').localeCompare(b.first_name||''));
+
+  // Phase assessment rows filtered by cohort (all FYs — phase transitions aren't FY-scoped to sessions)
+  const phaseRows=(DATA.phaseAssessment||[])
+    .filter(r=>curCohort==='__all__'||r.cohort_group===curCohort)
+    .sort((a,b)=>(a.cohort_group||'').localeCompare(b.cohort_group||'')||(a.last_name||'').localeCompare(b.last_name||'')||(a.phase_start_date||'').localeCompare(b.phase_start_date||''));
+
+  const cohortBtns=['__all__',...allCohorts].map(c=>`<button class="fy-btn${curCohort===c?' active':''}" onclick="setCohort('${c.replace(/'/g,"\\'")}')">
+    ${c==='__all__'?'All Cohorts':c}
+  </button>`).join('');
+
+  const fmtDate=d=>d?d.replace(/-/g,'/').slice(2):'—';
+  const apricotLink=id=>`<a href="https://login.apricotsoftware.uk/document/edit/id/${id}" target="_blank" rel="noopener" style="color:var(--sog-blue);text-decoration:none;font-size:11px">Apricot ↗</a>`;
+  const lookupLink=id=>`<span style="color:var(--sog-purple);text-decoration:underline;cursor:pointer;font-size:11px" onclick="switchTab('lookup');setTimeout(()=>{const s=document.getElementById('searchInput');if(s){s.value='${id}';applyLookupFilters();}},100)">Lookup ↗</span>`;
+
+  // Roster table rows
+  const rosterTableRows=rosterYP.map(r=>{
+    const name=r.first_name||r.last_name?`${r.first_name} ${r.last_name}`.trim():'—';
+    const phase=r.pv?r.pv.replace('Phase ','Ph'):'—';
+    const exitBadge=r.pv&&r.pv.includes('exit')||false;
+    return [
+      String(r.id),
+      name,
+      r.cohort_group==='Not yet assigned'?`<span style="color:var(--charcoal-40);font-style:italic">Unassigned</span>`:r.cohort_group,
+      phase||'—',
+      r.st||'—',
+      apricotLink(r.id),
+      lookupLink(r.id),
+    ];
+  });
+
+  // Phase assessment table rows — show all transitions for selected cohort
+  const phaseTableRows=phaseRows.map(r=>{
+    const name=r.first_name||r.last_name?`${r.first_name} ${r.last_name}`.trim():'—';
+    const latestBadge=r.is_latest?`<span style="background:var(--sog-teal);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px">LATEST</span>`:'';
+    const openBadge=r.phase_status==='Open'?`<span style="background:var(--sog-green);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">OPEN</span>`
+      :r.phase_status==='Completed'?`<span style="background:var(--sog-blue);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">DONE</span>`:'';
+    return [
+      `${String(r.yp_id)}${latestBadge}`,
+      name,
+      r.cohort_group==='Not yet assigned'?`<span style="color:var(--charcoal-40);font-style:italic">Unassigned</span>`:r.cohort_group,
+      r.phase_view||'—',
+      fmtDate(r.phase_start_date),
+      fmtDate(r.phase_completion_date),
+      r.days_in_phase!=null?String(r.days_in_phase):'—',
+      openBadge,
+      apricotLink(r.yp_id),
+    ];
+  });
+
+  el.innerHTML=`
+    <div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span class="ctrl-lbl">Cohort</span>
+      <div class="fy-btns">${cohortBtns}</div>
+    </div>
+    <div class="sh"><h2>YP Roster &mdash; ${curFY}${curCohort!=='__all__'?' &mdash; '+curCohort:''}</h2></div>
+    <div class="card" style="margin-bottom:18px">
+      <div class="ct">Active Young People (${rosterYP.length})</div>
+      ${rosterTableRows.length?dtable(
+        [{l:'Record ID'},{l:'Name'},{l:'Cohort'},{l:'Phase'},{l:'Stage of Change'},{l:'Apricot'},{l:'Lookup'}],
+        rosterTableRows
+      ):nodata('No active YP for '+curFY+(curCohort!=='__all__'?' in '+curCohort:''))}
+    </div>
+    <div class="sh"><h2>Phase Assessment History${curCohort!=='__all__'?' &mdash; '+curCohort:''}</h2></div>
+    <div class="card">
+      <div class="ct">Phase Transitions (${phaseRows.length} entries)</div>
+      ${phaseTableRows.length?dtable(
+        [{l:'Record ID'},{l:'Name'},{l:'Cohort'},{l:'Phase'},{l:'Start'},{l:'Completion'},{l:'Days'},{l:'Status'},{l:'Apricot'}],
+        phaseTableRows
+      ):nodata('No phase assessment data'+(curCohort!=='__all__'?' for '+curCohort:''))}
+    </div>`;
 }
 
 function renderReferrals(){
@@ -1329,7 +1423,7 @@ async function loadData(){
   const [
     kpisRes, sessionTypeRes, intRes, toolRes, grpRes, phRes, demoRes, ypRes, refDetailsRes,
     surveyOverviewRes, ngseLongRes, erqLongRes, safetyLongRes, safetyDevRes,
-    cohortRes, exitCohortRes
+    cohortRes, exitCohortRes, phaseAssessRes
   ] = await Promise.all([
     supabaseClient.from('vw_fy_kpis').select('*').limit(5000),
     supabaseClient.from('vw_fy_session_type_summary').select('*').limit(5000),
@@ -1347,11 +1441,12 @@ async function loadData(){
     supabaseClient.from('vw_safety_deviation').select('*').limit(5000),
     supabaseClient.from('vw_cohort_breakdown').select('*').limit(5000),
     supabaseClient.from('vw_exit_status_by_cohort').select('*').limit(5000),
+    supabaseClient.from('vw_phase_assessment_by_cohort').select('*').limit(10000),
   ]);
 
   for (const r of [kpisRes,sessionTypeRes,intRes,toolRes,grpRes,phRes,demoRes,ypRes,refDetailsRes,
                    surveyOverviewRes,ngseLongRes,erqLongRes,safetyLongRes,safetyDevRes,
-                   cohortRes,exitCohortRes]){
+                   cohortRes,exitCohortRes,phaseAssessRes]){
     if (r.error) throw new Error(r.error.message);
   }
 
@@ -1517,7 +1612,10 @@ async function loadData(){
 
   // YP records
   const yp = ypRes.data.map(r => ({
-    id:      r.id,
+    id:          r.id,
+    first_name:  r.first_name || '',
+    last_name:   r.last_name  || '',
+    cohort_group:r.cohort_group || 'Not yet assigned',
     g:       r.g || '',
     age:     r.age,
     eth:     r.eth || '',
@@ -1561,6 +1659,7 @@ async function loadData(){
     safetyDev:       safetyDevRes.data        || [],
     cohortBreakdown:     cohortRes.data       || [],
     exitStatusByCohort:  exitCohortRes.data   || [],
+    phaseAssessment:     phaseAssessRes.data  || [],
   };
 }
 
@@ -1580,16 +1679,25 @@ async function initDashboard(){
   }
 }
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('topbar-user').textContent = session.user?.email ?? '';
-    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') initDashboard();
-  } else {
-    document.getElementById('login-overlay').style.display = 'flex';
-    document.getElementById('topbar-user').textContent = '';
-  }
-});
+// Dev bypass: ?dev=1 on localhost skips auth (anon key, for local testing only)
+const _isLocalDev = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  && new URLSearchParams(location.search).has('dev');
+if (_isLocalDev) {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('topbar-user').textContent = 'dev@localhost';
+  initDashboard();
+} else {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('topbar-user').textContent = session.user?.email ?? '';
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') initDashboard();
+    } else {
+      document.getElementById('login-overlay').style.display = 'flex';
+      document.getElementById('topbar-user').textContent = '';
+    }
+  });
+}
 
 </script>
 </body>
