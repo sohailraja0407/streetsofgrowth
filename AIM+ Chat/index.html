@@ -428,7 +428,7 @@
     const { error } = await supabaseClient.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: window.location.origin + window.location.pathname,
+        emailRedirectTo: 'https://sohailraja0407.github.io/streetsofgrowth/AIM%2B%20Chat/',
         shouldCreateUser: true,
       },
     });
