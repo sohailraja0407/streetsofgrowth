@@ -11,14 +11,16 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --purple:    #625D9C;
-      --blue:      #4197CB;
-      --teal:      #0095A9;
-      --green:     #00AF9A;
-      --charcoal:  #323E48;
-      --off-white: #F5F5F7;
-      --white:     #ffffff;
-      --border:    #E0E0E6;
+      --purple:       #625D9C;
+      --blue:         #4197CB;
+      --teal:         #0095A9;
+      --green:        #00AF9A;
+      --charcoal:     #323E48;
+      --charcoal-70:  #70787F;
+      --charcoal-20:  #D6D8DA;
+      --off-white:    #F5F5F7;
+      --white:        #ffffff;
+      --border:       #E2E4E6;
     }
 
     body {
@@ -30,53 +32,32 @@
       flex-direction: column;
     }
 
-    /* ── Header ── */
-    header {
-      background: var(--purple);
-      color: white;
-      padding: 14px 24px;
+    /* ── Top bar (matches dashboard) ── */
+    .topbar {
+      background: #fff;
+      padding: 11px 24px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .logo-mark {
-      width: 38px;
-      height: 38px;
-      background: white;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 15px;
-      color: var(--purple);
-      letter-spacing: -0.5px;
-      flex-shrink: 0;
+    .topbar-logo { flex-shrink: 0; }
+    .topbar-logo img { width: auto; display: block; }
+    .logo-full  { height: 28px; display: block; }
+    .logo-mark-img { height: 32px; display: none; }
+    @media(max-width:600px) {
+      .logo-full { display: none; }
+      .logo-mark-img { display: block; }
+      .topbar-title { display: none; }
+      .topbar-divider { display: none; }
     }
-    .header-text h1 {
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-    .header-text p {
-      font-size: 12px;
-      opacity: 0.8;
-      margin-top: 1px;
-    }
-    .demo-badge {
-      margin-left: auto;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.35);
-      color: white;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
+    .topbar-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+    .topbar-title h1 { font-size: 14px; font-weight: 700; letter-spacing: 0.2px; color: var(--charcoal); }
+    .topbar-title p  { font-size: 11px; color: var(--charcoal-70); margin-top: 1px; font-weight: 400; }
 
     /* ── Suggested questions ── */
     .suggestions {
@@ -326,16 +307,15 @@
     }
     #login-msg { font-size: 13px; color: #888; min-height: 20px; }
 
-    /* ── Sign-out button in header ── */
+    /* ── Sign-out (matches dashboard) ── */
+    .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    #topbar-user { font-size: 13px; color: var(--purple); font-weight: 600; }
     .signout-btn {
-      margin-left: auto;
-      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35);
-      color: white; font-size: 11px; font-weight: 600; padding: 3px 10px;
-      border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;
-      cursor: pointer; font-family: inherit;
+      font-size: 13px; font-family: inherit; background: none;
+      border: 1.5px solid var(--purple); color: var(--purple);
+      padding: 5px 14px; border-radius: 6px; cursor: pointer; font-weight: 600;
     }
-    .signout-btn:hover { background: rgba(255,255,255,0.3); }
-    #topbar-user { display: none; }
+    .signout-btn:hover { background: #f0eff6; }
 
     /* ── Reset button ── */
     .reset-btn {
