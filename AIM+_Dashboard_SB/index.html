@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined%7CMaterial+Icons+Round" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ── SoG DESIGN SYSTEM TOKENS (v1.0) ── */
 :root {
@@ -300,6 +301,24 @@ canvas{max-width:100%}
 </style>
 
 
+<!-- ── LOGIN OVERLAY ── -->
+<div id="login-overlay" style="display:flex;position:fixed;inset:0;z-index:9999;background:var(--sog-off-white);align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:48px 40px;max-width:400px;width:90%;box-shadow:0 8px 32px rgba(50,62,72,0.12);text-align:center">
+    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDciIGhlaWdodD0iMTMyIiB2aWV3Qm94PSIwIDAgMTQ3IDEzMiI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgeyBmaWxsOiAjNDE5N2NiOyB9CiAgICAgIC5zdDEgeyBmaWxsOiAjNWViM2U0OyB9CiAgICAgIC5zdDIgeyBmaWxsOiAjMDA5NWE5OyB9CiAgICAgIC5zdDMgeyBmaWxsOiAjNjI1ZDljOyB9CiAgICAgIC5zdDQgeyBmaWxsOiAjMzIzZTQ4OyB9CiAgICAgIC5zdDUgeyBmaWxsOiAjMDBhZjlhOyB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8Zz4KICAgIDxnPgogICAgICA8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjEyNi45IDU4LjcgMTI2LjkgMTE3LjMgMTkuOSAxMTcuMyAxOS45IDEwMi41IDI1LjIgMTAyLjUgMTIuNiA4MC43IDAgMTAyLjUgNS4zIDEwMi41IDUuMyAxMzIgMTkuOSAxMzIgMTkuOSAxMzIgMTI2LjkgMTMyIDE0MS41IDExNy4zIDE0MS41IDU4LjcgMTI2LjkgNTguNyIvPgogICAgICA8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjE0MS41IDI5LjUgMTQxLjUgMCAxMjYuOSAwIDEyNi45IDAgMTkuOSAwIDUuMyAxNC43IDUuMyA3My4zIDE5LjkgNzMuMyAxOS45IDE0LjcgMTI2LjkgMTQuNyAxMjYuOSAyOS41IDEyMS42IDI5LjUgMTM0LjIgNTEuMyAxNDYuOCAyOS41IDE0MS41IDI5LjUiLz4KICAgIDwvZz4KICAgIDxnPgogICAgICA8cmVjdCBjbGFzcz0ic3QxIiB4PSI2My45IiB5PSI1OC43IiB3aWR0aD0iNDguNSIgaGVpZ2h0PSIxNC43Ii8+CiAgICAgIDxyZWN0IGNsYXNzPSJzdDUiIHg9IjM0LjYiIHk9Ijg4IiB3aWR0aD0iNzcuOCIgaGVpZ2h0PSIxNC43Ii8+CiAgICAgIDxyZWN0IGNsYXNzPSJzdDMiIHg9IjM0LjYiIHk9IjI5LjMiIHdpZHRoPSI3Ny44IiBoZWlnaHQ9IjE0LjciLz4KICAgICAgPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSI0OS4zIDU4LjcgMzQuNiA3My4zIDM0LjYgMjkuMyA0OS4zIDQ0IDQ5LjMgNTguNyIvPgogICAgICA8cG9seWdvbiBjbGFzcz0ic3QyIiBwb2ludHM9IjExMi40IDEwMi43IDk3LjcgODggOTcuNyA3My4zIDExMi40IDU4LjcgMTEyLjQgMTAyLjciLz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPg==" alt="Streets of Growth" height="48" style="margin-bottom:24px">
+    <h2 style="font-size:18px;font-weight:700;color:var(--sog-charcoal);margin:0 0 6px">AIM+ Programme Dashboard</h2>
+    <p style="font-size:13px;color:var(--charcoal-70);margin:0 0 28px">Sign in with your Streets of Growth email to continue.</p>
+    <input id="login-email" type="email" placeholder="you@streetsofgrowth.org"
+      style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid var(--charcoal-20);border-radius:8px;font-size:14px;font-family:inherit;color:var(--sog-charcoal);outline:none;margin-bottom:12px"
+      onkeydown="if(event.key==='Enter')sendMagicLink()"
+      onfocus="this.style.borderColor='var(--sog-purple)'" onblur="this.style.borderColor='var(--charcoal-20)'">
+    <button onclick="sendMagicLink()"
+      style="width:100%;padding:11px;background:var(--sog-purple);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:14px">
+      Send sign-in link
+    </button>
+    <p id="login-msg" style="font-size:13px;color:var(--charcoal-70);min-height:20px;margin:0"></p>
+  </div>
+</div>
+
 <!-- ── LOADING OVERLAY ── -->
 <div id="loadingOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:#F5F5F7;display:flex;align-items:center;justify-content:center">
   <div style="text-align:center">
@@ -318,6 +337,10 @@ canvas{max-width:100%}
   <div class="topbar-title">
     <h1>AIM+ Programme Dashboard</h1>
     <p>Streets of Growth</p>
+  </div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+    <span id="topbar-user" style="font-size:13px;color:var(--sog-purple);font-weight:600"></span>
+    <button onclick="signOut()" style="font-size:13px;font-family:inherit;background:none;border:1.5px solid var(--sog-purple);color:var(--sog-purple);padding:5px 14px;border-radius:6px;cursor:pointer;font-weight:600">Sign out</button>
   </div>
 </div>
 
@@ -1211,30 +1234,32 @@ function buildProfileChart(r,zoom){
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeProfile();});
-// ── SUPABASE EDGE FUNCTION CONFIG ──────────────────────────────────────────
-// No Supabase credentials in client-side code. All data fetches go through
-// the edge function which uses the service key server-side only.
-const EDGE_FUNCTION_URL = 'https://febshlxboadaeafqafsr.supabase.co/functions/v1/fetch-dashboard-data';
+// ── SUPABASE CLIENT CONFIG ─────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://febshlxboadaeafqafsr.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlYnNobHhib2FkYWVhZnFhZnNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MDk4MDUsImV4cCI6MjA5MjE4NTgwNX0.gLNUvDPa3Tp9D7R9ypZ6dbW41E-iFMglzBr8NQzyjFU';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// Returns AD token once AD auth is configured. For now returns a placeholder
-// so the dashboard works while AD setup is pending with tech support.
-function getADToken() {
-  return sessionStorage.getItem('adToken') || localStorage.getItem('adToken') || 'dashboard-pending-ad-setup';
+async function sendMagicLink() {
+  const email = document.getElementById('login-email').value.trim();
+  const msg   = document.getElementById('login-msg');
+  if (!email) { msg.textContent = 'Please enter your email address.'; return; }
+  msg.style.color = 'var(--charcoal-70)';
+  msg.textContent = 'Sending sign-in link…';
+  const { error } = await supabaseClient.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href, shouldCreateUser: true },
+  });
+  if (error) {
+    msg.style.color = 'var(--sog-red)';
+    msg.textContent = 'Error: ' + error.message;
+  } else {
+    msg.style.color = 'var(--sog-green)';
+    msg.textContent = 'Check your email — a sign-in link has been sent.';
+  }
 }
 
-async function fetchFromEdgeFunction(table) {
-  const res = await fetch(`${EDGE_FUNCTION_URL}?table=${encodeURIComponent(table)}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${getADToken()}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-    throw new Error(err.error || `Failed to fetch ${table}`);
-  }
-  return res.json();
+async function signOut() {
+  await supabaseClient.auth.signOut();
 }
 
 function showLoading(){ document.getElementById('loadingOverlay').style.display='flex'; }
@@ -1263,20 +1288,20 @@ async function loadData(){
     kpisRes, sessionTypeRes, intRes, toolRes, grpRes, phRes, demoRes, ypRes, refDetailsRes,
     surveyOverviewRes, ngseLongRes, erqLongRes, safetyLongRes, safetyDevRes
   ] = await Promise.all([
-    fetchFromEdgeFunction('vw_fy_kpis').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_fy_session_type_summary').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_intervention_breakdown').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_tool_breakdown').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_group_session_breakdown').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_phase_stage_breakdown').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_demographics_by_fy').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_yp_records').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_referral_details').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_survey_completion_overview').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_ngse_longitudinal').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_erq_longitudinal').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_safety_longitudinal').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
-    fetchFromEdgeFunction('vw_safety_deviation').then(d => ({ data: d, error: null })).catch(e => ({ data: [], error: e })),
+    supabaseClient.from('vw_fy_kpis').select('*').limit(5000),
+    supabaseClient.from('vw_fy_session_type_summary').select('*').limit(5000),
+    supabaseClient.from('vw_intervention_breakdown').select('*').limit(5000),
+    supabaseClient.from('vw_tool_breakdown').select('*').limit(5000),
+    supabaseClient.from('vw_group_session_breakdown').select('*').limit(5000),
+    supabaseClient.from('vw_phase_stage_breakdown').select('*').limit(5000),
+    supabaseClient.from('vw_demographics_by_fy').select('*').limit(5000),
+    supabaseClient.from('vw_yp_records').select('*').limit(5000),
+    supabaseClient.from('vw_referral_details').select('*').limit(5000),
+    supabaseClient.from('vw_survey_completion_overview').select('*').limit(5000),
+    supabaseClient.from('vw_ngse_longitudinal').select('*').limit(5000),
+    supabaseClient.from('vw_erq_longitudinal').select('*').limit(5000),
+    supabaseClient.from('vw_safety_longitudinal').select('*').limit(5000),
+    supabaseClient.from('vw_safety_deviation').select('*').limit(5000),
   ]);
 
   for (const r of [kpisRes,sessionTypeRes,intRes,toolRes,grpRes,phRes,demoRes,ypRes,refDetailsRes,
@@ -1507,7 +1532,16 @@ async function initDashboard(){
   }
 }
 
-initDashboard();
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('topbar-user').textContent = session.user?.email ?? '';
+    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') initDashboard();
+  } else {
+    document.getElementById('login-overlay').style.display = 'flex';
+    document.getElementById('topbar-user').textContent = '';
+  }
+});
 
 </script>
 </body>
