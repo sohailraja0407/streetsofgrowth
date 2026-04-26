@@ -1,7 +1,6 @@
 
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -388,7 +387,7 @@ canvas{max-width:100%}
           <th>Active FYs</th>
           <th onclick="sortLookup('tot')" data-col="tot">Interactions <span class="sa">↕</span></th>
           <th onclick="sortLookup('hrs')" data-col="hrs">Hrs <span class="sa">↕</span></th>
-          <th>Phase</th><th>Stage</th><th>Top Interventions</th>
+          <th>Phase</th><th>Stage</th><th>Top Interventions</th><th>Apricot</th>
         </tr></thead>
         <tbody id="lookupBody"></tbody>
       </table>
@@ -447,7 +446,7 @@ const RISK_COLORS={0:'rgba(200,200,200,0.2)',1:'#86efac',2:'#4ade80',3:'#fbbf24'
 const RISK_BORDERS={0:'#d1d5db',1:'#16a34a',2:'#15803d',3:'#d97706',4:'#dc2626',5:'#7c3aed'};
 const RISK_LABELS={0:'None',1:'Very Low',2:'Low',3:'Moderate',4:'High',5:'Very High'};
 let DATA = null;
-let curFY='',curTab='overview',curCohort='__all__';
+let curFY='',curTab='overview',curCohort='__all__',curEvalPhase='__all__',curEvalStatus='__all__';
 const charts={};
 let activeProfileChart=null,curRecord=null,activeZoom='all';
 let lookupFiltered=[],sortCol='id',sortAsc=true;
@@ -729,11 +728,13 @@ function renderDetailed(){
 }
 
 function setCohort(c){curCohort=c;renderEvaluation();}
+function setEvalPhase(v){curEvalPhase=v;renderEvaluation();}
+function setEvalStatus(v){curEvalStatus=v;renderEvaluation();}
 
 function renderEvaluation(){
   const el=document.getElementById('evalMain');
 
-  // All cohorts present in the data (across all FYs — cohort is a YP property)
+  // All cohorts present in the data
   const allCohorts=[...new Set((DATA.phaseAssessment||[]).map(r=>r.cohort_group))]
     .sort((a,b)=>{
       if(a==='Not yet assigned')return 1;
@@ -741,78 +742,100 @@ function renderEvaluation(){
       return a.localeCompare(b);
     });
 
-  // YP roster: active in current FY, filtered by selected cohort
+  // All phases present for filter options
+  const allPhases=[...new Set(DATA.yp.map(r=>r.pv).filter(Boolean))].sort();
+  const allPhasesAssess=[...new Set((DATA.phaseAssessment||[]).map(r=>r.phase_view).filter(Boolean))].sort();
+  const allStatuses=['Open','Completed'];
+
+  // YP roster: active in current FY, filtered by cohort + phase
   const rosterYP=DATA.yp
     .filter(r=>r.fys.includes(curFY))
     .filter(r=>curCohort==='__all__'||r.cohort_group===curCohort)
-    .sort((a,b)=>(a.last_name||'').localeCompare(b.last_name||'')||(a.first_name||'').localeCompare(b.first_name||''));
+    .filter(r=>curEvalPhase==='__all__'||r.pv===curEvalPhase)
+    .sort((a,b)=>a.id-b.id);
 
-  // Phase assessment rows filtered by cohort (all FYs — phase transitions aren't FY-scoped to sessions)
+  // Phase assessment rows filtered by cohort + status
   const phaseRows=(DATA.phaseAssessment||[])
     .filter(r=>curCohort==='__all__'||r.cohort_group===curCohort)
-    .sort((a,b)=>(a.cohort_group||'').localeCompare(b.cohort_group||'')||(a.last_name||'').localeCompare(b.last_name||'')||(a.phase_start_date||'').localeCompare(b.phase_start_date||''));
+    .filter(r=>curEvalStatus==='__all__'||r.phase_status===curEvalStatus)
+    .sort((a,b)=>a.yp_id-b.yp_id||(a.phase_start_date||'').localeCompare(b.phase_start_date||''));
 
-  const cohortBtns=['__all__',...allCohorts].map(c=>`<button class="fy-btn${curCohort===c?' active':''}" onclick="setCohort('${c.replace(/'/g,"\\'")}')">
-    ${c==='__all__'?'All Cohorts':c}
-  </button>`).join('');
+  const cohortBtns=['__all__',...allCohorts].map(c=>`<button class="fy-btn${curCohort===c?' active':''}" onclick="setCohort('${c.replace(/'/g,"\\'")}')"> ${c==='__all__'?'All Cohorts':c}</button>`).join('');
 
   const fmtDate=d=>d?d.replace(/-/g,'/').slice(2):'—';
-  const apricotLink=id=>`<a href="https://login.apricotsoftware.uk/document/edit/id/${id}" target="_blank" rel="noopener" style="color:var(--sog-blue);text-decoration:none;font-size:11px">Apricot ↗</a>`;
-  const lookupLink=id=>`<span style="color:var(--sog-purple);text-decoration:underline;cursor:pointer;font-size:11px" onclick="switchTab('lookup');setTimeout(()=>{const s=document.getElementById('searchInput');if(s){s.value='${id}';applyLookupFilters();}},100)">Lookup ↗</span>`;
+  const apricotLink=id=>`<a href="https://login.apricotsoftware.uk/document/edit/id/${id}" target="_blank" rel="noopener" style="color:var(--sog-blue);text-decoration:none;font-size:11px">↗ Apricot</a>`;
+  const lookupLink=id=>`<span style="color:var(--sog-purple);text-decoration:underline;cursor:pointer;font-size:11px" onclick="switchTab('lookup');setTimeout(()=>{const s=document.getElementById('searchInput');if(s){s.value='${id}';applyLookupFilters();}},100)">↗ Lookup</span>`;
+  const cohortLabel=g=>g==='Not yet assigned'?`<span style="color:var(--charcoal-40);font-style:italic">Unassigned</span>`:g;
 
-  // Roster table rows
-  const rosterTableRows=rosterYP.map(r=>{
-    const name=r.first_name||r.last_name?`${r.first_name} ${r.last_name}`.trim():'—';
-    const phase=r.pv?r.pv.replace('Phase ','Ph'):'—';
-    const exitBadge=r.pv&&r.pv.includes('exit')||false;
-    return [
-      String(r.id),
-      name,
-      r.cohort_group==='Not yet assigned'?`<span style="color:var(--charcoal-40);font-style:italic">Unassigned</span>`:r.cohort_group,
-      phase||'—',
-      r.st||'—',
-      apricotLink(r.id),
-      lookupLink(r.id),
-    ];
-  });
+  // Roster rows — Record ID only, no names
+  const rosterTableRows=rosterYP.map(r=>[
+    String(r.id),
+    cohortLabel(r.cohort_group),
+    r.pv||'—',
+    r.st||'—',
+    apricotLink(r.id),
+    lookupLink(r.id),
+  ]);
 
-  // Phase assessment table rows — show all transitions for selected cohort
+  // Phase assessment rows — Record ID only, no names
   const phaseTableRows=phaseRows.map(r=>{
-    const name=r.first_name||r.last_name?`${r.first_name} ${r.last_name}`.trim():'—';
     const latestBadge=r.is_latest?`<span style="background:var(--sog-teal);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px">LATEST</span>`:'';
-    const openBadge=r.phase_status==='Open'?`<span style="background:var(--sog-green);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">OPEN</span>`
-      :r.phase_status==='Completed'?`<span style="background:var(--sog-blue);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">DONE</span>`:'';
+    const statusBadge=r.phase_status==='Open'
+      ?`<span style="background:var(--sog-green);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">OPEN</span>`
+      :r.phase_status==='Completed'
+      ?`<span style="background:var(--sog-blue);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">DONE</span>`:'';
     return [
       `${String(r.yp_id)}${latestBadge}`,
-      name,
-      r.cohort_group==='Not yet assigned'?`<span style="color:var(--charcoal-40);font-style:italic">Unassigned</span>`:r.cohort_group,
+      cohortLabel(r.cohort_group),
       r.phase_view||'—',
       fmtDate(r.phase_start_date),
       fmtDate(r.phase_completion_date),
       r.days_in_phase!=null?String(r.days_in_phase):'—',
-      openBadge,
+      statusBadge,
       apricotLink(r.yp_id),
     ];
   });
 
+  const selStyle='padding:4px 8px;border:1px solid #E2E4E6;border-radius:6px;font-size:12px;color:var(--sog-charcoal);background:#fff;cursor:pointer';
+
   el.innerHTML=`
-    <div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px">
       <span class="ctrl-lbl">Cohort</span>
       <div class="fy-btns">${cohortBtns}</div>
     </div>
-    <div class="sh"><h2>YP Roster &mdash; ${curFY}${curCohort!=='__all__'?' &mdash; '+curCohort:''}</h2></div>
+
+    <div class="sh"><h2>YP Roster &mdash; ${curFY}</h2></div>
     <div class="card" style="margin-bottom:18px">
-      <div class="ct">Active Young People (${rosterYP.length})</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="ct" style="margin-bottom:0">Active Young People (${rosterYP.length})</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--charcoal-40)">Phase</span>
+          <select style="${selStyle}" onchange="setEvalPhase(this.value)">
+            <option value="__all__">All Phases</option>
+            ${allPhases.map(p=>`<option value="${p}"${curEvalPhase===p?' selected':''}>${p}</option>`).join('')}
+          </select>
+        </div>
+      </div>
       ${rosterTableRows.length?dtable(
-        [{l:'Record ID'},{l:'Name'},{l:'Cohort'},{l:'Phase'},{l:'Stage of Change'},{l:'Apricot'},{l:'Lookup'}],
+        [{l:'Record ID'},{l:'Cohort'},{l:'Phase'},{l:'Stage of Change'},{l:'Apricot'},{l:'Lookup'}],
         rosterTableRows
       ):nodata('No active YP for '+curFY+(curCohort!=='__all__'?' in '+curCohort:''))}
     </div>
-    <div class="sh"><h2>Phase Assessment History${curCohort!=='__all__'?' &mdash; '+curCohort:''}</h2></div>
+
+    <div class="sh"><h2>Phase Assessment History</h2></div>
     <div class="card">
-      <div class="ct">Phase Transitions (${phaseRows.length} entries)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="ct" style="margin-bottom:0">Phase Transitions (${phaseRows.length} entries)</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--charcoal-40)">Status</span>
+          <select style="${selStyle}" onchange="setEvalStatus(this.value)">
+            <option value="__all__">All</option>
+            ${allStatuses.map(s=>`<option value="${s}"${curEvalStatus===s?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
       ${phaseTableRows.length?dtable(
-        [{l:'Record ID'},{l:'Name'},{l:'Cohort'},{l:'Phase'},{l:'Start'},{l:'Completion'},{l:'Days'},{l:'Status'},{l:'Apricot'}],
+        [{l:'Record ID'},{l:'Cohort'},{l:'Phase'},{l:'Start'},{l:'Completion'},{l:'Days'},{l:'Status'},{l:'Apricot'}],
         phaseTableRows
       ):nodata('No phase assessment data'+(curCohort!=='__all__'?' for '+curCohort:''))}
     </div>`;
@@ -1222,6 +1245,7 @@ function sortLookupAndRender(){
     return `<tr onclick="openProfile(${r.id})">
       <td class="id-col"><div style="display:flex;align-items:center;gap:9px"><div class="avatar" style="background:${avBg}">${avInitial}</div><div style="font-size:14px;font-weight:700;color:var(--sog-purple)">${r.id}</div></div></td>
       <td>${gb}</td><td>${r.age??'—'}</td><td>${tb}</td><td>${r.ffy||'—'}</td><td>${fyt}</td><td style="font-weight:700">${r.tot}</td><td>${r.hrs}</td><td style="font-size:11px">${r.pv||'—'}</td><td style="font-size:11px">${r.st||'—'}</td><td>${ip}</td>
+      <td onclick="event.stopPropagation()"><a href="https://login.apricotsoftware.uk/document/edit/id/${r.id}" target="_blank" rel="noopener" style="color:var(--sog-blue);font-size:12px;text-decoration:none">↗</a></td>
     </tr>`;
   }).join('');
 }
