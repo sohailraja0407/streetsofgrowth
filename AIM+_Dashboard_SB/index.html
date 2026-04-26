@@ -529,6 +529,28 @@ function renderTab(){
 function renderOverview(){
   const d=DATA.by_fy[curFY];
   const ti=Object.values(d.interactions_by_type).reduce((a,b)=>a+b,0);
+
+  // Cohort breakdown for current FY — named cohorts by size, "Not yet assigned" last
+  const cohortRows=(DATA.cohortBreakdown||[])
+    .filter(r=>r.financial_year===curFY)
+    .sort((a,b)=>{
+      if(a.cohort_group==='Not yet assigned')return 1;
+      if(b.cohort_group==='Not yet assigned')return -1;
+      return b.yp_count-a.yp_count;
+    });
+  const cohortTotal=cohortRows.reduce((a,r)=>a+r.yp_count,0);
+  const unassigned=cohortRows.find(r=>r.cohort_group==='Not yet assigned');
+
+  // Exit status by cohort for current FY
+  const exitRows=(DATA.exitStatusByCohort||[])
+    .filter(r=>r.financial_year===curFY)
+    .sort((a,b)=>a.exit_status.localeCompare(b.exit_status)||a.cohort_group.localeCompare(b.cohort_group));
+  const exitTotal=exitRows.reduce((a,r)=>a+r.yp_count,0);
+
+  const cohortLabel=g=>g==='Not yet assigned'
+    ?`<span style="color:var(--charcoal-40);font-style:italic">Not yet assigned</span>`
+    :g;
+
   document.getElementById('overviewMain').innerHTML=`
     <div class="kpi-row">
       <div class="kpi"><div class="kpi-lbl">Active Young People</div><div class="kpi-val">${d.active_yp}</div><div class="kpi-sub">${curFY}</div>
@@ -547,6 +569,26 @@ function renderOverview(){
     <div class="r2">
       <div class="card"><div class="ct">Phase View</div>${pillList(d.phase_view,PC)}</div>
       <div class="card"><div class="ct">Stage of Change</div>${pillList(d.stage_of_change,PC)}</div>
+    </div>
+    <div class="sh"><h2>Cohort &amp; Exit Status</h2></div>
+    <div class="r2">
+      <div class="card">
+        <div class="ct">Active YP by Cohort</div>
+        ${cohortRows.length?dtable(
+          [{l:'Cohort Group'},{l:'YP',r:true}],
+          cohortRows.map(r=>[cohortLabel(r.cohort_group),r.yp_count]),
+          ['Total',cohortTotal]
+        ):nodata('No cohort data for '+curFY)}
+        ${unassigned?`<p style="font-size:11px;color:var(--charcoal-40);margin-top:8px">${unassigned.yp_count} YP not yet assigned to a cohort</p>`:''}
+      </div>
+      <div class="card">
+        <div class="ct">Exit Status by Cohort</div>
+        ${exitRows.length?dtable(
+          [{l:'Exit Status'},{l:'Cohort Group'},{l:'YP',r:true}],
+          exitRows.map(r=>[r.exit_status,cohortLabel(r.cohort_group),r.yp_count]),
+          ['Total','',exitTotal]
+        ):nodata('No exits recorded for '+curFY)}
+      </div>
     </div>`;
 }
 
@@ -1286,7 +1328,8 @@ async function loadData(){
   const VALID_FY = /^20\d{2}\/\d{2}$/;
   const [
     kpisRes, sessionTypeRes, intRes, toolRes, grpRes, phRes, demoRes, ypRes, refDetailsRes,
-    surveyOverviewRes, ngseLongRes, erqLongRes, safetyLongRes, safetyDevRes
+    surveyOverviewRes, ngseLongRes, erqLongRes, safetyLongRes, safetyDevRes,
+    cohortRes, exitCohortRes
   ] = await Promise.all([
     supabaseClient.from('vw_fy_kpis').select('*').limit(5000),
     supabaseClient.from('vw_fy_session_type_summary').select('*').limit(5000),
@@ -1302,10 +1345,13 @@ async function loadData(){
     supabaseClient.from('vw_erq_longitudinal').select('*').limit(5000),
     supabaseClient.from('vw_safety_longitudinal').select('*').limit(5000),
     supabaseClient.from('vw_safety_deviation').select('*').limit(5000),
+    supabaseClient.from('vw_cohort_breakdown').select('*').limit(5000),
+    supabaseClient.from('vw_exit_status_by_cohort').select('*').limit(5000),
   ]);
 
   for (const r of [kpisRes,sessionTypeRes,intRes,toolRes,grpRes,phRes,demoRes,ypRes,refDetailsRes,
-                   surveyOverviewRes,ngseLongRes,erqLongRes,safetyLongRes,safetyDevRes]){
+                   surveyOverviewRes,ngseLongRes,erqLongRes,safetyLongRes,safetyDevRes,
+                   cohortRes,exitCohortRes]){
     if (r.error) throw new Error(r.error.message);
   }
 
@@ -1513,6 +1559,8 @@ async function loadData(){
     erqLong:         erqLongRes.data          || [],
     safetyLong:      safetyLongRes.data       || [],
     safetyDev:       safetyDevRes.data        || [],
+    cohortBreakdown:     cohortRes.data       || [],
+    exitStatusByCohort:  exitCohortRes.data   || [],
   };
 }
 
