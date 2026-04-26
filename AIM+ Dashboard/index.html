@@ -1678,16 +1678,25 @@ async function initDashboard(){
   }
 }
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('topbar-user').textContent = session.user?.email ?? '';
-    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') initDashboard();
-  } else {
-    document.getElementById('login-overlay').style.display = 'flex';
-    document.getElementById('topbar-user').textContent = '';
-  }
-});
+// Dev bypass: ?dev=1 on localhost skips auth (anon key, for local testing only)
+const _isLocalDev = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  && new URLSearchParams(location.search).has('dev');
+if (_isLocalDev) {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('topbar-user').textContent = 'dev@localhost';
+  initDashboard();
+} else {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('topbar-user').textContent = session.user?.email ?? '';
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') initDashboard();
+    } else {
+      document.getElementById('login-overlay').style.display = 'flex';
+      document.getElementById('topbar-user').textContent = '';
+    }
+  });
+}
 
 </script>
 </body>
